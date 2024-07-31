@@ -78,7 +78,7 @@
       height: 100px;
       margin-left: -10px;
       margin-top: -10px;
-      background: url('crosshair.png') no-repeat center center;
+      background: url('assets/crosshair.png') no-repeat center center;
       background-size: contain;
       pointer-events: none;
     }
@@ -105,7 +105,7 @@
     <div id="playerHealthInner"></div>
   </div>
   <div id="crosshair"></div>
-  <img id="shotgun" src="shotgun.png" alt="Shotgun" />
+  <img id="shotgun" src="assets/shotgun.png" alt="Shotgun" />
   <script>
     // Static map array
     const toRadian = (degree) => degree * Math.PI / 180;
@@ -241,22 +241,22 @@
     const playerHealthInner = document.getElementById('playerHealthInner');
 
     const wallImg = new Image();
-    wallImg.src = 'test.png';
+    wallImg.src = 'assets/test.png';
 
     const enemyImg = new Image();
-    enemyImg.src = 'enemy.png';
+    enemyImg.src = 'assets/enemy.png';
 
     const enemyTwoImg = new Image();
-    enemyTwoImg.src = 'enemy_two.png';
+    enemyTwoImg.src = 'assets/enemy_two.png';
 
     const groundImg = new Image();
-    groundImg.src = 'ground.png';
+    groundImg.src = 'assets/ground.png';
 
     const skyImg = new Image();
-    skyImg.src = 'sky.png';
+    skyImg.src = 'assets/sky.png';
 
     const cloudImg = new Image();
-    cloudImg.src = 'clouds.png'; 
+    cloudImg.src = 'assets/clouds.png'; 
 
     let cloudOffset = 0;
 
