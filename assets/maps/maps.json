@@ -1,20 +1,3 @@
 {
-    "map_moin": {
-        "id": "map_moin",
-        "music": "music_amogus",
-        "width": 30,
-        "height": 30,
-        "layers": {
-            "collision": [],
-            "visual": [],
-            "interaction": []
-        },
-        "connections": {
-            "north": { "id": "map_2", "offset": 5 },
-            "east": null,
-            "south": null,
-            "west": null
-        },
-        "entities": []
-    }
+    "map_moin": { "id": "map_moin", "directory": "assets/maps/", "source": "map_moin.json" }
 }

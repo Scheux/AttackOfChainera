@@ -15,6 +15,7 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
   gameContext.setResources(resources);
   gameContext.timer.start();
   console.log(gameContext);
+  gameContext.mapLoader.loadMap("map_moin");
 });
 
 function generateMap(size) {
@@ -377,8 +378,6 @@ function render() {
   renderEnemies();
   renderMinimap();
   updatePlayerHealth();
-
-  ctx.drawImage(gameContext.renderer.display, 0, 0);
 }
 
 function renderEnemies() {
