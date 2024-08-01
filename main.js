@@ -175,7 +175,7 @@ function handleMouseClick(event) {
     const dy = enemy.y - player.y;
     const distance = Math.hypot(dx, dy);
     const angleToEnemy = Math.atan2(dy, dx);
-
+    
     if (distance < 20 && Math.abs(angleToEnemy - player.dir) < player.fov / 2) {
       const enemySize = canvas.height / distance;
       const enemyX = (canvas.width / 2) + Math.tan(angleToEnemy - player.dir) * canvas.width / 2 - enemySize / 2;
@@ -193,10 +193,10 @@ function handleMouseClick(event) {
 }
 
 function castRay(rayAngle) {
+  const stepSize = 0.05;
   const cos = Math.cos(rayAngle);
   const sin = Math.sin(rayAngle);
   let distance = 0;
-  const stepSize = 0.05;
   let hit = { distance: 20, x: player.x + cos * 20, y: player.y + sin * 20, vertical: false };
   while (distance < 20) {
     distance += stepSize;
