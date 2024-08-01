@@ -150,11 +150,6 @@ groundImg.src = 'assets/tiles/ground.png';
 const skyImg = new Image();
 skyImg.src = 'assets/tiles/sky.png';
 
-const cloudImg = new Image();
-cloudImg.src = 'assets/tiles/clouds.png'; 
-
-let cloudOffset = 0;
-
 const keys = {};
 document.addEventListener('keydown', (event) => { keys[event.key] = true; });
 document.addEventListener('keyup', (event) => { keys[event.key] = false; });
