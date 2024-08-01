@@ -377,6 +377,8 @@ function render() {
   renderEnemies();
   renderMinimap();
   updatePlayerHealth();
+
+  ctx.drawImage(gameContext.renderer.display, 0, 0);
 }
 
 function renderEnemies() {
@@ -548,7 +550,7 @@ gameContext.client.cursor.events.subscribe(Cursor.MOVE, "player", (event, cursor
     player.dir -= toRadian(deltaX) * player.turnSpeed;
     player.dir = toRadian(normalizeAngle(toAngle(player.dir)));
   }
-})
+});
 
 document.getElementById('startButton').addEventListener('click', () => {
   document.getElementById('mainMenu').style.display = 'none';

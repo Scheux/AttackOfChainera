@@ -1,6 +1,6 @@
 {
-    "map_moindome": {
-        "id": "map_moindome",
+    "map_moin": {
+        "id": "map_moin",
         "music": "music_amogus",
         "width": 30,
         "height": 30,
@@ -8,6 +8,12 @@
             "collision": [],
             "visual": [],
             "interaction": []
+        },
+        "connections": {
+            "north": { "id": "map_2", "offset": 5 },
+            "east": null,
+            "south": null,
+            "west": null
         },
         "entities": []
     }
