@@ -1,7 +1,7 @@
 import { ResourceLoader } from "./resourceLoader.js";
 
-export const MapLoader = function(mapConfigs) {
-    this.mapConfigs = mapConfigs;
+export const MapLoader = function(mapTypes) {
+    this.mapTypes = mapTypes;
     this.loadedMaps = new Map();
     this.cachedMaps = new Map();
     this.activeMapID = null;
@@ -34,7 +34,7 @@ MapLoader.prototype.clearActiveMap = function() {
 }
 
 MapLoader.prototype.loadMap = async function(mapID) {
-    if(!this.mapConfigs[mapID]) {
+    if(!this.mapTypes[mapID]) {
         console.warn(`Map ${mapID} does not exist! Returning...`);
         return;
     }
@@ -42,20 +42,20 @@ MapLoader.prototype.loadMap = async function(mapID) {
     if(this.cachedMaps.has(mapID)) {
         const map = this.cachedMaps.get(mapID);
 
-        this.loadedMaps.set(map.id, map);
+        this.loadedMaps.set(mapID, map);
         this.loadConnectedMaps(map.connections);
         return;
     }
 
     try {
-        const mapData = this.mapConfigs[mapID];
+        const mapData = this.mapTypes[mapID];
         const mapPath = `${mapData.directory}/${mapData.source}`;
         const mapFile = await ResourceLoader.loadJSON(mapPath);
 
         //create new game map object.
 
-        this.loadedMaps.set(mapFile.id, this.mapConfigs[mapID]);
-        this.cachedMaps.set(mapFile.id, this.mapConfigs[mapID]);
+        this.loadedMaps.set(mapID, this.mapTypes[mapID]);
+        this.cachedMaps.set(mapID, this.mapTypes[mapID]);
 
         this.loadConnectedMaps(mapFile.connections);
     } catch (error) {
@@ -72,26 +72,26 @@ MapLoader.prototype.loadConnectedMaps = async function(connections) {
             continue;
         }
 
-        if(!this.mapConfigs[connection.id]) {
+        if(!this.mapTypes[connection.id]) {
             console.warn(`Map ${connection.id} does not exist!`);
             continue;
         }
 
         if(this.cachedMaps.has(connection.id)) {
             const map = this.cachedMaps.get(connection.id);
-            this.loadedMaps.set(map.id, map);
+            this.loadedMaps.set(connection.id, map);
             continue;
         }
 
         try {
-            const connectedMapData = this.mapConfigs[connection.id];
+            const connectedMapData = this.mapTypes[connection.id];
             const connectedMapPath = `${connectedMapData.directory}/${connectedMapData.source}`;
             const connectedMapFile = await ResourceLoader.loadJSON(connectedMapPath);
 
             //create new game map object.
-
-            this.loadedMaps.set(connectedMapFile.id, this.mapConfigs[mapID]);
-            this.cachedMaps.set(connectedMapFile.id, this.mapConfigs[mapID]);
+            console.log(connectedMapFile)
+            this.loadedMaps.set(connection.id, this.mapTypes[connection.id]);
+            this.cachedMaps.set(connection.id, this.mapTypes[connection.id]);
         } catch (error) {
             console.error(error, `Error fetching map file! Returning...`);
             return;

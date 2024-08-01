@@ -133,7 +133,7 @@
         ]
     },
     "connections": {
-        "north": { "id": "map_moin_2", "offset": 5 },
+        "north": { "id": "map_moin2", "offset": 5 },
         "east": null,
         "south": null,
         "west": null

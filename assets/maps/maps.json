@@ -1,3 +1,4 @@
 {
-    "map_moin": { "id": "map_moin", "directory": "assets/maps/", "source": "map_moin.json" }
+    "map_moin": { "id": "map_moin", "directory": "assets/maps/", "source": "map_moin.json" },
+    "map_moin_2": { "id": "map_moin_2", "directory": "assets/maps/", "source": "map_moin_2.json" }
 }
