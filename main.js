@@ -1,17 +1,19 @@
-// Static map array
-const toRadian = (degree) => degree * Math.PI / 180;
-const toAngle = (radian)  => radian * 180 / Math.PI;
-const normalizeAngle = (degree) => ((degree % 360) + 360) % 360;
-const getRandomNumber = (param_minVal, param_maxVal) => {
-  param_maxVal -= param_minVal;
-  param_maxVal++;
+import { ResourceLoader } from "./source/resourceLoader.js";
+import { toAngle, toRadian, normalizeAngle, getRandomNumber } from "./source/helpers.js";
 
-  let val = Math.random() * param_maxVal;
-  val = Math.trunc(val);
-  val += param_minVal;
+const main = async function() {
+  const files = await ResourceLoader.loadConfigFiles("assets/files.json");
+  const enemies = files.enemies;
+  const sprites = {};
+  const tiles = {};
 
-  return val;
+  await ResourceLoader.loadImages(files.sprites, ((key, image, config) => sprites[key] = { image, config }));
+  await ResourceLoader.loadImages(files.tiles, ((key, image, config) => tiles[key] = { image, config }));
+
+  console.log(enemies, sprites, tiles);
 }
+
+main();
 
 // Random map generation with rooms and corridors
 function generateMap(size) {
@@ -132,22 +134,22 @@ const enemyCounter = document.getElementById('enemyCounter');
 const playerHealthInner = document.getElementById('playerHealthInner');
 
 const wallImg = new Image();
-wallImg.src = 'assets/test.png';
+wallImg.src = 'assets/tiles/wall.png';
 
 const enemyImg = new Image();
-enemyImg.src = 'assets/enemy.png';
+enemyImg.src = 'assets/sprites/enemy.png';
 
 const enemyTwoImg = new Image();
-enemyTwoImg.src = 'assets/enemy_two.png';
+enemyTwoImg.src = 'assets/sprites/enemy_two.png';
 
 const groundImg = new Image();
-groundImg.src = 'assets/ground.png';
+groundImg.src = 'assets/tiles/ground.png';
 
 const skyImg = new Image();
-skyImg.src = 'assets/sky.png';
+skyImg.src = 'assets/tiles/sky.png';
 
 const cloudImg = new Image();
-cloudImg.src = 'assets/clouds.png'; 
+cloudImg.src = 'assets/tiles/clouds.png'; 
 
 let cloudOffset = 0;
 

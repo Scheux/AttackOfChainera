@@ -1,0 +1,5 @@
+{
+    "enemies": { "id": "enemies", "directory": "assets/config", "source": "enemies.json" },
+    "sprites": { "id": "sprites", "directory": "assets/sprites", "source": "sprites.json" },
+    "tiles": { "id": "tiles", "directory": "assets/tiles", "source": "tiles.json" }
+}

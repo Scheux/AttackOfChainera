@@ -1,0 +1,6 @@
+{
+    "wall": { "id": "wall", "directory": "assets/tiles", "source": "wall.png" },
+    "sky": { "id": "sky", "directory": "assets/tiles", "source": "sky.png"},
+    "ground": { "id": "ground", "directory": "assets/tiles", "source": "ground.png"},
+    "clouds": { "id": "clouds", "directory": "assets/tiles", "source": "clouds.png"}
+}
