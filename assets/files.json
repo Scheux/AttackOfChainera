@@ -1,5 +1,6 @@
 {
     "entities": { "id": "entities", "directory": "assets/config", "source": "entities.json" },
     "sprites": { "id": "sprites", "directory": "assets/sprites", "source": "sprites.json" },
-    "tiles": { "id": "tiles", "directory": "assets/tiles", "source": "tiles.json" }
+    "tiles": { "id": "tiles", "directory": "assets/tiles", "source": "tiles.json" },
+    "maps": { "id": "maps", "directory": "assets/maps", "source": "maps.json" }
 }

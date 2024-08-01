@@ -10,10 +10,10 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
   await ResourceLoader.loadImages(files.sprites, ((key, image, config) => files.sprites[key] = { image, config }));
   await ResourceLoader.loadImages(files.tiles, ((key, image, config) => files.tiles[key] = { image, config }));
 
-  return files
+  return files;
 }).then(resources => {
   gameContext.setResources(resources);
-  gameContext.timer.start(30);
+  gameContext.timer.start();
   console.log(gameContext);
 });
 
@@ -343,14 +343,20 @@ function render() {
     const ray = castRay(correctedRayAngle);
     const distance = ray.distance * Math.cos(rayAngle);
     const stripHeight = Math.min(canvas.height / distance, canvas.height);
-
+    const shadingFactor = distance / 20; 
     const textureX = ray.vertical ? (ray.y % 1) * wallImg.width : (ray.x % 1) * wallImg.width;
     const correctedTextureX = Math.floor(textureX % wallImg.width);
 
     ctx.drawImage(
       wallImg,
       correctedTextureX, 0, 1, wallImg.height,
-      i * stripWidth, (canvas.height - stripHeight) / 2, stripWidth, stripHeight);
+      i * stripWidth, (canvas.height - stripHeight) / 2, stripWidth, stripHeight
+    );
+
+    ctx.globalAlpha = shadingFactor;
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(i * stripWidth, (canvas.height - stripHeight) / 2, stripWidth, stripHeight);
+    ctx.globalAlpha = 1;
   }
 
   renderEnemies();

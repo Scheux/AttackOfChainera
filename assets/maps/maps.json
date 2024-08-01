@@ -1,0 +1,14 @@
+{
+    "map_moindome": {
+        "id": "map_moindome",
+        "music": "music_amogus",
+        "width": 30,
+        "height": 30,
+        "layers": {
+            "collision": [],
+            "visual": [],
+            "interaction": []
+        },
+        "entities": []
+    }
+}

@@ -1,5 +1,5 @@
-export const Timer = function() {
-    this.timeStep = 0;
+export const Timer = function(timeStep) {
+    this.timeStep = 1/timeStep;
     this.gameTime = 0;
     this.accumulatedTime = 0;
     this.lastTime = 0;
@@ -37,8 +37,7 @@ Timer.prototype.queue = function() {
     requestAnimationFrame(this.updateProxy);
 }
 
-Timer.prototype.start = function(physicsUpdatesPerSecond) {
-    this.timeStep = 1/physicsUpdatesPerSecond;
+Timer.prototype.start = function() {
     this.queue();
 }
 
