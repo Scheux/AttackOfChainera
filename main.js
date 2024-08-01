@@ -90,7 +90,7 @@ const player = {
   dir: 0,
   fov: toRadian(90),
   speed: 10,
-  turnSpeed: (Math.PI / 180) * 150,
+  turnSpeed: 0.3,
   health: 1000
 };
 
@@ -156,9 +156,24 @@ document.addEventListener('keyup', (event) => { keys[event.key] = false; });
 
 canvas.addEventListener('click', handleMouseClick);
 
-document.addEventListener('click', () => {
-  canvas.requestPointerLock();
+canvas.addEventListener("click", async () => {
+  if(!gameContext.client.cursor.isLocked) {
+    await canvas.requestPointerLock();
+    return;
+  }
+
+  //document.exitPointerLock();
 });
+
+document.addEventListener("pointerlockchange", () => {
+  if (document.pointerLockElement === canvas) {
+      gameContext.client.cursor.isLocked = true;
+      return;
+  }
+
+  gameContext.client.cursor.isLocked = false;
+});
+
 
 function handleMouseClick(event) {
   const rect = canvas.getBoundingClientRect();
@@ -457,7 +472,6 @@ function renderMinimap() {
 
 function updatePlayer() {
   const moveSpeed = player.speed * timeStep;
-  const turnSpeed = player.turnSpeed * timeStep;
 
   if (keys['w']) {
     const newX = player.x + Math.cos(player.dir) * moveSpeed;
@@ -476,12 +490,20 @@ function updatePlayer() {
     }
   }
   if (keys['a']) {
-    player.dir -= turnSpeed;
-    player.dir = toRadian(normalizeAngle(toAngle(player.dir)));
+    const newX = player.x - Math.cos(player.dir + toRadian(90)) * moveSpeed;
+    const newY = player.y - Math.sin(player.dir + toRadian(90)) * moveSpeed;
+    if (maze[Math.floor(newY)][Math.floor(newX)] === 0) {
+      player.x = newX;
+      player.y = newY;
+    }
   }
   if (keys['d']) {
-    player.dir += turnSpeed;
-    player.dir = toRadian(normalizeAngle(toAngle(player.dir)));
+    const newX = player.x - Math.cos(player.dir - toRadian(90)) * moveSpeed;
+    const newY = player.y - Math.sin(player.dir - toRadian(90)) * moveSpeed;
+    if (maze[Math.floor(newY)][Math.floor(newX)] === 0) {
+      player.x = newX;
+      player.y = newY;
+    }
   }
 }
 
@@ -520,6 +542,13 @@ function gameLoop(timestamp) {
 
   requestAnimationFrame(gameLoop);
 }
+
+gameContext.client.cursor.events.subscribe(Cursor.MOVE, "player", (event, cursor, deltaX, deltaY) => {
+  if(cursor.isLocked) {
+    player.dir -= toRadian(deltaX) * player.turnSpeed;
+    player.dir = toRadian(normalizeAngle(toAngle(player.dir)));
+  }
+})
 
 document.getElementById('startButton').addEventListener('click', () => {
   document.getElementById('mainMenu').style.display = 'none';
