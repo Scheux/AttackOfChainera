@@ -16,8 +16,8 @@ export const Camera = function(screenWidth, screenHeight) {
 }
 
 Camera.SCALE = 1;
-Camera.TILE_WIDTH = 64;
-Camera.TILE_HEIGHT = 64;
+Camera.TILE_WIDTH = 16;
+Camera.TILE_HEIGHT = 16;
 
 Camera.prototype.drawSprites = function() {}
 
