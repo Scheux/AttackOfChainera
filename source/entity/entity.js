@@ -1,5 +1,5 @@
-import { EventEmitter } from "./events/eventEmitter.js";
-import { StateMachine } from "./state/stateMachine.js";
+import { EventEmitter } from "../events/eventEmitter.js";
+import { StateMachine } from "../state/stateMachine.js";
 
 export const Entity = function(id) {
     this.id = id;

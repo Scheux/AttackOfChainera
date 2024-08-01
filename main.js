@@ -1,5 +1,6 @@
 import { ResourceLoader } from "./source/resourceLoader.js";
 import { toAngle, toRadian, normalizeAngle, getRandomNumber } from "./source/helpers.js";
+import { GameMap } from "./source/gameMap.js";
 
 const main = async function() {
   const files = await ResourceLoader.loadConfigFiles("assets/files.json");
@@ -101,6 +102,7 @@ for (let i = 0; i < numEnemies; i++) {
     x: Math.floor(Math.random() * (mazeSize - 2)) + 1.5,
     y: Math.floor(Math.random() * (mazeSize - 2)) + 1.5,
     speed: getRandomNumber(2, 5),
+    maxHealth: 100,
     health: 100,
     damage: 1,
     hit: false,
@@ -336,10 +338,15 @@ function render() {
   ctx.drawImage(skyImg, 0, 0, canvas.width, canvas.height / 2);
   ctx.drawImage(groundImg, 0, canvas.height / 2, canvas.width, canvas.height / 2);
 
+  const halfCameraFOV = player.fov / 2;
+  const halfCameraFOVTan = Math.tan(halfCameraFOV);
+
   for (let i = 0; i < rays; i++) {
-    const rayAngle = player.dir + (i / rays - 0.5) * player.fov;
-    const ray = castRay(rayAngle);
-    const distance = ray.distance * Math.cos(rayAngle - player.dir);
+    const screenX = (2 * i) / rays - 1;
+    const rayAngle = Math.atan(screenX * halfCameraFOVTan)
+    const correctedRayAngle = rayAngle + player.dir;
+    const ray = castRay(correctedRayAngle);
+    const distance = ray.distance * Math.cos(rayAngle);
     const stripHeight = Math.min(canvas.height / distance, canvas.height);
 
     const textureX = ray.vertical ? (ray.y % 1) * wallImg.width : (ray.x % 1) * wallImg.width;
@@ -402,7 +409,7 @@ function renderEnemies() {
     ctx.fillRect(barX, barY, barWidth, barHeight);
 
     ctx.fillStyle = 'green';
-    ctx.fillRect(barX, barY, barWidth * (enemy.health / 100), barHeight);
+    ctx.fillRect(barX, barY, barWidth * (enemy.health / enemy.maxHealth), barHeight);
   });
 }
 
