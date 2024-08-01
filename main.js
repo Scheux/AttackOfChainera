@@ -1,6 +1,10 @@
 import { ResourceLoader } from "./source/resourceLoader.js";
 import { toAngle, toRadian, normalizeAngle, getRandomNumber } from "./source/helpers.js";
-import { GameMap } from "./source/gameMap.js";
+import { GameContext } from "./gameContext.js";
+import { Cursor } from "./source/client/cursor.js";
+import { Keyboard } from "./source/client/keyboard.js";
+
+const gameContext = new GameContext();
 
 const main = async function() {
   const files = await ResourceLoader.loadConfigFiles("assets/files.json");
@@ -14,9 +18,9 @@ const main = async function() {
   console.log(enemies, sprites, tiles);
 }
 
+console.log(gameContext);
 main();
 
-// Random map generation with rooms and corridors
 function generateMap(size) {
   const map = Array(size).fill().map(() => Array(size).fill(1));
   const roomMinSize = 5;
@@ -332,7 +336,7 @@ function isEnemyVisible(enemy) {
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const rays = 240;
+  const rays = 120;
   const stripWidth = canvas.width / rays;
 
   ctx.drawImage(skyImg, 0, 0, canvas.width, canvas.height / 2);
@@ -350,9 +354,12 @@ function render() {
     const stripHeight = Math.min(canvas.height / distance, canvas.height);
 
     const textureX = ray.vertical ? (ray.y % 1) * wallImg.width : (ray.x % 1) * wallImg.width;
-    const correctedTextureX = Math.floor(textureX) % wallImg.width;
+    const correctedTextureX = Math.floor(textureX % wallImg.width);
 
-    ctx.drawImage(wallImg, correctedTextureX, 0, 1, wallImg.height, Math.floor(i * stripWidth), Math.floor((canvas.height - stripHeight) / 2), Math.ceil(stripWidth), Math.ceil(stripHeight));
+    ctx.drawImage(
+      wallImg,
+      correctedTextureX, 0, 1, wallImg.height,
+      i * stripWidth, (canvas.height - stripHeight) / 2, stripWidth, stripHeight);
   }
 
   renderEnemies();
@@ -498,6 +505,8 @@ function gameLoop(timestamp) {
   let passedTime = deltaTime - lastTime;
 
   accumulatedTime += passedTime;
+
+  gameContext.client.update(gameContext);
 
   while(accumulatedTime > timeStep) {
     updatePlayer();
