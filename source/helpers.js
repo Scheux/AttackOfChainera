@@ -14,3 +14,7 @@ export const getRandomNumber = (param_minVal, param_maxVal) => {
 
   return val;
 }
+
+export const getDistance = (x1, y1, x2, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+
+export const getDistanceVec = (vec_1, vec_2) => Math.sqrt((vec_1.x - vec_2.x) ** 2 + (vec_1.y - vec_2.y) ** 2);

@@ -13,4 +13,9 @@ export const Camera = function(screenWidth, screenHeight) {
     this.bufferContext.imageSmoothingEnabled = false;
 }
 
+Camera.TILE_WIDTH = 64;
+Camera.TILE_HEIGHT = 64;
+
 Camera.prototype.drawSprites = function() {}
+
+Camera.prototype.update = function(gameContext) {}

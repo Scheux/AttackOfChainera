@@ -6,20 +6,16 @@ import { Keyboard } from "./source/client/keyboard.js";
 
 const gameContext = new GameContext();
 
-const main = async function() {
-  const files = await ResourceLoader.loadConfigFiles("assets/files.json");
-  const enemies = files.enemies;
-  const sprites = {};
-  const tiles = {};
+ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
+  await ResourceLoader.loadImages(files.sprites, ((key, image, config) => files.sprites[key] = { image, config }));
+  await ResourceLoader.loadImages(files.tiles, ((key, image, config) => files.tiles[key] = { image, config }));
 
-  await ResourceLoader.loadImages(files.sprites, ((key, image, config) => sprites[key] = { image, config }));
-  await ResourceLoader.loadImages(files.tiles, ((key, image, config) => tiles[key] = { image, config }));
-
-  console.log(enemies, sprites, tiles);
-}
-
-console.log(gameContext);
-main();
+  return files
+}).then(resources => {
+  gameContext.setResources(resources);
+  gameContext.timer.start(30);
+  console.log(gameContext);
+});
 
 function generateMap(size) {
   const map = Array(size).fill().map(() => Array(size).fill(1));
