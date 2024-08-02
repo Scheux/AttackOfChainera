@@ -2,22 +2,34 @@ import { ResourceLoader } from "./source/resourceLoader.js";
 import { toAngle, toRadian, normalizeAngle, getRandomNumber } from "./source/helpers.js";
 import { GameContext } from "./gameContext.js";
 import { Cursor } from "./source/client/cursor.js";
+import { ImageSheet } from "./source/graphics/imageSheet.js";
 import { Keyboard } from "./source/client/keyboard.js";
 
 const gameContext = new GameContext();
 
 ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
-  await ResourceLoader.loadImages(files.sprites, ((key, image, config) => files.sprites[key] = { image, config }));
-  await ResourceLoader.loadImages(files.tiles, ((key, image, config) => files.tiles[key] = { image, config }));
+  await ResourceLoader.loadImages(files.sprites, ((key, image, config) => {
+    const imageSheet = new ImageSheet(image, config);
+    imageSheet.defineAnimations();
+    imageSheet.defineFrames();
+    files.sprites[key] = imageSheet;
+  }));
+  await ResourceLoader.loadImages(files.tiles, ((key, image, config) => {
+    const imageSheet = new ImageSheet(image, config);
+    imageSheet.defineAnimations();
+    imageSheet.defineFrames();
+    files.tiles[key] = imageSheet;
+  }));
 
   return files;
-}).then(resources => {
-  gameContext.setResources(resources);
+}).then(async resources => {
+  gameContext.loadResources(resources);
   gameContext.timer.start();
   console.log(gameContext);
-  gameContext.mapLoader.loadMap("map_moin");
+  gameContext.loadMap("map_moin");  
 });
 
+/*
 function generateMap(size) {
   const map = Array(size).fill().map(() => Array(size).fill(1));
   const roomMinSize = 5;
@@ -555,7 +567,7 @@ document.getElementById('startButton').addEventListener('click', () => {
   document.getElementById('mainMenu').style.display = 'none';
   canvas.style.display = 'block';
   player.health = 100;
-  requestAnimationFrame(gameLoop);
+  //requestAnimationFrame(gameLoop);
 });
 
 const images = [wallImg, enemyImg, enemyTwoImg, groundImg, skyImg];
@@ -568,3 +580,5 @@ images.forEach(img => {
     }
   };
 });
+
+*/

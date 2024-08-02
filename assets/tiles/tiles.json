@@ -2,5 +2,33 @@
     "wall": { "id": "wall", "directory": "assets/tiles", "source": "wall.png" },
     "sky": { "id": "sky", "directory": "assets/tiles", "source": "sky.png"},
     "ground": { "id": "ground", "directory": "assets/tiles", "source": "ground.png"},
-    "clouds": { "id": "clouds", "directory": "assets/tiles", "source": "clouds.png"}
+    "clouds": { "id": "clouds", "directory": "assets/tiles", "source": "clouds.png"},
+    "test": { 
+        "id": "test",
+        "directory": "assets/tiles",
+        "source": "test.png",
+        "offset": { "x": 0, "y": 0 },
+        "frameTime": 1,
+        "allowFlip": false,
+        "frames": {
+            "grass": {"x":0,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
+            "wood": {"x":16,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
+            "water": {"x":0,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}},
+            "meadow": {"x":16,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}}
+        }
+    },
+    "test_raycast": { 
+        "id": "test_raycast",
+        "directory": "assets/tiles",
+        "source": "test_raycast.png",
+        "offset": { "x": 0, "y": 0 },
+        "frameTime": 1,
+        "allowFlip": false,
+        "frames": {
+            "grass": {"x":0,"y":0,"w":64,"h":64,"offset":{"x":0,"y":0}},
+            "water": {"x":64,"y":0,"w":64,"h":64,"offset":{"x":0,"y":0}},
+            "meadow": {"x":0,"y":64,"w":64,"h":64,"offset":{"x":0,"y":0}},
+            "ocean": {"x":64,"y":64,"w":64,"h":64,"offset":{"x":0,"y":0}}
+        }
+    }
 }
