@@ -38,6 +38,7 @@ export const GameContext = function() {
 }
 
 GameContext.prototype.loadResources = function(resources) {
+    this.client.musicPlayer.loadMusicTypes(resources.music);
     this.entityManager.loadEntityTypes(resources.entities);
     this.tileManager.loadTileTypes(resources.tileTypes);
     this.mapLoader.loadMapTypes(resources.maps);
@@ -49,10 +50,12 @@ GameContext.prototype.loadMap = async function(mapID) {
     await this.mapLoader.loadMap(mapID);
     const gameMap = this.mapLoader.getLoadedMap(mapID);
     
-    if(gameMap) {
-        this.mapLoader.setActiveMap(mapID);
+    if(!gameMap) {
+        console.warn(`Error loading map! Returning...`);
     }
 
+    this.client.musicPlayer.loadTrack(gameMap.music);
+    this.mapLoader.setActiveMap(mapID);
     this.tileManager.workStart(gameMap.layers);
     this.spriteManager.workStart();
     this.entityManager.workStart(gameMap.entities);
@@ -81,6 +84,13 @@ GameContext.prototype.setupPlayer = function() {
     this.client.keyboard.subscribe(Keyboard.KEY_RELEASED,"d",  (event, keyboard) => move3D.isMovingRight = false);
 
     this.renderer.display.canvas.addEventListener("click", async () => {
+
+        const map = this.mapLoader.getActiveMap();
+
+        if(map) {
+            this.client.musicPlayer.playTrack(map.music, 0.2);
+        }
+
         if(!this.client.cursor.isLocked) {
             await this.renderer.display.canvas.requestPointerLock();
         }

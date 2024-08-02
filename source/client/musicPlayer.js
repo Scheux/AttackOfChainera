@@ -8,6 +8,10 @@ export const MusicPlayer = function() {
     this.volume = 0.5;
 }
 
+MusicPlayer.prototype.loadMusicTypes = function(musicTypes) {
+    this.musicList = musicTypes;
+}
+
 MusicPlayer.prototype.swapTrack = function(audioID, volume = this.volume) {
     if(!this.tracks.has(audioID) || this.currentTack === audioID) {
         console.warn(`Music ${audioID} does not exist or is not loaded! Returning...`);
@@ -25,6 +29,11 @@ MusicPlayer.prototype.loadAllTracks = function() {
 }
 
 MusicPlayer.prototype.loadTrack = function(audioID) {
+    if(!this.musicList[audioID]) {
+        console.warn(`Music ${audioID} does not exist! Returning...`);
+        return;
+    }
+
     if(this.tracks.has(audioID)) {
         console.warn(`Music ${audioID} is already loaded! Returning...`);
         return;
