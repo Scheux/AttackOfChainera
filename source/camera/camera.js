@@ -7,13 +7,12 @@ export const Camera = function(screenWidth, screenHeight) {
     this.viewportY = 0;
     this.viewportWidth = screenWidth;
     this.viewportHeight = screenHeight;
+    this.viewportX_limit = 0;
+    this.viewportY_limit = 0;
 
     this.fps = 0;
     this.smoothedFPS = 60;
-    this.smoothingFactor = 0.01;
-
-    this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
-    this.buffer = new Canvas().createNewElement(screenWidth / 2, screenHeight / 2).getImageData();
+    this.smoothingFactor = 0.02;
 
     this.events = new EventEmitter();
     this.events.listen(Camera.EVENT_LEVEL_LOAD);
@@ -22,11 +21,10 @@ export const Camera = function(screenWidth, screenHeight) {
     this.events.subscribe(Camera.EVENT_LEVEL_LOAD, 0, (width, height) => this.loadViewport(width, height));
     this.events.subscribe(Camera.EVENT_WINDOW_RESIZE, 0, (width, height) => this.resizeViewport(width, height));
     
-    window.addEventListener("resize", () => this.events.emit(Camera.EVENT_WINDOW_RESIZE, window.innerWidth, window.innerHeight));
+    this.raycaster = null;
+    this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
 
-    this.raycaster = new Raycaster();
-    this.raycaster.copyScreen(this.buffer);
-    this.raycaster.calculateRayData();
+    window.addEventListener("resize", () => this.events.emit(Camera.EVENT_WINDOW_RESIZE, window.innerWidth, window.innerHeight));
 }
 
 Camera.SCALE = 1;
@@ -76,7 +74,7 @@ Camera.prototype.drawTiles = function(gameContext) {
                 }
 
                 const renderX = j * Camera.TILE_WIDTH - this.viewportX;
-                const tileGraphics = ["test_raycast", "wood"];//tileRow[j];
+                const tileGraphics = ["test_raycast", "grass"]; //tileRow[j];
                 const [tileSetID, tileSetAnimationID] = tileGraphics;
                 const tileSet = spriteManager.tileSprites[tileSetID];
                 const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
@@ -97,14 +95,28 @@ Camera.prototype.calculateFPS = function(passedTime) {
 }
 
 Camera.prototype.update = function(gameContext) {
-    const { timer, spriteManager } = gameContext; 
+    const { timer } = gameContext; 
     const deltaTime = timer.getDeltaTime();
-    const realTime = timer.getRealTime();
 
     this.display.clear();
-
     this.calculateFPS(deltaTime);
-    //this.drawTiles(gameContext);
+
+    this.drawTiles(gameContext);
+    //this.drawRaycaster(gameContext);
+
+    this.display.context.fillStyle = "#ffffff";
+    this.display.context.font = "30px Arial";
+    this.display.context.fillText(`FPS: ${Math.floor(this.smoothedFPS)}`, 0, 25);
+}
+
+Camera.prototype.drawRaycaster = function(gameContext) {
+    if(!this.raycaster) {
+        return;
+    }
+
+    const { timer, spriteManager } = gameContext; 
+    const realTime = timer.getRealTime();
+
     const graphics = [["test_raycast", "grass"], ["test_raycast", "water"], ["test_raycast", "meadow"], ["test_raycast", "ocean"]].map(([setID, animationID]) => {
         const tileSet = spriteManager.tileSprites[setID];
         const buffers = tileSet.getAnimationFrame(animationID, realTime);
@@ -116,13 +128,7 @@ Camera.prototype.update = function(gameContext) {
     this.raycaster.copyPosition(gameContext.player.position3D);
     this.raycaster.raycast(gameContext, graphics);
 
-    this.buffer.context.putImageData(this.buffer.imageData, 0, 0);
-    this.display.context.drawImage(this.buffer.canvas, 0, 0, this.display.width, this.display.height);
-
-    this.display.context.fillStyle = "#ffffff";
-    this.display.context.font = "30px Arial";
-    this.display.context.fillText(`FPS: ${Math.floor(this.smoothedFPS)}`, 0, 25);
-
+    this.display.context.drawImage(this.raycaster.display.canvas, 0, 0, this.display.width, this.display.height);
     this.display.context.fillRect(this.display.centerX - 4, this.display.centerY - 4, 8, 8);
 }
 
@@ -180,18 +186,27 @@ Camera.prototype.loadViewport = function(mapWidth, mapHeight) {
     this.limitViewport();
 }
 
+Camera.prototype.initializeRaycaster = function() {
+    this.raycaster = new Raycaster();
+    this.raycaster.display.resize(this.display.width / 2, this.display.height / 2);
+    this.raycaster.display.getImageData();
+    this.raycaster.copyScreen();
+    this.raycaster.calculateRayData();
+}
+
 Camera.prototype.resizeViewport = function(width, height) {
     this.viewportWidth = width;
     this.viewportHeight = height;
 
     this.loadViewport(this.mapWidth, this.mapHeight);
     this.display.resize(width, height);
-    this.buffer.resize(width/2, height/2);
 
-    this.raycaster.copyScreen(this.buffer);
-    this.raycaster.calculateRayData();
-
-    this.buffer.getImageData();
+    if(this.raycaster) {
+        this.raycaster.display.resize(width / 2, height / 2);
+        this.raycaster.display.getImageData();
+        this.raycaster.copyScreen();
+        this.raycaster.calculateRayData();
+    }
 }
 
 Camera.prototype.getViewportWidth = function() {

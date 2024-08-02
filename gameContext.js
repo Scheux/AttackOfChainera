@@ -54,6 +54,7 @@ GameContext.prototype.loadMap = async function(mapID) {
         console.warn(`Error loading map! Returning...`);
     }
 
+    this.renderer.events.emit(Camera.EVENT_LEVEL_LOAD, gameMap.width, gameMap.height);
     this.client.musicPlayer.loadTrack(gameMap.music);
     this.mapLoader.setActiveMap(mapID);
     this.tileManager.workStart(gameMap.layers);
@@ -83,6 +84,8 @@ GameContext.prototype.setupPlayer = function() {
     this.client.keyboard.subscribe(Keyboard.KEY_RELEASED,"s",  (event, keyboard) => move3D.isMovingDown = false);
     this.client.keyboard.subscribe(Keyboard.KEY_RELEASED,"d",  (event, keyboard) => move3D.isMovingRight = false);
 
+    this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_DRAG, 0, (deltaX, deltaY) => this.renderer.dragViewportBy(deltaX, deltaY));
+    
     this.renderer.display.canvas.addEventListener("click", async () => {
 
         const map = this.mapLoader.getActiveMap();
@@ -91,9 +94,9 @@ GameContext.prototype.setupPlayer = function() {
             this.client.musicPlayer.playTrack(map.music, 0.2);
         }
 
-        if(!this.client.cursor.isLocked) {
+        /*if(!this.client.cursor.isLocked) {
             await this.renderer.display.canvas.requestPointerLock();
-        }
+        }*/
     });
 
     document.addEventListener("pointerlockchange", () => {
