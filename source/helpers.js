@@ -1,3 +1,6 @@
+import { Camera } from "./camera/camera.js";
+import { Vec2 } from "./math/vec2.js";
+
 export const toRadian = (degree) => degree * Math.PI / 180;
 
 export const toAngle = (radian)  => radian * 180 / Math.PI;
@@ -18,6 +21,18 @@ export const getRandomNumber = (param_minVal, param_maxVal) => {
 export const getDistance = (x1, y1, x2, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
 
 export const getDistanceVec = (vec_1, vec_2) => Math.sqrt((vec_1.x - vec_2.x) ** 2 + (vec_1.y - vec_2.y) ** 2);
+
+export const getViewportTile = function(positionVector, viewportX, viewportY) {
+  const renderWidth = Camera.TILE_WIDTH;
+  const renderHeight = Camera.TILE_HEIGHT;
+
+  const tileX = Math.trunc((positionVector.x / Camera.SCALE + viewportX) / renderWidth);
+  const tileY = Math.trunc((positionVector.y / Camera.SCALE + viewportY) / renderHeight);
+
+  const tilePosition = new Vec2(tileX, tileY);
+  
+  return tilePosition;
+}
 
 export const saveTemplateAsFile = (filename, dataObjToWrite) => {
   const blob = new Blob([dataObjToWrite], { type: "text/json" });

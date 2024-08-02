@@ -16,17 +16,45 @@ export const Camera = function(screenWidth, screenHeight) {
     this.raycaster = null;
     this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
 
-    window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight));
+    window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight))
 }
 
-Camera.SCALE = 1;
-Camera.TILE_WIDTH = 64;
-Camera.TILE_HEIGHT = 64;
-Camera.EVENT_LEVEL_LOAD = 0;
-Camera.EVENT_WINDOW_RESIZE = 1;
+Camera.DRAW_2D_MAP = true;
+Camera.DRAW_RAYCAST = false;
+Camera.SCALE = 4;
+Camera.TILE_WIDTH = 16;
+Camera.TILE_HEIGHT = 16;
 
 Camera.prototype.drawSprites = function(gameContext) {
-    const { spriteManager } = gameContext;
+    const { timer, spriteManager } = gameContext;
+    const { rootSprites } = spriteManager;
+    const realTime = timer.getRealTime();
+    const timeStep = timer.getFixedDeltaTime();
+    const visibleSprites = [];
+    const length = rootSprites.length;
+    const viewportLeftEdge = this.viewportX;
+    const viewportTopEdge = this.viewportY;
+    const viewportRightEdge = viewportLeftEdge + this.getViewportWidth();
+    const viewportBottomEdge = viewportTopEdge + this.getViewportHeight();
+
+    for(let i = 0; i < length; i++) {
+        const sprite = rootSprites[i];
+        const positionData = sprite.getPositionData(this.viewportX, this.viewportY, 0, 0);     
+        const { spriteX, spriteY, sourceWidth, sourceHeight } = positionData;
+        const inBounds = spriteX < viewportRightEdge && spriteX + sourceWidth > viewportLeftEdge && spriteY < viewportBottomEdge && spriteY + sourceHeight > viewportTopEdge;
+
+        if(inBounds) {
+            visibleSprites.push(sprite);
+        }
+    }
+
+    visibleSprites.sort((a, b) => (a.position.y) - (b.position.y));
+
+    for(let i = 0; i < visibleSprites.length; i++) {
+        const sprite = visibleSprites[i];
+        sprite.receiveUpdate(realTime, timeStep);
+        sprite.draw(this.display.context, this.viewportX, this.viewportY, 0, 0);
+    }
 }
 
 Camera.prototype.drawLayer = function(gameContext, layer, startX, startY, endX, endY) {
@@ -40,7 +68,7 @@ Camera.prototype.drawLayer = function(gameContext, layer, startX, startY, endX, 
     for(let i = startY; i <= endY; i++) {
         const tileRow = layer[i];
 
-        if(tileRow === undefined) {
+        if(tileRow === undefined || tileRow === null) {
             continue;
         }
 
@@ -48,7 +76,7 @@ Camera.prototype.drawLayer = function(gameContext, layer, startX, startY, endX, 
         
         for(let j = startX; j <= endX; j++) {
             
-            if(tileRow[j] === undefined) {
+            if(tileRow[j] === undefined || tileRow[j] === null) {
                 continue;
             }
 
@@ -86,10 +114,15 @@ Camera.prototype.draw2DMap = function(gameContext) {
     const layerFloor = gameMap.layers["floor"];
     const layerTop = gameMap.layers["top"];
 
+    this.display.context.save();
+    this.display.context.scale(Camera.SCALE, Camera.SCALE);
+
     this.drawLayer(gameContext, layerBottom, startX, startY, endX, endY);
     this.drawLayer(gameContext, layerFloor, startX, startY, endX, endY);
-    this.drawSprites(gameContext, gameMap.entities, startX, startY, endX, endY)
-    this.drawLayer(gameContext, layerTop, startX, startY, endX, endY);
+    this.drawSprites(gameContext, startX, startY, endX, endY)
+    //this.drawLayer(gameContext, layerTop, startX, startY, endX, endY);
+
+    this.display.context.restore();
 }
 
 Camera.prototype.calculateFPS = function(passedTime) {
@@ -107,8 +140,13 @@ Camera.prototype.update = function(gameContext) {
     this.display.clear();
     this.calculateFPS(deltaTime);
 
-    this.draw2DMap(gameContext);
-    //this.drawRaycaster(gameContext);
+    if(Camera.DRAW_2D_MAP) {
+        this.draw2DMap(gameContext);
+    }
+
+    if(Camera.DRAW_RAYCAST) {
+        this.drawRaycaster(gameContext);
+    }
 
     this.display.context.fillStyle = "#ffffff";
     this.display.context.font = "30px Arial";
@@ -157,8 +195,8 @@ Camera.prototype.limitViewport = function() {
 }
 
 Camera.prototype.dragViewportBy = function(param_dragX, param_dragY) {
-    this.viewportX += Math.trunc((param_dragX / Camera.SCALE));
-    this.viewportY += Math.trunc((param_dragY / Camera.SCALE));
+    this.viewportX += param_dragX / Camera.SCALE;
+    this.viewportY += param_dragY / Camera.SCALE;
   
     this.limitViewport();
 }
@@ -198,6 +236,10 @@ Camera.prototype.initializeRaycaster = function() {
     this.raycaster.display.getImageData();
     this.raycaster.copyScreen();
     this.raycaster.calculateRayData();
+}
+
+Camera.prototype.clearRaycaster = function() {
+    this.raycaster = null;
 }
 
 Camera.prototype.resizeViewport = function(width, height) {

@@ -16,6 +16,8 @@ export const Keyboard = function() {
     this.keys.add("a");
     this.keys.add("s");
     this.keys.add("d");
+    this.keys.add("b");
+    this.keys.add("e");
 }
 
 Keyboard.KEY_PRESSED = 0;

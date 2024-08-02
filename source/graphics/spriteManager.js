@@ -35,13 +35,13 @@ SpriteManager.prototype.workEnd = function() {
     this.IDgenerator.reset();
 }
 
-SpriteManager.prototype.createSprite = function(spriteTypeID, isRooted, timeStamp) {
+SpriteManager.prototype.createSprite = function(spriteTypeID, isRooted, spriteAnimationID, timeStamp) {
     const spriteID = this.IDgenerator.getID();
     const sprite = new Sprite(spriteID, spriteTypeID);
 
     this.sprites.set(sprite.id, sprite);
     sprite.onFinish = (entity) => this.removeSprite(entity.id);
-    this.updateSprite(sprite.id, spriteTypeID, "default");
+    this.updateSprite(sprite.id, spriteTypeID, spriteAnimationID);
 
     if(isRooted) {
         sprite.openFamily(spriteTypeID);
@@ -129,12 +129,12 @@ SpriteManager.prototype.updateSprite = function(spriteID, newSpriteTypeID, newSp
     const sprite = this.sprites.get(spriteID);
 
     if(!sprite) {
-        console.warn(`Sprite ${spriteID} does not exist!`);
+        console.warn(`Sprite ${spriteID} does not exist! Returning...`);
         return;
     }
 
     if(!newSpriteTypeID) {
-        console.warn(`SpriteType ${newSpriteTypeID} does not exist!`);
+        console.warn(`SpriteType ${newSpriteTypeID} does not exist! Returning...`);
         return;
     }
 
@@ -143,6 +143,12 @@ SpriteManager.prototype.updateSprite = function(spriteID, newSpriteTypeID, newSp
     }
 
     const spriteConfig = this.spriteTypes[newSpriteTypeID];
+
+    if(!spriteConfig) {
+        console.warn(`SpriteType ${newSpriteTypeID} does not exist! Returning...`);
+        return;
+    }
+
     const animationConfig = spriteConfig.getAnimation(newSpriteAnimationID);
 
     sprite.override(spriteConfig, animationConfig);

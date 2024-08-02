@@ -1,4 +1,4 @@
-export const Move3D = function() {
+export const Move3DComponent = function() {
     this.isMovingUp = false;
     this.isMovingDown = false;
     this.isMovingLeft = false;
@@ -6,7 +6,7 @@ export const Move3D = function() {
     this.isJumping = false;
     this.isCrouching = false;
     this.isFalling = false;
-    this.speed = 300;
-    this.acceleration = 100;
-    this.initialAcceleration = 100;
+    this.speed = 0;
+    this.acceleration = 0;
+    this.initialAcceleration = 0;
 }

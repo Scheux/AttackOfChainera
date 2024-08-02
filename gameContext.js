@@ -1,4 +1,3 @@
-import { Player } from "./player.js";
 import { Camera } from "./source/camera/camera.js";
 import { Client } from "./source/client.js";
 import { Cursor } from "./source/client/cursor.js";
@@ -6,7 +5,9 @@ import { Keyboard } from "./source/client/keyboard.js";
 import { EntityManager } from "./source/entity/entityManager.js";
 import { EventEmitter } from "./source/events/eventEmitter.js";
 import { SpriteManager } from "./source/graphics/spriteManager.js";
+import { getViewportTile } from "./source/helpers.js";
 import { MapLoader } from "./source/map/mapLoader.js";
+import { Vec2 } from "./source/math/vec2.js";
 import { StateMachine } from "./source/state/stateMachine.js";
 import { TileManager } from "./source/tile/tileManager.js";
 import { Timer } from "./source/timer.js";
@@ -50,17 +51,26 @@ GameContext.prototype.loadMap = async function(mapID) {
     
     if(!gameMap) {
         console.warn(`Error loading map! Returning...`);
+        return;
     }
 
-    this.renderer.loadViewport(gameMap.width, gameMap.height);
-    this.client.musicPlayer.loadTrack(gameMap.music);
     this.mapLoader.setActiveMap(mapID);
+
     this.tileManager.workStart(gameMap.tiles);
     this.spriteManager.workStart();
     this.entityManager.workStart(gameMap.entities);
+
+    this.renderer.loadViewport(gameMap.width, gameMap.height);
+    this.client.musicPlayer.loadTrack(gameMap.music);
     this.tileManager.loadTiles(gameMap.width, gameMap.height);
 
     this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_DRAG, 0, (deltaX, deltaY) => this.renderer.dragViewportBy(deltaX, deltaY));
+
+    this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_CLICK, 0, (event, cursor) => {
+        const tilePosition = getViewportTile(cursor.position, this.renderer.viewportX, this.renderer.viewportY);
+        const tile = this.tileManager.getTile(tilePosition.x, tilePosition.y);
+        console.log("TILE CLICKED!", tile);
+    });
 
     this.renderer.display.canvas.addEventListener("click", async () => {
         const map = this.mapLoader.getActiveMap();
@@ -82,16 +92,24 @@ GameContext.prototype.loadMap = async function(mapID) {
       
         this.client.cursor.isLocked = false;
     });
+
+    this.spriteManager.createSprite("enemy", true);
+    const enemyTwo = this.spriteManager.createSprite("enemy_two", true);
+    enemyTwo.setPosition(new Vec2(100, 100));
 }
 
 GameContext.prototype.unloadMap = function(mapID) {
     this.mapLoader.unloadMap(mapID);
     this.tileManager.workEnd();
     this.spriteManager.workEnd();
+    this.entityManager.workEnd();
+
+    //todo find what map was unloaded and check where the sprites were from.
+    //unload only the sprites that were in the now unloaded map!
 }
 
 GameContext.prototype.setupPlayer3D = function() {
-    this.player = new Player();
+    this.player = null;
     const position3D = this.player.position3D;
     const move3D = this.player.move3D;
 
