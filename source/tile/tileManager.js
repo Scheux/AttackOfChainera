@@ -3,7 +3,7 @@ import { Vec2 } from "../math/vec2.js";
 import { Tile } from "./tile.js";
 
 export const TileManager = function() {
-    this.tileTypes = null;
+    this.tileTypes = {};
     this.tiles = [];
 
     this.events = new EventEmitter();
@@ -37,7 +37,10 @@ TileManager.prototype.createTile = function(tileType, positionVector) {
     const tile = new Tile();
 
     tile.setPosition(positionVector);
-    this.updateTileConfig(tile, tileType);
+
+    if(tileType !== null) {
+        this.updateTileConfig(tile, tileType);
+    }
 
     return tile;
 }
@@ -284,20 +287,26 @@ TileManager.prototype.updateAllTiles = function() {
     }
 }
 
-//TODO: what the fuck?
-TileManager.prototype.loadInteractiveTiles = function(mapWidth, mapHeight) {
+TileManager.prototype.loadTiles = function(mapWidth, mapHeight) {
     if(!this.tiles) {
-        console.warn("No tiles to operate on found!\nUse TileManager.prototype.startOperation to acces a tilemap.");
+        console.warn(`Tiles is undefined! Returning...`);
         return;
     }
-    
+
     for(let i = 0; i < mapHeight; i++) {
+
+        if(this.tiles[i] === undefined) {
+            this.tiles[i] = [];
+        }
+
         for(let j = 0; j < mapWidth; j++) {
-            if(!this.tiles[i] || !this.tiles[i][j]) {
-                this.tiles[i][j] = this.createTile("00", new Vec2(j, i));
-            } else {
-                this.tiles[i][j] = this.createTile(this.tiles[i][j], new Vec2(j, i));
+
+            if(this.tiles[i][j] === undefined) { 
+                this.tiles[i][j] = this.createTile(null, new Vec2(j, i));
+                continue;
             }
+
+            this.tiles[i][j] = this.createTile(this.tiles[i][j], new Vec2(j, i));
         }
     }
 }

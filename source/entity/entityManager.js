@@ -2,7 +2,7 @@ import { IDGenerator } from "../idGenerator.js";
 import { Entity } from "./entity.js";
 
 export const EntityManager = function() {
-    this.entityTypes = null;
+    this.entityTypes = {};
     this.IDGenerator = new IDGenerator();
     this.entities = new Map();
 }

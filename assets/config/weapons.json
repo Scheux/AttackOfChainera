@@ -1,0 +1,35 @@
+{
+    "pistol": {
+        "id": "pistol",
+        "sprites": {
+            "idle": "weapon_pistol",
+            "reload": "weapon_pistol_reload",
+            "fire": "weapin_pistol_fire"
+        },
+        "damage": 4,
+        "pellets": 1,
+        "levels": {
+            "0": {
+                "id": 0,
+                "experienceRequired": 0,
+                "damageIncrease": 0,
+                "pelletsIncrease": 0
+            },
+            "1": {
+                "id": 1,
+                "experienceRequired": 10,
+                "damageIncrease": 1,
+                "pelletsIncrease": 0
+            },
+            "2": {
+                "id": 2,
+                "experienceRequired": 100,
+                "damageIncrease": 1,
+                "pelletsIncrease": 1,
+                "spritesEdit": {
+                    "idle": "weapon_pistol_gold"
+                }
+            }
+        }
+    }
+}

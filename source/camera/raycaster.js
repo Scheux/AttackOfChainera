@@ -33,6 +33,11 @@ export const Raycaster = function() {
     ResourceLoader.promiseImage("assets/sky.png").then(image => this.skybox = new ImageBuffer(image));
 }
 
+Raycaster.WALL_X_POSITIVE = -1;
+Raycaster.WALL_X_NEGATIVE = 1;
+Raycaster.WALL_Y_POSITIVE = -1;
+Raycaster.WALL_Y_NEGATIVE = 1;
+
 Raycaster.prototype.calculateRayData = function() {
     this.rayAngles = [];
     this.fishEyeFixes = [];
@@ -279,7 +284,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
                 "hitY": horHitY,
                 "distance": horizDistance,
                 "wallHitX": 0,
-                "wallHitY": sinRayAngle > 0 ? Camera.WALL_Y_POSITIVE : Camera.WALL_Y_NEGATIVE,
+                "wallHitY": sinRayAngle > 0 ? Raycaster.WALL_Y_POSITIVE : Raycaster.WALL_Y_NEGATIVE,
                 "textureOffset": sinRayAngle > 0 ? Camera.TILE_HEIGHT - horHitX % Camera.TILE_HEIGHT : horHitX % Camera.TILE_HEIGHT,
                 "hitBy": "HORIZONTAL"
             }
@@ -334,7 +339,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
                 "hitX": vertHitX,
                 "hitY": vertHitY,
                 "distance": vertDistance,
-                "wallHitX": cosRayAngle > 0 ? Camera.WALL_X_POSITIVE : Camera.WALL_X_NEGATIVE,
+                "wallHitX": cosRayAngle > 0 ? Raycaster.WALL_X_POSITIVE : Raycaster.WALL_X_NEGATIVE,
                 "wallHitY": 0,
                 "textureOffset": cosRayAngle > 0 ? Camera.TILE_WIDTH - horHitX % Camera.TILE_WIDTH : horHitX % Camera.TILE_WIDTH,
                 "hitBy": "HORIZONTAL"

@@ -2,8 +2,8 @@ import { IDGenerator } from "../idGenerator.js";
 import { Sprite } from "./sprite.js";
 
 export const SpriteManager = function() {
-    this.tileSprites = null;
-    this.spriteTypes = null;
+    this.tileSprites = {};
+    this.spriteTypes = {};
     this.sprites = new Map();
     this.rootSprites = [];
     this.IDgenerator = new IDGenerator();

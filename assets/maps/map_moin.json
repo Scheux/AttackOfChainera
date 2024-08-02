@@ -2,7 +2,6 @@
     "music": "music_29",
     "width": 30,
     "height": 30,
-    "layerDrawOrder": ["floor"],
     "layers": {
         "collision": [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -133,6 +132,7 @@
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
     },
+    "tiles": [],
     "connections": {
         "north": { "id": "map_moin_2", "offset": 5 },
         "east": null,

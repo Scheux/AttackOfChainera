@@ -1,5 +1,5 @@
 export const GameMap = function(id, config) {
-    const { music, width, height, collisions, layers, layerDrawOrder, connections, entities, flags } = config;
+    const { music, width, height, collisions, layers, tiles, connections, entities, flags } = config;
 
     this.id = id;
     this.music = music;
@@ -7,14 +7,13 @@ export const GameMap = function(id, config) {
     this.height = height;
     this.collisions = collisions;
     this.layers = layers;
-    this.layerDrawOrder = layerDrawOrder;
+    this.tiles = tiles;
     this.connections = connections;
     this.entities = entities;
     this.flags = flags;
 }
 
-GameMap.prototype.generateEmptyMap = function(layerIndex) {
-    const layerID = this.layerDrawOrder[layerIndex];
+GameMap.prototype.generateEmptyLayer = function(layerID) {
     const layer = this.layers[layerID];
 
     if(!layer) {
