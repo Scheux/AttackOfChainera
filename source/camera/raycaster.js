@@ -355,6 +355,7 @@ Raycaster.prototype.drawRays = function(rayIntersectionsArraySorted, pixelColumn
 
     for(let i = 0; i < rayIntersectionsArraySorted.length; i++) {
         const { tileX, tileY, hitX, hitY, distance, textureOffset, hitBy } = rayIntersectionsArraySorted[i];
+
         const maxDistance = 2000;
         const shadingFactor = (1 - Math.exp(-distance / maxDistance));
 
@@ -364,7 +365,7 @@ Raycaster.prototype.drawRays = function(rayIntersectionsArraySorted, pixelColumn
 
         const wallBottom = ratio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
         const wallTop = wallBottom - projectionHeight * WALL_HEIGHT;
-        const wallHeight = wallBottom - wallTop;
+        const wallHeight = Math.floor(wallBottom - wallTop);
 
         const visualTile = visualMap[tileY][tileX];
         const interactiveTile = interactiveMap[tileY][tileX];
@@ -374,26 +375,45 @@ Raycaster.prototype.drawRays = function(rayIntersectionsArraySorted, pixelColumn
             this.drawSky(pixelColumn, correctedRayAngle, display);
         }
 
-        this.drawWall(pixelColumn, textureOffset, wallTop, wallHeight, buffer, display);
-
-        display.context.globalAlpha = shadingFactor;
-        display.context.fillStyle = "#000000";
-        display.context.fillRect(pixelColumn, wallTop, 1, projectionHeight);
-        display.context.globalAlpha = 1;
+        this.drawWall(pixelColumn, textureOffset, wallTop, wallHeight, distance, buffer, display);
 
         if(i === rayIntersectionsArraySorted.length - 1) {
             this.drawFloor(pixelColumn, correctedRayAngle, Math.floor(wallBottom), gameMap, graphics, display);
         }
+        
         //this.drawCeiling(Math.floor(wallTop), pixelColumn, correctedRayAngle, gameMap, graphics, position3D, pitchOffset);
     }
 }
 
-Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, buffer, display) {
-    display.context.drawImage(
-        buffer.bitmap,
-        textureOffset, 0, 1 - textureOffset % 1, Camera.TILE_HEIGHT,
-        pixelColumn, wallTop, 1, wallHeight
-    );
+Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, distance, buffer, display) {
+    //GANZ FETT EHRE AN CHATGPT!
+    const TILE_HEIGHT = Camera.TILE_HEIGHT;
+    const shadingFactor = 300 / (distance + 1);
+    const sourceX = Math.floor(textureOffset);
+    const sourceY = 0;
+    const sourceWidth = 1;
+    const sourceHeight = TILE_HEIGHT;
+
+    const destinationX = pixelColumn;
+    const destinationY = Math.floor(wallTop);
+    const destinationWidth = 1;
+    const destinationHeight = Math.floor(wallHeight);
+
+    for (let y = 0; y < destinationHeight; y++) {
+        const sourceIndex = ((sourceY + Math.floor(y * sourceHeight / destinationHeight)) * buffer.bitmap.width + sourceX) * this.bytesPerPixel;
+        const destinationIndex = ((destinationY + y) * display.canvas.width + destinationX) * this.bytesPerPixel;
+
+        const sourceR = buffer.imageData.data[sourceIndex];
+        const sourceG = buffer.imageData.data[sourceIndex + 1];
+        const sourceB = buffer.imageData.data[sourceIndex + 2];
+
+        display.drawPixel(destinationIndex,
+            Math.min(sourceR, sourceR * shadingFactor),
+            Math.min(sourceG, sourceG * shadingFactor),
+            Math.min(sourceB, sourceB * shadingFactor),
+            255
+        );
+    }
 }
 
 Raycaster.prototype.drawSky = function(pixelColumn, rayAngle, display) {
@@ -444,7 +464,7 @@ Raycaster.prototype.drawFloor = function(pixelColumn, rayAngle, wallBottom, game
             }
 
             const buffer = graphics[bottomTileID];
-            const shadingFactor = 250 / (diagDist + 1);
+            const shadingFactor = 300 / (diagDist + 1);
             const sourceData = buffer.imageData.data;
             const tileRow = ~~(xEnd % Camera.TILE_WIDTH);
             const tileCol = ~~(yEnd % Camera.TILE_HEIGHT);

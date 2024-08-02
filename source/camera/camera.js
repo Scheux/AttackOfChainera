@@ -13,7 +13,6 @@ export const Camera = function(screenWidth, screenHeight) {
     this.smoothingFactor = 0.01;
 
     this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
-    this.offscreenDisplay = new Canvas().createNewElement(screenWidth / 2, screenHeight / 2).getImageData();
     this.buffer = new Canvas().createNewElement(screenWidth / 2, screenHeight / 2).getImageData();
 
     this.events = new EventEmitter();
@@ -103,7 +102,6 @@ Camera.prototype.update = function(gameContext) {
     const realTime = timer.getRealTime();
 
     this.display.clear();
-    this.buffer.clear();
 
     this.calculateFPS(deltaTime);
     //this.drawTiles(gameContext);
@@ -118,8 +116,7 @@ Camera.prototype.update = function(gameContext) {
     this.raycaster.copyPosition(gameContext.player.position3D);
     this.raycaster.raycast(gameContext, graphics);
 
-    this.offscreenDisplay.context.putImageData(this.buffer.imageData, 0, 0);
-    this.display.context.drawImage(this.offscreenDisplay.canvas, 0, 0, this.display.width, this.display.height);
+    this.buffer.context.putImageData(this.buffer.imageData, 0, 0);
     this.display.context.drawImage(this.buffer.canvas, 0, 0, this.display.width, this.display.height);
 
     this.display.context.fillStyle = "#ffffff";
@@ -190,13 +187,11 @@ Camera.prototype.resizeViewport = function(width, height) {
     this.loadViewport(this.mapWidth, this.mapHeight);
     this.display.resize(width, height);
     this.buffer.resize(width/2, height/2);
-    this.offscreenDisplay.resize(width/2, height/2);
 
     this.raycaster.copyScreen(this.buffer);
     this.raycaster.calculateRayData();
 
     this.buffer.getImageData();
-    this.offscreenDisplay.getImageData();
 }
 
 Camera.prototype.getViewportWidth = function() {
