@@ -13,10 +13,16 @@ export const UIElement = function(DEBUG_NAME) {
     this.events.listen(UIElement.EVENT_HOVER);
 }
 
+UIElement.ANCHOR_TYPE_TOP_CENTER = "TOP_CENTER";
 UIElement.ANCHOR_TYPE_TOP_LEFT = "TOP_LEFT";
 UIElement.ANCHOR_TYPE_TOP_RIGHT = "TOP_RIGHT";
+UIElement.ANCHOR_TYPE_BOTTOM_CENTER = "BOTTOM_CENTER";
 UIElement.ANCHOR_TYPE_BOTTOM_LEFT = "BOTTOM_LEFT";
 UIElement.ANCHOR_TYPE_BOTTOM_RIGHT = "BOTTOM_RIGHT";
+UIElement.ANCHOR_TYPE_RIGHT_CENTER = "RIGHT_CENTER";
+UIElement.ANCHOR_TYPE_LEFT_CENTER = "LEFT_CENTER";
+UIElement.ANCHOR_TYPE_CENTER = "CENTER";
+
 UIElement.EVENT_CLICKED = 0;
 UIElement.EVENT_HOVER = 1;
 
@@ -54,7 +60,13 @@ UIElement.prototype.adjustAnchor = function(viewportWidth, viewportHeight) {
     }
 
     switch(this.config.anchor) {
+
         case UIElement.ANCHOR_TYPE_TOP_LEFT: {
+            break;
+        }
+
+        case UIElement.ANCHOR_TYPE_TOP_CENTER: {
+            this.position.x = viewportWidth / 2 - this.config.position.x - this.width / 2;
             break;
         }
 
@@ -67,10 +79,33 @@ UIElement.prototype.adjustAnchor = function(viewportWidth, viewportHeight) {
             this.position.y = viewportHeight - this.config.position.y - this.height;
             break;
         }
+        
+        case UIElement.ANCHOR_TYPE_BOTTOM_CENTER: {
+            this.position.x = viewportWidth / 2 - this.config.position.x - this.width / 2;
+            this.position.y = viewportHeight - this.config.position.y - this.height;
+            break;
+        }
 
         case UIElement.ANCHOR_TYPE_BOTTOM_RIGHT: {
             this.position.x = viewportWidth - this.config.position.x - this.width;
             this.position.y = viewportHeight - this.config.position.y - this.height;
+            break;
+        }
+
+        case UIElement.ANCHOR_TYPE_LEFT_CENTER: {
+            this.position.y = viewportHeight / 2 - this.config.position.y - this.height / 2;
+            break;
+        }
+
+        case UIElement.ANCHOR_TYPE_CENTER: {
+            this.position.x = viewportWidth / 2 - this.config.position.x - this.width / 2;
+            this.position.y = viewportHeight / 2 - this.config.position.y - this.height / 2;
+            break;
+        }
+
+        case UIElement.ANCHOR_TYPE_RIGHT_CENTER: {
+            this.position.x = viewportWidth - this.config.position.x - this.width;
+            this.position.y = viewportHeight / 2 - this.config.position.y - this.height / 2;
             break;
         }
 
