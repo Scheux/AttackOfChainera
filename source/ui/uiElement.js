@@ -7,6 +7,7 @@ export const UIElement = function(DEBUG_NAME) {
     this.config = null;
     this.goals = new Map();
     this.goalsReached = new Set();
+    this.isHighlighted = false;
     
     this.events = new EventEmitter();
     this.events.listen(UIElement.EVENT_CLICKED);
@@ -114,4 +115,8 @@ UIElement.prototype.adjustAnchor = function(viewportWidth, viewportHeight) {
             return null;
         }
     }
+}
+
+UIElement.prototype.highlight = function(isHighlighted) {
+    this.isHighlighted = isHighlighted;
 }

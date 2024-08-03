@@ -1,5 +1,6 @@
 {
     "music_29": { "id": "music_29", "directory": "assets/music/", "source": "009 Route 29.mp3", "isLooping": true, "defaultVolume": 0.2 },
+    "surfing": { "id": "surfing", "directory": "assets/music/", "source": "surfing.mp3", "isLooping": true, "defaultVolume": 0.2 },
     "e1m4": { "id": "e1m4", "directory": "assets/music/", "source": "e1m4.mp3", "isLooping": true, "defaultVolume": 0.2 },
     "e2m1": { "id": "e2m1", "directory": "assets/music/", "source": "e2m1.mp3", "isLooping": true, "defaultVolume": 0.2 },
     "e2m3": { "id": "e2m3", "directory": "assets/music/", "source": "e2m3.mp3", "isLooping": true, "defaultVolume": 0.2 },

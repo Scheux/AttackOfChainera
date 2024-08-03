@@ -81,10 +81,9 @@ GameContext.prototype.loadMap = async function(mapID) {
     this.renderer.display.canvas.addEventListener("click", async () => {
         const map = this.mapLoader.getActiveMap();
 
-        /*
         if(map) {
             this.client.musicPlayer.playTrack(map.music, 0.2);
-        }*/
+        }
 
         /*
         if(!this.client.cursor.isLocked) {

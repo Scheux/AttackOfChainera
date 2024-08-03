@@ -27,6 +27,14 @@ ButtonSquare.prototype.draw = function(context, viewportX, viewportY, rootLocalX
     const localX = rootLocalX + this.position.x;
     const localY = rootLocalY + this.position.y;
 
+    if(this.isHighlighted) {
+        context.save();
+        context.globalAlpha = 0.5;
+        context.fillStyle = "#eeeeee";
+        context.fillRect(localX, localY, this.width, this.height);
+        context.restore();
+    }
+
     this.drawChildren(context, viewportX, viewportY, localX, localY);
 }
 

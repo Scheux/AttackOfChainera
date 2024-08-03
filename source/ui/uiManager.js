@@ -68,7 +68,8 @@ UIManager.prototype.workEnd = function() {
 }
 
 UIManager.prototype.update = function(gameContext) {
-    const { timer } = gameContext;
+    const { timer, client } = gameContext;
+    const { cursor } = client;
     const deltaTime = timer.getDeltaTime();
 
     for(const [id, element] of this.elementsToUpdate) {
@@ -89,6 +90,15 @@ UIManager.prototype.update = function(gameContext) {
 
         if(element.goals.size === 0) {
             this.elementsToUpdate.delete(id);
+        }
+    }
+
+    for(const [key, element] of this.drawableElements) {
+        const isColliding = element.collides(cursor.position.x, cursor.position.y, cursor.radius);
+        element.highlight(false);
+
+        if(isColliding) {
+            element.highlight(true);
         }
     }
 }
