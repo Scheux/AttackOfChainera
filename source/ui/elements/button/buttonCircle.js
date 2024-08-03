@@ -1,4 +1,4 @@
-import { isCircleCicleIntersect } from "../../math/math.js";
+import { isCircleCicleIntersect } from "../../../math/math.js";
 import { Button } from "../button.js";
 
 export const ButtonCircle = function() {

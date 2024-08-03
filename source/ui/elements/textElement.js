@@ -1,4 +1,4 @@
-import { UIElement } from "./uiElement.js";
+import { UIElement } from "../uiElement.js";
 
 export const TextElement = function() {
     UIElement.call(this, "TextElement");
@@ -32,7 +32,7 @@ TextElement.prototype.draw = function(context, viewportX, viewportY, rootLocalX,
     const renderX = localX - viewportX;
     const renderY = localY - viewportY;
 
-    this.onDraw(this);
+    this.fetch(this);
 
     context.save();
     context.font = this.font;

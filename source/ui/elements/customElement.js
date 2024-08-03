@@ -1,5 +1,5 @@
-import { Vec2 } from "../math/vec2.js";
-import { UIElement } from "./uiElement.js";
+import { Vec2 } from "../../math/vec2.js";
+import { UIElement } from "../uiElement.js";
 
 export const CustomElement = function() {
     UIElement.call(this, "CustomElement");

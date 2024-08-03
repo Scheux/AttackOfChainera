@@ -1,3 +1,4 @@
+import { EventEmitter } from "../events/eventEmitter.js";
 import { Canvas } from "./canvas.js";
 import { Raycaster } from "./raycaster.js";
 
@@ -16,7 +17,10 @@ export const Camera = function(screenWidth, screenHeight) {
     this.raycaster = null;
     this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
 
-    window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight))
+    this.events = new EventEmitter();
+    this.events.listen(Camera.EVENT_SCREEN_RESIZE);
+
+    window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight));
 }
 
 Camera.DRAW_2D_MAP = true;
@@ -24,6 +28,7 @@ Camera.DRAW_RAYCAST = false;
 Camera.SCALE = 4;
 Camera.TILE_WIDTH = 16;
 Camera.TILE_HEIGHT = 16;
+Camera.EVENT_SCREEN_RESIZE = 0;
 
 Camera.prototype.drawSprites = function(gameContext) {
     const { timer, spriteManager } = gameContext;
@@ -167,14 +172,13 @@ Camera.prototype.drawUI = function(gameContext) {
 
     drawableElements.forEach(element => element.draw(this.display.context, 0, 0, 0, 0));
     
-    /*
+    
     buttons.forEach(button => button.drawDebug(this.display.context));
     icons.forEach(icon => icon.drawDebug(this.display.context));
     texts.forEach(text => {
         text.drawDebug(this.display.context);
         text.receiveUpdate(deltaTime);
     });
-    */
 }
 
 Camera.prototype.calculateFPS = function(passedTime) {
@@ -305,6 +309,8 @@ Camera.prototype.resizeViewport = function(width, height) {
         this.raycaster.copyScreen();
         this.raycaster.calculateRayData();
     }
+
+    this.events.emit(Camera.EVENT_SCREEN_RESIZE, this.viewportWidth, this.viewportHeight);
 }
 
 Camera.prototype.getViewportWidth = function() {

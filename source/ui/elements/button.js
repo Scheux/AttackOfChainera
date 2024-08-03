@@ -1,4 +1,4 @@
-import { UIElement } from "./uiElement.js";
+import { UIElement } from "../uiElement.js";
 
 export const Button = function(DEBUG_NAME) {
     UIElement.call(this, DEBUG_NAME);

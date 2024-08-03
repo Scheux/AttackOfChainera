@@ -105,8 +105,8 @@ GameContext.prototype.loadMap = async function(mapID) {
     const enemyTwo = this.spriteManager.createSprite("enemy_two", true);
     enemyTwo.setPosition(new Vec2(100, 100));
 
-    this.uiManager.parseUI("MAIN_MENU");
-    this.uiManager.addOnDraw("TEXT_FPS", element => element.setText(`FPS: ${Math.round(this.renderer.smoothedFPS)}`));
+    this.uiManager.parseUI("MAP_EDITOR", this);
+    this.uiManager.addFetch("TEXT_FPS", element => element.setText(`FPS: ${Math.round(this.renderer.smoothedFPS)}`));
 }
 
 GameContext.prototype.unloadMap = function(mapID) {

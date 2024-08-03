@@ -1,11 +1,12 @@
-import { ButtonCircle } from "./button/buttonCircle.js";
-import { ButtonSquare } from "./button/buttonSquare.js";
-import { Icon } from "./icon.js";
-import { TextElement } from "./textElement.js";
-import { UIElement } from "./uiElement.js";
+import { Camera } from "../camera/camera.js";
+import { ButtonCircle } from "./elements/button/buttonCircle.js";
+import { ButtonSquare } from "./elements/button/buttonSquare.js";
+import { TextElement } from "./elements/textElement.js";
 
 //TODO ADD DYNAMIC BUTTON EVENTS - UIManager.prototype.addOnClick(buttonID, callback);
 //TODO ADD UNPARSING UI - UIManager.prototype.unparseUI(userInterfaceID);
+//TODO ADD DYNAMIC UI FAMILIES - SEE UIManager.finishParsing.
+//TODO UIELEMENT - NOT EVERY ELEMENT HAS A WIDTH
 
 export const UIManager = function() {
     this.userInterfaces = {};
@@ -25,6 +26,46 @@ UIManager.BUTTON_TYPE_CIRCLE = "CIRCLE";
 UIManager.BUTTON_TYPE_SQUARE = "SQUARE";
 UIManager.EFFECT_TYPE_FADE_IN = "FADE_IN";
 UIManager.EFFECT_TYPE_FADE_OUT = "FADE_OUT";
+
+UIManager.prototype.loadFontTypes = function(fonts) {
+    if(!fonts) {
+        console.warn(`FontTypes cannot be undefined! Returning...`);
+        return;
+    }
+
+    this.fonts = fonts;
+}
+
+UIManager.prototype.loadIconTypes = function(icons) {    
+    if(!icons) {
+        console.warn(`IconTypes cannot be undefined! Returning...`);
+        return;
+    }
+
+    this.iconTypes = icons;
+}
+
+UIManager.prototype.loadUserInterfaceTypes = function(userInterfaces) {    
+    if(!userInterfaces) {
+        console.warn(`UITypes cannot be undefined! Returning...`);
+        return;
+    }
+
+    this.userInterfaces = userInterfaces;
+}
+
+UIManager.prototype.workStart = function() {
+    
+}
+
+UIManager.prototype.workEnd = function() {
+    this.customElements.clear();
+    this.texts.clear();
+    this.buttons.clear();
+    this.icons.clear();
+    this.elementsToUpdate.clear();
+    this.drawableElements.clear();
+}
 
 UIManager.prototype.update = function(gameContext) {
     const { timer } = gameContext;
@@ -74,126 +115,130 @@ UIManager.prototype.parseEffects = function(element, effects) {
     }
 }
 
-UIManager.prototype.parseText = function(element) {
+UIManager.prototype.parseText = function(config) {
     const text = new TextElement();
 
-    text.id = element.id;
-    text.DEBUG_NAME = element.id;
-    text.setOpacity(element.opacity);
-    text.setFont(element.font, element.align, element.color);
-    text.position.x = element.position.x;
-    text.position.y = element.position.y;
+    text.id = config.id;
+    text.DEBUG_NAME = config.id;
+    text.setConfig(config);
+    text.setOpacity(config.opacity);
+    text.setFont(config.font, config.align, config.color);
+    text.position.x = config.position.x;
+    text.position.y = config.position.y;
+    text.anchor = config.anchor;
 
-    if(element.text) {
-        text.setText(element.text);
+    if(config.text) {
+        text.setText(config.text);
     }
 
     return text;
 }
 
-UIManager.prototype.parseButtonSquare = function(element) {
+UIManager.prototype.parseButtonSquare = function(config) {
     const button = new ButtonSquare();
 
-    button.id = element.id;
-    button.DEBUG_NAME = element.id;
-    button.setOpacity(element.opacity);
-    button.setSize(element.width, element.height);
-    button.position.x = element.position.x;
-    button.position.y = element.position.y;
+    button.id = config.id;
+    button.DEBUG_NAME = config.id;
+    button.setConfig(config);
+    button.setOpacity(config.opacity);
+    button.setSize(config.width, config.height);
+    button.position.x = config.position.x;
+    button.position.y = config.position.y;
 
     return button;
 }
 
-UIManager.prototype.parseButtonCircle = function(element) {
+UIManager.prototype.parseButtonCircle = function(config) {
     const button = new ButtonCircle();
 
-    button.id = element.id;
-    button.DEBUG_NAME = element.id;
-    button.setOpacity(element.opacity);
-    button.setRadius(element.radius);
-    button.position.x = element.position.x;
-    button.position.y = element.position.y;
+    button.id = config.id;
+    button.DEBUG_NAME = config.id;
+    button.setConfig(config);
+    button.setOpacity(config.opacity);
+    button.setRadius(config.radius);
+    button.position.x = config.position.x;
+    button.position.y = config.position.y;
 
     return button;
 }
 
-UIManager.prototype.parseElement = function(element) {
-    switch(element.type) {
+UIManager.prototype.parseElement = function(config) {
+    switch(config.type) {
         case UIManager.ELEMENT_TYPE_TEXT: {
-            const text = this.parseText(element);
-            this.parseEffects(text, element.effects);
-            this.texts.set(element.id, text);
+            const text = this.parseText(config);
+            this.texts.set(config.id, text);
             return text;
         }
+
         case UIManager.ELEMENT_TYPE_BUTTON: {
             let button = null;
 
-            if(element.shape === UIManager.BUTTON_TYPE_CIRCLE) {
-                button = this.parseButtonCircle(element);
-            } else if(element.shape === UIManager.BUTTON_TYPE_SQUARE) {
-                button = this.parseButtonSquare(element);
+            if(config.shape === UIManager.BUTTON_TYPE_CIRCLE) {
+                button = this.parseButtonCircle(config);
+            } else if(config.shape === UIManager.BUTTON_TYPE_SQUARE) {
+                button = this.parseButtonSquare(config);
             } else {
-                console.warn(`ButtonShape ${element.shape} does not exist! Returning null...`);
+                console.warn(`ButtonShape ${config.shape} does not exist! Returning null...`);
                 return null;
             }
 
-            this.parseEffects(button, element.effects);
-            this.buttons.set(element.id, button);
+            this.buttons.set(config.id, button);
             return button;
         }
+
         default: {
-            console.warn(`UIElement ${element.type} does not exist! Returning null...`);
+            console.warn(`UIElement ${config.type} does not exist! Returning null...`);
             return null;
         }
     }
 }
 
-UIManager.prototype.finishParsing = function(parsedElements) {
-    parsedElements.forEach(({config, element}) => {
-        if (!config.hasParent) {
-            this.drawableElements.set(config.id, element);
-        }
+UIManager.prototype.parseUI = function(userInterfaceID, gameContext) {
+    const { renderer } = gameContext;
 
-        if(!config.children) {
-            return;
-        }
-
-        for(const childID of config.children) {
-            const { config: childConfig, element: child } = parsedElements.get(childID);
-            element.addChild(child, childConfig.id);
-        }
-    });
-}
-
-UIManager.prototype.parseUI = function(userInterfaceID) {
     if(!this.userInterfaces.hasOwnProperty(userInterfaceID)) {
         console.warn(`UserInterface ${userInterfaceID} does not exist! Returning...`);
         return;
     }
 
-    const userInterface = this.userInterfaces[userInterfaceID];
     const parsedElements = new Map();
+    const userInterface = this.userInterfaces[userInterfaceID];
 
     for(const key in userInterface) {
         const elementConfig = userInterface[key];
         const element = this.parseElement(elementConfig);
 
         if(element) {
-            parsedElements.set(elementConfig.id, { "config": elementConfig, "element": element });
+            this.parseEffects(element, elementConfig.effects);
+            parsedElements.set(elementConfig.id, {"config": elementConfig, "element": element});
         }
     }
 
-    this.finishParsing(parsedElements);
+    for(const [key, {config, element}] of parsedElements) {
+        if (!config.hasParent) {
+            element.adjustAnchor(renderer.viewportWidth, renderer.viewportHeight);
+            renderer.events.subscribe(Camera.EVENT_SCREEN_RESIZE, config.id, (width, height) => element.adjustAnchor(width, height));
+            this.drawableElements.set(config.id, element);
+        }
+
+        if(!config.children) {
+            continue;
+        }
+
+        for(const childID of config.children) {
+            const { config: childConfig, element: child } = parsedElements.get(childID);
+            element.addChild(child, childConfig.id);
+        }
+    }
 }
 
-UIManager.prototype.addOnDraw = function(textID, callback) {
+UIManager.prototype.addFetch = function(textID, callback) {
     if(!this.texts.has(textID)) {
         console.warn(`Text ${textID} does not exist! Returning...`);
         return;
     }
 
-    const text = this.texts.get(textID);
-    text.onDraw = callback;
+    this.texts.get(textID).fetch = callback;
 }
 
 UIManager.prototype.addFadeOutEffect = function(element, fadeDecrement, fadeThreshold) {
@@ -228,106 +273,12 @@ UIManager.prototype.addFadeInEffect = function(element, fadeIncrement, fadeThres
     this.elementsToUpdate.set(element.id, element);
 }
 
-UIManager.prototype.loadFontTypes = function(fonts) {
-    if(!fonts) {
-        console.warn(`FontTypes cannot be undefined! Returning...`);
-        return;
-    }
-
-    this.fonts = fonts;
-}
-
-UIManager.prototype.loadIconTypes = function(icons) {    
-    if(!icons) {
-        console.warn(`IconTypes cannot be undefined! Returning...`);
-        return;
-    }
-
-    this.iconTypes = icons;
-}
-
-UIManager.prototype.loadUserInterfaceTypes = function(userInterfaces) {    
-    if(!userInterfaces) {
-        console.warn(`UITypes cannot be undefined! Returning...`);
-        return;
-    }
-
-    this.userInterfaces = userInterfaces;
-}
-
 UIManager.prototype.addCustomElement = function(element) {
     this.customElements.set(element.id, element);
 }
 
 UIManager.prototype.removeCustomElement = function(elementID) {
     this.customElements.delete(elementID);
-}
-
-UIManager.prototype.workStart = function() {}
-
-UIManager.prototype.workEnd = function() {
-    this.customElements.clear();
-    this.texts.clear();
-    this.buttons.clear();
-    this.icons.clear();
-    this.elementsToUpdate.clear();
-    this.drawableElements.clear();
-}
-
-UIManager.prototype.createIcon = function(iconID) {
-    if(!this.iconTypes.hasOwnProperty(iconID)) {
-        console.warn(`Icon ${iconID} does not exist! Returning...`);
-        return;
-    }
-
-    const icon = new Icon();
-    const image = this.iconTypes[iconID];
-
-    icon.setImage(image);
-    this.icons.set(icon.id, icon);
-
-    return icon;
-}
-
-UIManager.prototype.createText = function(callback) {
-    const text = new TextElement();
-
-    if(callback) {
-        text.onDraw = callback;
-    }
-
-    this.texts.set(text.id, text);
-    return text;
-}
-
-UIManager.prototype.createCircleButton = function(callback) {
-    const button = new ButtonCircle();
-
-    if(callback) {
-        button.events.subscribe(UIElement.CLICKED, "UI_MANAGER", callback);
-    }
-
-    this.buttons.set(button.id, button);   
-    return button;
-}
-
-UIManager.prototype.createSquareButton = function(callback) {
-    const button = new ButtonSquare();
-    
-    if(callback) {
-        button.events.subscribe(UIElement.CLICKED, "UI_MANAGER", callback);
-    }
-
-    this.buttons.set(button.id, button);   
-    return button;
-}
-
-UIManager.prototype.clickButtons = function(gameContext, mouseX, mouseY, mouseRange) {
-    this.buttons.forEach(button => {
-        if(button.collides(mouseX, mouseY, mouseRange)) {
-            button.events.emit(UIElement.CLICKED, gameContext);
-        }
-    });
 }
 
 UIManager.prototype.findClickedButtons = function(mouseX, mouseY, mouseRange) {
@@ -344,20 +295,4 @@ UIManager.prototype.findClickedButtons = function(mouseX, mouseY, mouseRange) {
     }
 
     return clickedButtons;
-}
-
-UIManager.prototype.updateRelativePositions = function(viewportWidth, viewportHeight) {
-    this.icons.forEach(icon => {
-        const { relativeX, relativeY, position } = icon;
-
-        if(relativeX !== null) {
-            const positionX = Math.floor(viewportWidth * (relativeX / 100));
-            position.x = positionX;
-        }
-
-        if(relativeY !== null) {
-            const positionY = Math.floor(viewportHeight * (relativeY / 100));
-            position.y = positionY;
-        }
-    });
 }

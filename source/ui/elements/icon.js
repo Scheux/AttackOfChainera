@@ -1,4 +1,4 @@
-import { UIElement } from "./uiElement.js";
+import { UIElement } from "../uiElement.js";
 
 export const Icon = function() {
     UIElement.call(this, "Icon");

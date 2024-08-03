@@ -1,4 +1,4 @@
-import { rectangularCollision } from "../../math/math.js";
+import { rectangularCollision } from "../../../math/math.js";
 import { Button } from "../button.js";
 
 export const ButtonSquare = function() {
