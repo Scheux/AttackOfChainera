@@ -25,7 +25,7 @@ Drawable.prototype.setPosition = function(positionVector) {
 
 Drawable.prototype.openFamily = function(customName) {
     if(this.family) {
-        console.warn(`Drawable ${this.DEBUG_NAME} already has family ${this.family.customName} open! Cannot create new family ${customName}! Returning...`);
+        console.warn(`Drawable ${this.DEBUG_NAME} already has family ${this.family.customName} open! Cannot create new family! Returning...`);
         return;
     }
 

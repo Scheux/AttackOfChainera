@@ -2,11 +2,7 @@ import { Camera } from "../camera/camera.js";
 import { ButtonCircle } from "./elements/button/buttonCircle.js";
 import { ButtonSquare } from "./elements/button/buttonSquare.js";
 import { TextElement } from "./elements/textElement.js";
-
-//TODO ADD DYNAMIC BUTTON EVENTS - UIManager.prototype.addOnClick(buttonID, callback);
-//TODO ADD UNPARSING UI - UIManager.prototype.unparseUI(userInterfaceID);
-//TODO ADD DYNAMIC UI FAMILIES - SEE UIManager.finishParsing.
-//TODO UIELEMENT - NOT EVERY ELEMENT HAS A WIDTH
+import { UIElement } from "./uiElement.js";
 
 export const UIManager = function() {
     this.userInterfaces = {};
@@ -22,6 +18,7 @@ export const UIManager = function() {
 
 UIManager.ELEMENT_TYPE_TEXT = "TEXT";
 UIManager.ELEMENT_TYPE_BUTTON = "BUTTON";
+UIManager.ELEMENT_TYPE_CONTAINER = "CONTAINER";
 UIManager.BUTTON_TYPE_CIRCLE = "CIRCLE";
 UIManager.BUTTON_TYPE_SQUARE = "SQUARE";
 UIManager.EFFECT_TYPE_FADE_IN = "FADE_IN";
@@ -101,6 +98,10 @@ UIManager.prototype.update = function(gameContext) {
             element.highlight(true);
         }
     }
+
+    for(const [key, element] of this.texts) {
+        element.receiveUpdate(deltaTime);
+    }
 }
 
 UIManager.prototype.parseEffects = function(element, effects) {
@@ -135,7 +136,6 @@ UIManager.prototype.parseText = function(config) {
     text.setFont(config.font, config.align, config.color);
     text.position.x = config.position.x;
     text.position.y = config.position.y;
-    text.anchor = config.anchor;
 
     if(config.text) {
         text.setText(config.text);
@@ -176,7 +176,7 @@ UIManager.prototype.parseElement = function(config) {
     switch(config.type) {
         case UIManager.ELEMENT_TYPE_TEXT: {
             const text = this.parseText(config);
-            this.texts.set(config.id, text);
+            this.texts.set(text.id, text);
             return text;
         }
 
@@ -192,7 +192,7 @@ UIManager.prototype.parseElement = function(config) {
                 return null;
             }
 
-            this.buttons.set(config.id, button);
+            this.buttons.set(button.id, button);
             return button;
         }
 
@@ -211,6 +211,8 @@ UIManager.prototype.parseUI = function(userInterfaceID, gameContext) {
         return;
     }
 
+    const children = new Set();
+    const parents = new Set();
     const parsedElements = new Map();
     const userInterface = this.userInterfaces[userInterfaceID];
 
@@ -219,25 +221,62 @@ UIManager.prototype.parseUI = function(userInterfaceID, gameContext) {
         const element = this.parseElement(elementConfig);
 
         if(element) {
+            if(elementConfig.children) {
+                for(const childID of elementConfig.children) {
+                    children.add(childID);
+                }
+                parents.add(element.id);
+            }
+
             this.parseEffects(element, elementConfig.effects);
-            parsedElements.set(elementConfig.id, {"config": elementConfig, "element": element});
+            parsedElements.set(element.id, {"config": elementConfig, "element": element});
         }
     }
 
     for(const [key, {config, element}] of parsedElements) {
-        if (!config.hasParent) {
+        if (!children.has(element.id)) {
             element.adjustAnchor(renderer.viewportWidth, renderer.viewportHeight);
-            renderer.events.subscribe(Camera.EVENT_SCREEN_RESIZE, config.id, (width, height) => element.adjustAnchor(width, height));
-            this.drawableElements.set(config.id, element);
+            renderer.events.subscribe(Camera.EVENT_SCREEN_RESIZE, element.id, (width, height) => element.adjustAnchor(width, height));
+            this.drawableElements.set(element.id, element);
         }
 
-        if(!config.children) {
-            continue;
+        if(parents.has(element.id)) {
+            for(const childID of config.children) {
+                const { element: child } = parsedElements.get(childID);
+                element.addChild(child, child.id);
+            }
+        }
+    }
+}
+
+UIManager.prototype.unparseUI = function(userInterfaceID, gameContext) {
+    if(!this.userInterfaces.hasOwnProperty(userInterfaceID)) {
+        console.warn(`UserInterface ${userInterfaceID} does not exist! Returning...`);
+        return;
+    }
+
+    const userInterface = this.userInterfaces[userInterfaceID];
+
+    for(const key in userInterface) {
+        const element = userInterface[key];
+
+        switch(element.type) {
+            case UIManager.ELEMENT_TYPE_TEXT: {
+                this.texts.delete(element.id);
+                break;
+            }
+            case UIManager.ELEMENT_TYPE_BUTTON: {
+                this.buttons.delete(element.id);
+                break;
+            }
+            case UIManager.ELEMENT_TYPE_CONTAINER: {
+                break;
+            }
         }
 
-        for(const childID of config.children) {
-            const { config: childConfig, element: child } = parsedElements.get(childID);
-            element.addChild(child, childConfig.id);
+        if(this.drawableElements.has(element.id)) {
+            this.drawableElements.delete(element.id);
+            gameContext.renderer.events.unsubscribe(Camera.EVENT_SCREEN_RESIZE, element.id);
         }
     }
 }
@@ -249,6 +288,15 @@ UIManager.prototype.addFetch = function(textID, callback) {
     }
 
     this.texts.get(textID).fetch = callback;
+}
+
+UIManager.prototype.addClick = function(buttonID, callback) {
+    if(!this.buttons.has(buttonID)) {
+        console.warn(`Button ${buttonID} does not exist! Returning...`);
+        return;
+    }
+
+    this.buttons.get(buttonID).events.subscribe(UIElement.EVENT_CLICKED, "UI_MANAGER", (gameContext, button) => callback(gameContext, button));
 }
 
 UIManager.prototype.addFadeOutEffect = function(element, fadeDecrement, fadeThreshold) {
@@ -299,10 +347,6 @@ UIManager.prototype.findClickedButtons = function(mouseX, mouseY, mouseRange) {
             clickedButtons.push(button);
         }
     });
-
-    if(clickedButtons.length === 0) {
-        return null;
-    }
 
     return clickedButtons;
 }

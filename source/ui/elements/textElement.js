@@ -1,16 +1,16 @@
 import { UIElement } from "../uiElement.js";
 
 export const TextElement = function() {
-    UIElement.call(this, "TextElement");
+    UIElement.call(this, "TEXT_ELEMENT");
     this.font = null;
     this.textAlignment = null;
     this.fillStyle = null;
     this.fullText = "";
     this.revealedText = "";
-    this.textRevealSpeed = 1;
     this.timeElapsed = 0;
     this.isLooping = false;
     this.isRevealing = false;
+    this.lettersPerSecond = 2;
 }
 
 TextElement.prototype = Object.create(UIElement.prototype);
@@ -42,6 +42,8 @@ TextElement.prototype.draw = function(context, viewportX, viewportY, rootLocalX,
     context.textBaseline = "middle";
     context.fillText(this.revealedText, renderX, renderY);
     context.restore();
+
+    this.drawChildren(context, viewportX, viewportY, localX, localY);
 }
 
 TextElement.prototype.setRevealSpeed = function(revealSpeed) {
@@ -58,6 +60,10 @@ TextElement.prototype.revealLetter = function() {
     }
 }
 
+TextElement.setRevealing = function(isRevealing) {
+    this.isRevealing = isRevealing;
+}
+
 TextElement.prototype.setText = function(text) {
     this.fullText = text;
 
@@ -71,10 +77,10 @@ TextElement.prototype.setText = function(text) {
 
 TextElement.prototype.receiveUpdate = function(deltaTime) {
     this.timeElapsed += deltaTime;
-    const revealCount = Math.floor(this.timeElapsed / this.textRevealSpeed);
+    const revealCount = Math.floor(this.lettersPerSecond * this.timeElapsed);
 
     if (revealCount > 0) {
-        this.timeElapsed -= revealCount * this.textRevealSpeed;
+        this.timeElapsed -= revealCount / this.lettersPerSecond;
         
         for (let i = 0; i < revealCount; i++) {
             if (this.fullText.length === this.revealedText.length) {
@@ -82,8 +88,8 @@ TextElement.prototype.receiveUpdate = function(deltaTime) {
                     this.revealedText = "";
                 } else {
                     this.timeElapsed = 0;
-                    break;
                 }
+                break;
             }
             this.revealLetter();
         }

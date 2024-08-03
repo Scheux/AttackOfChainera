@@ -2,7 +2,7 @@ import { Vec2 } from "../../math/vec2.js";
 import { UIElement } from "../uiElement.js";
 
 export const CustomElement = function() {
-    UIElement.call(this, "CustomElement");
+    UIElement.call(this, "CUSTOM_ELEMENT");
     this.offset = new Vec2(0, 0);
     this.width = 0;
     this.height = 0;

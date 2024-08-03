@@ -12,6 +12,7 @@ import { Vec2 } from "./source/math/vec2.js";
 import { StateMachine } from "./source/state/stateMachine.js";
 import { TileManager } from "./source/tile/tileManager.js";
 import { Timer } from "./source/timer.js";
+import { UIElement } from "./source/ui/uiElement.js";
 
 export const GameContext = function() {
     this.client = new Client();
@@ -73,18 +74,14 @@ GameContext.prototype.loadMap = async function(mapID) {
     this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_DRAG, 0, (deltaX, deltaY) => this.renderer.dragViewportBy(deltaX, deltaY));
 
     this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_CLICK, 0, (event, cursor) => {
+        const uiElements = this.uiManager.findClickedButtons(cursor.position.x, cursor.position.y, cursor.radius);
         const tilePosition = getViewportTile(cursor.position, this.renderer.viewportX, this.renderer.viewportY);
         const tile = this.tileManager.getTile(tilePosition.x, tilePosition.y);
-        console.log("TILE CLICKED!", tile);
+
+        uiElements.forEach(element => element.events.emit(UIElement.EVENT_CLICKED, this, element));
     });
 
     this.renderer.display.canvas.addEventListener("click", async () => {
-        const map = this.mapLoader.getActiveMap();
-
-        if(map) {
-            this.client.musicPlayer.playTrack(map.music, 0.2);
-        }
-
         /*
         if(!this.client.cursor.isLocked) {
             await this.renderer.display.canvas.requestPointerLock();
@@ -106,6 +103,8 @@ GameContext.prototype.loadMap = async function(mapID) {
 
     this.uiManager.parseUI("MAP_EDITOR", this);
     this.uiManager.addFetch("TEXT_FPS", element => element.setText(`FPS: ${Math.round(this.renderer.smoothedFPS)}`));
+    this.uiManager.addClick("BUTTON_SAVE", (gameContext, element) => this.client.musicPlayer.playTrack(gameMap.music, 0.2));
+    this.uiManager.addClick("BUTTON_LOAD", (gameContext, element) => this.uiManager.unparseUI("MAP_EDITOR", this));
 }
 
 GameContext.prototype.unloadMap = function(mapID) {

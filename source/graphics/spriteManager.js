@@ -60,7 +60,8 @@ SpriteManager.prototype.removeSprite = function(spriteID) {
     const sprite = this.sprites.get(spriteID);
 
     if(!sprite) {
-        console.warn(`Sprite ${spriteID} does not exist!`);
+        console.warn(`Sprite ${spriteID} does not exist! Returning...`);
+        return;
     }
     
     sprite.closeFamily();
@@ -72,7 +73,7 @@ SpriteManager.prototype.getSprite = function(spriteID) {
     const sprite = this.sprites.get(spriteID);
 
     if(!sprite) {
-        console.warn(`Sprite ${spriteID} does not exist!`);
+        console.warn(`Sprite ${spriteID} does not exist! Returning null...`);
         return null;
     }
 
@@ -81,7 +82,7 @@ SpriteManager.prototype.getSprite = function(spriteID) {
 
 SpriteManager.prototype.addChildSprite = function(parentSpriteID, memberSpriteTypeID, customChildID) {
     if(!this.sprites.has(parentSpriteID)) {
-        console.warn(`Sprite ${parentSpriteID} does not exist!`);
+        console.warn(`Sprite ${parentSpriteID} does not exist! Returning...`);
         return null;
     }
 
@@ -95,7 +96,7 @@ SpriteManager.prototype.addChildSprite = function(parentSpriteID, memberSpriteTy
 
 SpriteManager.prototype.removeChildSprite = function(parentSpriteID, customChildID) {
     if(!this.sprites.has(parentSpriteID)) {
-        console.warn(`Sprite ${parentSpriteID} does not exist!`);
+        console.warn(`Sprite ${parentSpriteID} does not exist! Returning...`);
         return;
     }
 
@@ -103,7 +104,7 @@ SpriteManager.prototype.removeChildSprite = function(parentSpriteID, customChild
     const childSprite = parent.removeChild(customChildID);
 
     if(!childSprite) {
-        console.warn(`Child ${customChildID} does not exist for ${parentSpriteID}`);
+        console.warn(`Child ${customChildID} does not exist for ${parentSpriteID}! Returning...`);
         return;
     }
 
@@ -140,7 +141,7 @@ SpriteManager.prototype.updateSprite = function(spriteID, newSpriteTypeID, newSp
     }
 
     if(!newSpriteAnimationID) {
-        console.warn(`SpriteAnimation ${newSpriteAnimationID} on SpriteType ${newSpriteTypeID} does not exist. Proceeding with "default".`);
+        console.warn(`SpriteAnimation ${newSpriteAnimationID} on SpriteType ${newSpriteTypeID} does not exist. Using "default". Proceeding...`);
     }
 
     const spriteConfig = this.spriteTypes[newSpriteTypeID];

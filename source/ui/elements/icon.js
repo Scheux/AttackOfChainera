@@ -1,7 +1,7 @@
 import { UIElement } from "../uiElement.js";
 
 export const Icon = function() {
-    UIElement.call(this, "Icon");
+    UIElement.call(this, "ICON");
     this.image = null;
 }
 
