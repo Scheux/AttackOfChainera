@@ -26,8 +26,8 @@ export const getViewportTile = function(positionVector, viewportX, viewportY) {
   const renderWidth = Camera.TILE_WIDTH;
   const renderHeight = Camera.TILE_HEIGHT;
 
-  const tileX = Math.trunc((positionVector.x / Camera.SCALE + viewportX) / renderWidth);
-  const tileY = Math.trunc((positionVector.y / Camera.SCALE + viewportY) / renderHeight);
+  const tileX = Math.floor((positionVector.x / Camera.SCALE + viewportX) / renderWidth);
+  const tileY = Math.floor((positionVector.y / Camera.SCALE + viewportY) / renderHeight);
 
   const tilePosition = new Vec2(tileX, tileY);
   

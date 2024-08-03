@@ -39,8 +39,9 @@ SpriteManager.prototype.createSprite = function(spriteTypeID, isRooted, spriteAn
     const spriteID = this.IDgenerator.getID();
     const sprite = new Sprite(spriteID, spriteTypeID);
 
+    sprite.events.subscribe(Sprite.FINISHED, "SPRITE_MANAGER", sprite => this.removeSprite(sprite.id));
+    
     this.sprites.set(sprite.id, sprite);
-    sprite.onFinish = (entity) => this.removeSprite(entity.id);
     this.updateSprite(sprite.id, spriteTypeID, spriteAnimationID);
 
     if(isRooted) {

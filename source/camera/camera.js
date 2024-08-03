@@ -57,40 +57,79 @@ Camera.prototype.drawSprites = function(gameContext) {
     }
 }
 
-Camera.prototype.drawLayer = function(gameContext, layer, startX, startY, endX, endY) {
-    if(!layer) {
+Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileID) {
+    const { timer, spriteManager } = gameContext;
+    const realTime = timer.getRealTime();
+
+    const renderY = tileY * Camera.TILE_HEIGHT - this.viewportY;
+    const renderX = tileX * Camera.TILE_WIDTH - this.viewportX;
+    const tileGraphics = tileID === 1 ? ["wall", "default"] : tileID === 2 ? ["test", "grass"] : ["test", "wood"]; //tileID;
+    const [tileSetID, tileSetAnimationID] = tileGraphics;
+    const tileSet = spriteManager.tileSprites[tileSetID];
+    const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
+    const buffer = buffers[0];
+
+    this.display.context.drawImage(buffer.bitmap, 
+        0, 0, buffer.width, buffer.height,
+        renderX + buffer.offset.x, renderY + buffer.offset.y, Camera.TILE_WIDTH, Camera.TILE_HEIGHT
+    );
+}
+
+Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, startY, endX, endY) {
+    if(!layerID) {
         return;
     }
 
-    const { timer, spriteManager } = gameContext;
-    const realTime = timer.getRealTime();
+    const { mapLoader } = gameContext;
+    const neighbors = gameMap.getConnections();
+    const layer = gameMap.layers[layerID];
 
     for(let i = startY; i <= endY; i++) {
         const tileRow = layer[i];
 
-        if(tileRow === undefined || tileRow === null) {
+        if(i < 0 || i >= gameMap.height) {
+            for(const neighbor of neighbors) {
+                if(i >= neighbor.startY && i < neighbor.endY) {
+                    const neighborMap = mapLoader.getLoadedMap(neighbor.id);
+                    const neighborLayer = neighborMap.layers[layerID];
+                    const neighborRow = neighborLayer[i - neighbor.startY];
+
+                    for(let j = startX; j <= endX; j++) {
+                        if(j >= neighbor.startX && j < neighbor.endX) {
+                            const neighborTile = neighborRow[j - neighbor.startX];
+                            this.drawTile(gameContext, j, i, neighborTile);
+                        }
+                    }
+                }
+            }
             continue;
         }
 
-        const renderY = i * Camera.TILE_HEIGHT - this.viewportY;
+        if(tileRow === undefined || tileRow === null) {
+            continue;
+        }
         
         for(let j = startX; j <= endX; j++) {
             
+            if(j < 0 || j >= gameMap.width) {
+                for(const neighbor of neighbors) {
+                    if(j >= neighbor.startX && j < neighbor.endX && i >= neighbor.startY && i < neighbor.endY) {
+                        const neighborMap = mapLoader.getLoadedMap(neighbor.id);
+                        const neighborLayer = neighborMap.layers[layerID];
+                        const neighborRow = neighborLayer[i - neighbor.startY];
+                        const neighborTile = neighborRow[j - neighbor.startX];
+                        
+                        this.drawTile(gameContext, j, i, neighborTile);
+                    }
+                }
+                continue;
+            }
+
             if(tileRow[j] === undefined || tileRow[j] === null) {
                 continue;
             }
 
-            const renderX = j * Camera.TILE_WIDTH - this.viewportX;
-            const tileGraphics = ["wall", "default"]; //tileRow[j];
-            const [tileSetID, tileSetAnimationID] = tileGraphics;
-            const tileSet = spriteManager.tileSprites[tileSetID];
-            const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
-            const buffer = buffers[0];
-
-            this.display.context.drawImage(buffer.bitmap, 
-                0, 0, buffer.width, buffer.height,
-                renderX + buffer.offset.x, renderY + buffer.offset.y, Camera.TILE_WIDTH, Camera.TILE_HEIGHT
-            );
+            this.drawTile(gameContext, j, i, tileRow[j]);
         }
     }
 }
@@ -110,17 +149,13 @@ Camera.prototype.draw2DMap = function(gameContext) {
     const endX = Math.floor((this.viewportX + this.getViewportWidth()) / Camera.TILE_WIDTH) + offsetX;
     const endY = Math.floor((this.viewportY + this.getViewportHeight()) / Camera.TILE_HEIGHT) + offsetY;
 
-    const layerBottom = gameMap.layers["bottom"];
-    const layerFloor = gameMap.layers["floor"];
-    const layerTop = gameMap.layers["top"];
-
     this.display.context.save();
     this.display.context.scale(Camera.SCALE, Camera.SCALE);
 
-    this.drawLayer(gameContext, layerBottom, startX, startY, endX, endY);
-    this.drawLayer(gameContext, layerFloor, startX, startY, endX, endY);
+    this.drawLayer(gameContext, gameMap, "bottom", startX, startY, endX, endY);
+    //this.drawLayer(gameContext, gameMap, "floor", startX, startY, endX, endY);
     this.drawSprites(gameContext, startX, startY, endX, endY)
-    //this.drawLayer(gameContext, layerTop, startX, startY, endX, endY);
+    //this.drawLayer(gameContext, gameMap, "top", startX, startY, endX, endY);
 
     this.display.context.restore();
 }
@@ -198,7 +233,7 @@ Camera.prototype.dragViewportBy = function(param_dragX, param_dragY) {
     this.viewportX += param_dragX / Camera.SCALE;
     this.viewportY += param_dragY / Camera.SCALE;
   
-    this.limitViewport();
+    //this.limitViewport();
 }
   
 Camera.prototype.snapViewportTo = function(param_snapX, param_snapY) {

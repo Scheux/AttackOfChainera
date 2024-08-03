@@ -1,0 +1,10 @@
+{
+    "0": {
+        "id": "0",
+        "description": "Default Tile. No collisions."
+    },
+    "1": {
+        "id": "1",
+        "description": "Water Tile. Only walkable while in surfing state."
+    }
+}

@@ -24,8 +24,11 @@ GameMap.prototype.generateEmptyLayer = function(layerID) {
     for(let i = 0; i < this.height; i++) {
         layer[i] = [];
         for(let j = 0; j < this.width; j++) {
-            layer[i][j] = null;
+            layer[i][j] = undefined;
         }
     }
 }
 
+GameMap.prototype.getConnections = function() {
+    return this.connections;
+}

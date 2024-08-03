@@ -66,11 +66,13 @@ MapLoader.prototype.loadMap = async function(mapID) {
         this.loadedMaps.set(mapID, gameMap);
         this.cachedMaps.set(mapID, gameMap);
 
-        this.loadConnectedMaps(mapFile.connections);
+        await this.loadConnectedMaps(mapFile.connections);
     } catch (error) {
         console.error(error, `Error fetching map file! Returning...`);
         return;
     }
+
+    this.loadMapConnections(mapID);
 }
 
 MapLoader.prototype.loadConnectedMaps = async function(connections) {
@@ -106,6 +108,86 @@ MapLoader.prototype.loadConnectedMaps = async function(connections) {
             return;
         }
     }
+}
+
+MapLoader.prototype.loadMapConnections = function(mapID) {
+    if(!this.loadedMaps.has(mapID)) {
+        console.warn(`Map ${mapID} is not loaded! Returning...`);
+        return;
+    }
+
+    const connections = [];
+    const gameMap = this.getLoadedMap(mapID);
+
+    if(!gameMap.connections) {
+        gameMap.connections = connections;
+        return;
+    }
+
+    for(const key in gameMap.connections) {
+        const connection = gameMap.connections[key];
+        
+        if(!connection) {
+            continue;
+        }
+
+        switch(connection.type) {
+            case "north": {
+                const connectedMap = this.getLoadedMap(connection.id);
+                connection.startX = connection.scroll;
+                connection.startY = -connectedMap.height;
+                connection.endX = connectedMap.width + connection.scroll;
+                connection.endY = 0;
+                connection.attachX = connection.scroll;
+                connection.attachY = 0;
+                connection.height = connectedMap.height;
+                connection.width = connectedMap.width;
+                connections.push(connection);
+                break;
+            }
+            case "south": {
+                const connectedMap = this.getLoadedMap(connection.id);
+                connection.startX = connection.scroll;
+                connection.startY = gameMap.height;
+                connection.endX = connectedMap.width + connection.scroll;
+                connection.endY = gameMap.height + connectedMap.height;
+                connection.attachX = connection.scroll;
+                connection.attachY = gameMap.height;
+                connection.height = connectedMap.height;
+                connection.width = connectedMap.width;
+                connections.push(connection);
+                break;
+            }
+            case "east": {
+                const connectedMap = this.getLoadedMap(connection.id);
+                connection.startX = gameMap.width;
+                connection.startY = connection.scroll;
+                connection.endX = gameMap.width + connectedMap.width;
+                connection.endY = connection.scroll + connectedMap.height;
+                connection.attachX = gameMap.width;
+                connection.attachY = connection.scroll;
+                connection.height = connectedMap.height;
+                connection.width = connectedMap.width;
+                connections.push(connection);
+                break;
+            }
+            case "west": {
+                const connectedMap = this.getLoadedMap(connection.id);
+                connection.startX = -connectedMap.width;
+                connection.startY = connection.scroll;
+                connection.endX = 0;
+                connection.endY = connectedMap.height + connection.scroll;
+                connection.attachX = 0;
+                connection.attachY = connection.scroll;
+                connection.height = connectedMap.height;
+                connection.width = connectedMap.width;
+                connections.push(connection);
+                break;
+            }
+        }
+    }
+
+    gameMap.connections = connections;
 }
 
 MapLoader.prototype.unloadMap = function(mapID) {

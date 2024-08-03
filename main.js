@@ -29,6 +29,7 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
   gameContext.loadMap("map_moin");  
 });
 
+//preload connections
 /*
 function generateMap(size) {
   const map = Array(size).fill().map(() => Array(size).fill(1));

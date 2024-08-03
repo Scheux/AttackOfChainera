@@ -1,3 +1,1 @@
-export const MoveSystem = function() {
-    
-}
+export const MoveSystem = function() {}
