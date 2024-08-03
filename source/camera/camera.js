@@ -160,6 +160,23 @@ Camera.prototype.draw2DMap = function(gameContext) {
     this.display.context.restore();
 }
 
+Camera.prototype.drawUI = function(gameContext) {
+    const { uiManager, timer } = gameContext;
+    const { buttons, icons, texts, drawableElements } = uiManager;
+    const deltaTime = timer.getDeltaTime();
+
+    drawableElements.forEach(element => element.draw(this.display.context, 0, 0, 0, 0));
+    
+    /*
+    buttons.forEach(button => button.drawDebug(this.display.context));
+    icons.forEach(icon => icon.drawDebug(this.display.context));
+    texts.forEach(text => {
+        text.drawDebug(this.display.context);
+        text.receiveUpdate(deltaTime);
+    });
+    */
+}
+
 Camera.prototype.calculateFPS = function(passedTime) {
     const fps = 1 / passedTime;
     const smoothedFPS = (fps - this.smoothedFPS) * this.smoothingFactor;
@@ -183,9 +200,7 @@ Camera.prototype.update = function(gameContext) {
         this.drawRaycaster(gameContext);
     }
 
-    this.display.context.fillStyle = "#ffffff";
-    this.display.context.font = "30px Arial";
-    this.display.context.fillText(`FPS: ${Math.floor(this.smoothedFPS)}`, 0, 25);
+    this.drawUI(gameContext);
 }
 
 Camera.prototype.drawRaycaster = function(gameContext) {

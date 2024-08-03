@@ -5,4 +5,4 @@ export const Player = function() {
 }
 
 Player.prototype = Object.create(Entity.prototype);
-Player.prototype.constructor = Entity;
+Player.prototype.constructor = Player;

@@ -5,4 +5,4 @@ export const Monster = function() {
 }
 
 Monster.prototype = Object.create(Entity.prototype);
-Monster.prototype.constructor = Entity;
+Monster.prototype.constructor = Monster;

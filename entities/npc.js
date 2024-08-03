@@ -5,4 +5,4 @@ export const NPC = function() {
 }
 
 NPC.prototype = Object.create(Entity.prototype);
-NPC.prototype.constructor = Entity;
+NPC.prototype.constructor = NPC;

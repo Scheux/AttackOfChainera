@@ -5,6 +5,7 @@ import { Keyboard } from "./source/client/keyboard.js";
 import { EntityManager } from "./source/entity/entityManager.js";
 import { EventEmitter } from "./source/events/eventEmitter.js";
 import { SpriteManager } from "./source/graphics/spriteManager.js";
+import { UIManager } from "./source/ui/uiManager.js";
 import { getViewportTile } from "./source/helpers.js";
 import { MapLoader } from "./source/map/mapLoader.js";
 import { Vec2 } from "./source/math/vec2.js";
@@ -20,6 +21,7 @@ export const GameContext = function() {
     this.entityManager = new EntityManager();
     this.tileManager = new TileManager();
     this.spriteManager = new SpriteManager();
+    this.uiManager = new UIManager();
     this.states = new StateMachine(this);
     this.events = new EventEmitter();
 
@@ -32,11 +34,15 @@ export const GameContext = function() {
     }
 
     this.timer.renderFunction = () => {
+        this.uiManager.update(this);
         this.renderer.update(this);
     }
 }
 
 GameContext.prototype.loadResources = function(resources) {
+    this.uiManager.loadFontTypes(null);
+    this.uiManager.loadIconTypes(null);
+    this.uiManager.loadUserInterfaceTypes(resources.uiConfig);
     this.client.musicPlayer.loadMusicTypes(resources.music);
     this.entityManager.loadEntityTypes(resources.entities);
     this.tileManager.loadTileTypes(resources.tileTypes);
@@ -75,11 +81,13 @@ GameContext.prototype.loadMap = async function(mapID) {
     this.renderer.display.canvas.addEventListener("click", async () => {
         const map = this.mapLoader.getActiveMap();
 
+        /*
         if(map) {
             this.client.musicPlayer.playTrack(map.music, 0.2);
-        }
+        }*/
 
-        /*if(!this.client.cursor.isLocked) {
+        /*
+        if(!this.client.cursor.isLocked) {
             await this.renderer.display.canvas.requestPointerLock();
         }*/
     });
@@ -96,6 +104,9 @@ GameContext.prototype.loadMap = async function(mapID) {
     this.spriteManager.createSprite("enemy", true);
     const enemyTwo = this.spriteManager.createSprite("enemy_two", true);
     enemyTwo.setPosition(new Vec2(100, 100));
+
+    this.uiManager.parseUI("MAIN_MENU");
+    this.uiManager.addOnDraw("TEXT_FPS", element => element.setText(`FPS: ${Math.round(this.renderer.smoothedFPS)}`));
 }
 
 GameContext.prototype.unloadMap = function(mapID) {

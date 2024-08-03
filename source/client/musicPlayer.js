@@ -9,6 +9,11 @@ export const MusicPlayer = function() {
 }
 
 MusicPlayer.prototype.loadMusicTypes = function(musicTypes) {
+    if(!musicTypes) {
+        console.warn(`MusicTypes cannot be undefined! Returning...`);
+        return;
+    }
+
     this.musicList = musicTypes;
 }
 
