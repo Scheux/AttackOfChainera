@@ -86,7 +86,7 @@ Family.prototype.onRemove = function() {
     }
 
     this.children.forEach(child => {
-        child.parent = null;
+        this.removeChild(child);
     });
 
     this.children = [];

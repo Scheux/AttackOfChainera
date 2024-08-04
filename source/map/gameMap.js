@@ -19,7 +19,7 @@ GameMap.prototype.generateEmptyLayer = function(layerID) {
         this.layers[layerID][i] = [];
 
         for(let j = 0; j < this.width; j++) {
-            this.layers[layerID][i][j] = null;
+            this.layers[layerID][i][j] = 0;
         }
     }
 }

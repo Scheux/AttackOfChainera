@@ -13,6 +13,8 @@ import { StateMachine } from "./source/state/stateMachine.js";
 import { TileManager } from "./source/tile/tileManager.js";
 import { Timer } from "./source/timer.js";
 import { UIElement } from "./source/ui/uiElement.js";
+import { MainMenuState } from "./states/gameContext/mainMenu.js";
+import { MapEditorState } from "./states/gameContext/mapEditor.js";
 
 export const GameContext = function() {
     this.client = new Client();
@@ -38,7 +40,22 @@ export const GameContext = function() {
         this.uiManager.update(this);
         this.renderer.update(this);
     }
+
+    this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_DRAG, "GAME_CONTEXT", (deltaX, deltaY) => this.renderer.dragViewportBy(deltaX, deltaY));
+    this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_CLICK, "GAME_CONTEXT", (event, cursor) => {
+        const uiElements = this.uiManager.findClickedButtons(cursor.position.x, cursor.position.y, cursor.radius);
+        const tilePosition = getViewportTile(cursor.position, this.renderer.viewportX, this.renderer.viewportY);
+        const tile = this.tileManager.getTile(tilePosition.x, tilePosition.y);
+
+        uiElements.forEach(element => element.events.emit(UIElement.EVENT_CLICKED, this, element));
+    });
+
+    this.states.addState(GameContext.STATE_MAIN_MENU, new MainMenuState());
+    this.states.addState(GameContext.STATE_MAP_EDITOR, new MapEditorState());
 }
+
+GameContext.STATE_MAIN_MENU = 0;
+GameContext.STATE_MAP_EDITOR = 1;
 
 GameContext.prototype.loadResources = function(resources) {
     this.uiManager.loadFontTypes(null);
@@ -55,56 +72,32 @@ GameContext.prototype.loadResources = function(resources) {
 GameContext.prototype.loadMap = async function(mapID) {
     await this.mapLoader.loadMap(mapID);
     const gameMap = this.mapLoader.getLoadedMap(mapID);
-    
+    const activeMapID = this.mapLoader.getActiveMapID();
+
     if(!gameMap) {
         console.warn(`Error loading map! Returning...`);
-        return;
+        return false;
+    }
+
+    if(activeMapID) {
+
+        if(activeMapID === mapID) {
+            console.warn(`Map ${mapID} is already loaded and active! Returning...`);
+            return false;
+        }
+
+        this.unloadMap(activeMapID); //TODO: ADD dynamic loading system.
     }
 
     this.mapLoader.setActiveMap(mapID);
-
     this.tileManager.workStart(gameMap.tiles);
     this.spriteManager.workStart();
     this.entityManager.workStart(gameMap.entities);
-
     this.renderer.loadViewport(gameMap.width, gameMap.height);
     this.client.musicPlayer.loadTrack(gameMap.music);
     this.tileManager.loadTiles(gameMap.width, gameMap.height);
 
-    this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_DRAG, 0, (deltaX, deltaY) => this.renderer.dragViewportBy(deltaX, deltaY));
-
-    this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_CLICK, 0, (event, cursor) => {
-        const uiElements = this.uiManager.findClickedButtons(cursor.position.x, cursor.position.y, cursor.radius);
-        const tilePosition = getViewportTile(cursor.position, this.renderer.viewportX, this.renderer.viewportY);
-        const tile = this.tileManager.getTile(tilePosition.x, tilePosition.y);
-
-        uiElements.forEach(element => element.events.emit(UIElement.EVENT_CLICKED, this, element));
-    });
-
-    this.renderer.display.canvas.addEventListener("click", async () => {
-        /*
-        if(!this.client.cursor.isLocked) {
-            await this.renderer.display.canvas.requestPointerLock();
-        }*/
-    });
-
-    document.addEventListener("pointerlockchange", () => {
-        if (document.pointerLockElement === this.renderer.display.canvas) {
-            this.client.cursor.isLocked = true;
-            return;
-        }
-      
-        this.client.cursor.isLocked = false;
-    });
-
-    this.spriteManager.createSprite("enemy", true);
-    const enemyTwo = this.spriteManager.createSprite("enemy_two", true);
-    enemyTwo.setPosition(new Vec2(100, 100));
-
-    this.uiManager.parseUI("MAP_EDITOR", this);
-    this.uiManager.addFetch("TEXT_FPS", element => element.setText(`FPS: ${Math.round(this.renderer.smoothedFPS)}`));
-    this.uiManager.addClick("BUTTON_SAVE", (gameContext, element) => this.client.musicPlayer.playTrack(gameMap.music, 0.2));
-    this.uiManager.addClick("BUTTON_LOAD", (gameContext, element) => this.uiManager.unparseUI("MAP_EDITOR", this));
+    return true;
 }
 
 GameContext.prototype.unloadMap = function(mapID) {
@@ -113,7 +106,7 @@ GameContext.prototype.unloadMap = function(mapID) {
     this.spriteManager.workEnd();
     this.entityManager.workEnd();
 
-    //todo find what map was unloaded and check where the sprites were from.
+    //TODO find what map was unloaded and check where the sprites were from.
     //unload only the sprites that were in the now unloaded map!
 }
 

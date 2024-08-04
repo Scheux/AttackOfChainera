@@ -28,7 +28,7 @@ MapLoader.prototype.setActiveMap = function(mapID) {
 
 MapLoader.prototype.getActiveMap = function() {
     if(!this.loadedMaps.has(this.activeMapID)) {
-        console.warn(`Map ${this.activeMapID} is not loaded! Returning...`);
+        //console.warn(`Map ${this.activeMapID} is not loaded! Returning...`);
         return null;
     }
 
@@ -44,16 +44,16 @@ MapLoader.prototype.clearActiveMap = function() {
 }
 
 MapLoader.prototype.loadMap = async function(mapID) {
-    if(!this.mapTypes[mapID]) {
-        console.warn(`Map ${mapID} does not exist! Returning...`);
-        return;
-    }
-
     if(this.cachedMaps.has(mapID)) {
         const map = this.cachedMaps.get(mapID);
 
         this.loadedMaps.set(mapID, map);
         this.loadConnectedMaps(map.connections);
+        return;
+    }
+
+    if(!this.mapTypes[mapID]) {
+        console.warn(`Map ${mapID} does not exist! Returning...`);
         return;
     }
 
@@ -196,6 +196,10 @@ MapLoader.prototype.unloadMap = function(mapID) {
         return;
     }
 
+    if(this.activeMapID === mapID) {
+        this.activeMapID = null;
+    }
+
     this.loadedMaps.delete(mapID);
 }
 
@@ -215,6 +219,20 @@ MapLoader.prototype.getCachedMap = function(mapID) {
     }
 
     return this.cachedMaps.get(mapID);
+}
+
+MapLoader.prototype.cacheMap = function(map) {
+    if(!map) {
+        console.warn(`Map cannot be undefined! Returning...`);
+        return; 
+    }
+
+    if(this.cachedMaps.has(map.id)) {
+        console.warn(`Map ${map.id} is already cached! Returning...`);
+        return;
+    }
+
+    this.cachedMaps.set(map.id, map);
 }
 
 MapLoader.prototype.uncacheMap = function(mapID) {
@@ -241,7 +259,7 @@ MapLoader.prototype.createEmptyMap = function(id, width, height) {
         "music": null,
         "layers": {},
         "tiles": [],
-        "connections": {},
+        "connections": [],
         "entities": [],
         "flags": {}
     }

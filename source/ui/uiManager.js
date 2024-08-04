@@ -249,6 +249,50 @@ UIManager.prototype.parseUI = function(userInterfaceID, gameContext) {
     }
 }
 
+UIManager.prototype.unparseElement = function(config) {
+    switch(config.type) {
+
+        case UIManager.ELEMENT_TYPE_TEXT: {
+
+            if(!this.texts.has(config.id)) {
+                console.warn(`Unparsing failed. Text ${config.id} does not exist! Returning...`);
+                return;
+            }
+
+            const text = this.texts.get(config.id);
+
+            if(text.family && text.family.parent) {
+                const parent = text.family.parent.reference;
+                parent.removeChild(text.family.customName);
+            }
+
+            this.texts.delete(text.id);
+            break;
+        }
+
+        case UIManager.ELEMENT_TYPE_BUTTON: {
+            if(!this.buttons.has(config.id)) {
+                console.warn(`Unparsing failed. Button ${config.id} does not exist! Returning...`);
+                return;
+            }
+
+            const button = this.buttons.get(config.id);
+
+            if(button.family && button.family.parent) {
+                const parent = button.family.parent.reference;
+                parent.removeChild(button.family.customName);
+            }
+
+            this.buttons.delete(button.id);
+            break;
+        }
+
+        case UIManager.ELEMENT_TYPE_CONTAINER: {
+            break;
+        }
+    }
+}
+
 UIManager.prototype.unparseUI = function(userInterfaceID, gameContext) {
     if(!this.userInterfaces.hasOwnProperty(userInterfaceID)) {
         console.warn(`UserInterface ${userInterfaceID} does not exist! Returning...`);
@@ -258,25 +302,13 @@ UIManager.prototype.unparseUI = function(userInterfaceID, gameContext) {
     const userInterface = this.userInterfaces[userInterfaceID];
 
     for(const key in userInterface) {
-        const element = userInterface[key];
+        const config = userInterface[key];
 
-        switch(element.type) {
-            case UIManager.ELEMENT_TYPE_TEXT: {
-                this.texts.delete(element.id);
-                break;
-            }
-            case UIManager.ELEMENT_TYPE_BUTTON: {
-                this.buttons.delete(element.id);
-                break;
-            }
-            case UIManager.ELEMENT_TYPE_CONTAINER: {
-                break;
-            }
-        }
+        this.unparseElement(config);
 
-        if(this.drawableElements.has(element.id)) {
-            this.drawableElements.delete(element.id);
-            gameContext.renderer.events.unsubscribe(Camera.EVENT_SCREEN_RESIZE, element.id);
+        if(this.drawableElements.has(config.id)) {
+            this.drawableElements.delete(config.id);
+            gameContext.renderer.events.unsubscribe(Camera.EVENT_SCREEN_RESIZE, config.id);
         }
     }
 }

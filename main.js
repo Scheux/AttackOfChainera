@@ -26,7 +26,8 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
   gameContext.loadResources(resources);
   gameContext.timer.start();
   console.log(gameContext);
-  gameContext.loadMap("map_moin");  
+  gameContext.states.setNextState(GameContext.STATE_MAP_EDITOR);
+  //gameContext.loadMap("map_moin");  
 });
 
 //preload connections
