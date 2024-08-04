@@ -167,18 +167,13 @@ Camera.prototype.draw2DMap = function(gameContext) {
 
 Camera.prototype.drawUI = function(gameContext) {
     const { uiManager, timer } = gameContext;
-    const { buttons, icons, texts, drawableElements } = uiManager;
+    const { texts, drawableElements } = uiManager;
     const deltaTime = timer.getDeltaTime();
 
     drawableElements.forEach(element => element.draw(this.display.context, 0, 0, 0, 0));
+    drawableElements.forEach(element => element.drawDebug(this.display.context, 0, 0, 0, 0));
     
-    
-    buttons.forEach(button => button.drawDebug(this.display.context));
-    icons.forEach(icon => icon.drawDebug(this.display.context));
-    texts.forEach(text => {
-        text.drawDebug(this.display.context);
-        text.receiveUpdate(deltaTime);
-    });
+    texts.forEach(text => text.receiveUpdate(deltaTime));
 }
 
 Camera.prototype.calculateFPS = function(passedTime) {

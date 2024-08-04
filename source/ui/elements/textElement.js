@@ -11,6 +11,19 @@ export const TextElement = function() {
     this.isLooping = false;
     this.isRevealing = false;
     this.lettersPerSecond = 2;
+
+    this.events.subscribe(UIElement.EVENT_DRAW, "TEXT_ELEMENT", (context, localX, localY) => {    
+        this.fetch(this);
+    
+        context.save();
+        context.font = this.font;
+        context.fillStyle = this.fillStyle;
+        context.textAlign = this.textAlignment;
+        context.globalAlpha = this.opacity;
+        context.textBaseline = "middle";
+        context.fillText(this.revealedText, localX, localY);
+        context.restore();
+    });
 }
 
 TextElement.prototype = Object.create(UIElement.prototype);
@@ -24,26 +37,6 @@ TextElement.prototype.setFont = function(font, alignment, fillStyle = "#000000")
     this.font = font;
     this.textAlignment = alignment;
     this.fillStyle = fillStyle;
-}
-
-TextElement.prototype.draw = function(context, viewportX, viewportY, rootLocalX, rootLocalY) {
-    const localX = rootLocalX + this.position.x;
-    const localY = rootLocalY + this.position.y;
-    const renderX = localX - viewportX;
-    const renderY = localY - viewportY;
-
-    this.fetch(this);
-
-    context.save();
-    context.font = this.font;
-    context.fillStyle = this.fillStyle;
-    context.textAlign = this.textAlignment;
-    context.globalAlpha = this.opacity;
-    context.textBaseline = "middle";
-    context.fillText(this.revealedText, renderX, renderY);
-    context.restore();
-
-    this.drawChildren(context, viewportX, viewportY, localX, localY);
 }
 
 TextElement.prototype.setRevealSpeed = function(revealSpeed) {

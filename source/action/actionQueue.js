@@ -16,7 +16,11 @@ export const ActionQueue = function() {
 ActionQueue.IDLE = 0;
 ActionQueue.PROCESSING = 1;
 
-ActionQueue.prototype.clear = function() {
+ActionQueue.prototype.workStart = function() {
+    this.states.setNextState(ActionQueue.IDLE);
+}
+
+ActionQueue.prototype.workEnd = function() {
     this.states.currentState = null;
     this.queuedActions.length = 0;
     this.currentAction = null;
@@ -88,8 +92,4 @@ ActionQueue.prototype.skipAction = function() {
         this.isSkippingAction = true;
         this.endProcessing();
     }
-}
-
-ActionQueue.prototype.start = function() {
-    this.states.setNextState(ActionQueue.IDLE);
 }

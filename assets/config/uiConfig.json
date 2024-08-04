@@ -240,6 +240,46 @@
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
+        },
+        "CONTAINER_TILES": {
+            "id": "CONTAINER_TILES",
+            "type": "CONTAINER",
+            "anchor": "TOP_RIGHT",
+            "position": { "x": 0, "y": 0 },
+            "width": 300,
+            "height": 600,
+            "opacity": 1,
+            "children": [ "TEXT_TILESET", "BUTTON_TILESET_RIGHT", "BUTTON_TILESET_LEFT" ]
+        },
+        "TEXT_TILESET": {
+            "id": "TEXT_TILESET",
+            "type": "TEXT",
+            "position": { "x": 150, "y": 25 },
+            "text": "<TILESET>",
+            "font": "20px Arial",
+            "color": "#80fff0",
+            "align": "center",
+            "opacity": 1
+        },
+        "BUTTON_TILESET_RIGHT": {
+            "id": "BUTTON_TILESET_RIGHT",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 0, "y": 0 },
+            "radius": 50,
+            "width": 50,
+            "height": 100,
+            "opacity": 1
+        },
+        "BUTTON_TILESET_LEFT": {
+            "id": "BUTTON_TILESET_LEFT",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 250, "y": 0 },
+            "radius": 50,
+            "width": 50,
+            "height": 100,
+            "opacity": 1
         }
     }
 }

@@ -15,13 +15,14 @@ CustomElement.prototype.constructor = CustomElement;
 
 CustomElement.prototype.createBuffer = function(width, height) {
     this.buffer = document.createElement("canvas");
-    this.context = this.buffer.getContext("2d");
-    this.context.imageSmoothingEnabled = false;
 
     this.width = width;
     this.height = height;
     this.buffer.width = width;
     this.buffer.height = height;
+
+    this.context = this.buffer.getContext("2d");
+    this.context.imageSmoothingEnabled = false;
 }
 
 CustomElement.prototype.setDimensions = function(width, height) {

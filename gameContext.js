@@ -8,13 +8,12 @@ import { SpriteManager } from "./source/graphics/spriteManager.js";
 import { UIManager } from "./source/ui/uiManager.js";
 import { getViewportTile } from "./source/helpers.js";
 import { MapLoader } from "./source/map/mapLoader.js";
-import { Vec2 } from "./source/math/vec2.js";
 import { StateMachine } from "./source/state/stateMachine.js";
 import { TileManager } from "./source/tile/tileManager.js";
 import { Timer } from "./source/timer.js";
-import { UIElement } from "./source/ui/uiElement.js";
 import { MainMenuState } from "./states/gameContext/mainMenu.js";
 import { MapEditorState } from "./states/gameContext/mapEditor.js";
+import { ActionQueue } from "./source/action/actionQueue.js";
 
 export const GameContext = function() {
     this.client = new Client();
@@ -25,6 +24,7 @@ export const GameContext = function() {
     this.tileManager = new TileManager();
     this.spriteManager = new SpriteManager();
     this.uiManager = new UIManager();
+    this.actionQueue = new ActionQueue();
     this.states = new StateMachine(this);
     this.events = new EventEmitter();
 
@@ -33,6 +33,7 @@ export const GameContext = function() {
     }
 
     this.timer.updateFunction = () => {
+        this.actionQueue.update(this);
         this.entityManager.update(this);
     }
 
@@ -43,11 +44,9 @@ export const GameContext = function() {
 
     this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_DRAG, "GAME_CONTEXT", (deltaX, deltaY) => this.renderer.dragViewportBy(deltaX, deltaY));
     this.client.cursor.events.subscribe(Cursor.LEFT_MOUSE_CLICK, "GAME_CONTEXT", (event, cursor) => {
-        const uiElements = this.uiManager.findClickedButtons(cursor.position.x, cursor.position.y, cursor.radius);
+        this.uiManager.handleCollision(cursor.position.x, cursor.position.y, cursor.radius, true);
         const tilePosition = getViewportTile(cursor.position, this.renderer.viewportX, this.renderer.viewportY);
         const tile = this.tileManager.getTile(tilePosition.x, tilePosition.y);
-
-        uiElements.forEach(element => element.events.emit(UIElement.EVENT_CLICKED, this, element));
     });
 
     this.states.addState(GameContext.STATE_MAIN_MENU, new MainMenuState());
@@ -96,6 +95,7 @@ GameContext.prototype.loadMap = async function(mapID) {
     this.renderer.loadViewport(gameMap.width, gameMap.height);
     this.client.musicPlayer.loadTrack(gameMap.music);
     this.tileManager.loadTiles(gameMap.width, gameMap.height);
+    this.actionQueue.workStart();
 
     return true;
 }
@@ -108,6 +108,10 @@ GameContext.prototype.unloadMap = function(mapID) {
 
     //TODO find what map was unloaded and check where the sprites were from.
     //unload only the sprites that were in the now unloaded map!
+}
+
+GameContext.prototype.saveGame = function() {
+
 }
 
 GameContext.prototype.setupPlayer3D = function() {

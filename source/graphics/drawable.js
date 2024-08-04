@@ -10,9 +10,13 @@ export const Drawable = function(DEBUG_NAME) {
     this.opacity = 1;
 }
 
-Drawable.prototype.draw = function(context, viewportX, viewportY, rootLocalX, rootLocalY) {}
+Drawable.prototype.draw = function(context, viewportX, viewportY, rootLocalX, rootLocalY) {
 
-Drawable.prototype.receiveUpdate = function(timeStamp, timeStep) {}
+}
+
+Drawable.prototype.receiveUpdate = function(timeStamp, timeStep) {
+    
+}
 
 Drawable.prototype.setPosition = function(positionVector) {
     if(!positionVector) {
@@ -39,6 +43,7 @@ Drawable.prototype.closeFamily = function() {
     }
 
     this.family.onRemove();
+    this.family = null;
 }
 
 Drawable.prototype.setVisible = function(visible) {

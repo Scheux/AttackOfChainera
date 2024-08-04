@@ -1,10 +1,30 @@
 import { rectangularCollision } from "../../../math/math.js";
+import { UIElement } from "../../uiElement.js";
 import { Button } from "../button.js";
 
 export const ButtonSquare = function() {
-    Button.call(this, "ButtonSquare");
+    Button.call(this, "BUTTON_SQUARE");
     this.width = 0;
     this.height = 0;
+
+    this.events.subscribe(UIElement.EVENT_DEBUG, "BUTTON_SQUARE", (context, localX, localY) => {
+        context.save();
+        context.globalAlpha = 0.2;
+        context.fillStyle = "#ff00ff";
+        context.fillRect(localX, localY, this.width, this.height);
+        context.restore();
+    });
+
+    this.events.subscribe(UIElement.EVENT_DRAW, "BUTTON_SQUARE", (context, localX, localY) => {
+        if(this.isHighlighted) {
+            context.save();
+            context.globalAlpha = this.highlightOpacity;
+            context.fillStyle = this.highlightColor;
+            context.fillRect(localX, localY, this.width, this.height);
+            context.restore();
+            this.isHighlighted = false;
+        }
+    });
 }
 
 ButtonSquare.prototype = Object.create(Button.prototype);
@@ -13,29 +33,6 @@ ButtonSquare.prototype.constructor = ButtonSquare;
 ButtonSquare.prototype.collides = function(mouseX, mouseY, mouseRange) {
     const collision = rectangularCollision(this.position.x, this.position.y, this.width, this.height, mouseX, mouseY, mouseRange, mouseRange);
     return collision;
-}
-
-ButtonSquare.prototype.drawDebug = function(context) {
-    context.save();
-    context.globalAlpha = 0.5;
-    context.fillStyle = "#ff00ff";
-    context.fillRect(this.position.x, this.position.y, this.width, this.height);
-    context.restore();
-}
-
-ButtonSquare.prototype.draw = function(context, viewportX, viewportY, rootLocalX, rootLocalY) {
-    const localX = rootLocalX + this.position.x;
-    const localY = rootLocalY + this.position.y;
-
-    if(this.isHighlighted) {
-        context.save();
-        context.globalAlpha = 0.5;
-        context.fillStyle = "#eeeeee";
-        context.fillRect(localX, localY, this.width, this.height);
-        context.restore();
-    }
-
-    this.drawChildren(context, viewportX, viewportY, localX, localY);
 }
 
 ButtonSquare.prototype.setSize = function(width, height) {
