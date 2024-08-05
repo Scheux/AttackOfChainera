@@ -49,5 +49,7 @@ EventEmitter.prototype.unsubscribe = function(eventType, subscriberID) {
     }
 
     const listener = this.listeners.get(eventType);
-    listener.observers = listener.observers.filter(observer => observer.subscriber !== subscriberID);
+    const remainingObservers = listener.observers.filter(observer => observer.subscriber !== subscriberID);
+    
+    listener.observers = remainingObservers;
 }

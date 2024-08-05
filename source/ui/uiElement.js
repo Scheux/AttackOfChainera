@@ -116,20 +116,12 @@ UIElement.prototype.collides = function(mouseX, mouseY, mouseRange) {
     return false;
 }
 
-UIElement.prototype.handleCollision = function(mouseX, mouseY, mouseRange, isClick) {
+UIElement.prototype.handleCollision = function(mouseX, mouseY, mouseRange, collidedElements) {
     const localX = mouseX - this.position.x;
     const localY = mouseY - this.position.y;
 
-    this.events.emit(UIElement.EVENT_COLLIDES);
+    collidedElements.push(this);
 
-    if(isClick) {
-        this.events.emit(UIElement.EVENT_CLICKED);
-    }
-
-    this.collidesChildren(localX, localY, mouseRange);
-}
-
-UIElement.prototype.collidesChildren = function(localX, localY, mouseRange, isClick) {
     if(!this.family || this.family.children.length === 0) {
         return;
     }
@@ -144,7 +136,7 @@ UIElement.prototype.collidesChildren = function(localX, localY, mouseRange, isCl
             continue;
         }
 
-        child.handleCollision(localX, localY, mouseRange, isClick);
+        child.handleCollision(localX, localY, mouseRange, collidedElements);
     }
 }
 
@@ -153,10 +145,7 @@ UIElement.prototype.drawDebug = function(context, viewportX, viewportY, rootLoca
     const localY = rootLocalY + this.position.y;
 
     this.events.emit(UIElement.EVENT_DEBUG, context, localX, localY);
-    this.drawDebugChildren(context, viewportX, viewportY, localX, localY);
-}
 
-UIElement.prototype.drawDebugChildren = function(context, viewportX, viewportY, rootLocalX, rootLocalY) {
     if(!this.family) {
         return;
     }
@@ -166,7 +155,7 @@ UIElement.prototype.drawDebugChildren = function(context, viewportX, viewportY, 
     children.forEach(child => {
         const reference = child.getReference();
 
-        reference.drawDebug(context, viewportX, viewportY, rootLocalX, rootLocalY);
+        reference.drawDebug(context, viewportX, viewportY, localX, localY);
     });
 }
 

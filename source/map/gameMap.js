@@ -25,6 +25,16 @@ GameMap.prototype.generateEmptyLayer = function(layerID) {
 }
 
 GameMap.prototype.resize = function(width, height) {
+    if(width < 0 || height < 0) {
+        console.warn(`Width or Height cannot be below 0! Returning...`);
+        return;
+    }
+
+    if(width > 200 || height > 200) {
+        console.warn(`Width or Height cannot exceed 200! Returning...`);
+        return;
+    }
+
     for(const key in this.layers) {
         const layer = this.layers[key];
 

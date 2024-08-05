@@ -1,7 +1,7 @@
 import { Animation } from "./animation.js";
 
 export const ImageSheet = function(image, config) {
-    const { id, directory, source, offset, frameTime, frames, allowFlip, animations } = config;
+    const { id, directory, source, offset, frameTime, frames, allowFlip, animations, patterns } = config;
 
     this.image = image;
     this.id = id;
@@ -12,6 +12,7 @@ export const ImageSheet = function(image, config) {
     this.frameTime = frameTime;
     this.allowFlip = allowFlip;
     this.animations = animations;
+    this.patterns = patterns;
     this.buffers = new Map();
     this.loadedAnimations = new Map();
 
@@ -43,6 +44,10 @@ export const ImageSheet = function(image, config) {
 
     if(!animations) {
         this.animations = {};
+    }
+
+    if(!patterns) {
+        this.patterns = {};
     }
 }
 

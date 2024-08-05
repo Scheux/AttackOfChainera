@@ -15,16 +15,7 @@ export const ButtonSquare = function() {
         context.restore();
     });
 
-    this.events.subscribe(UIElement.EVENT_DRAW, "BUTTON_SQUARE", (context, localX, localY) => {
-        if(this.isHighlighted) {
-            context.save();
-            context.globalAlpha = this.highlightOpacity;
-            context.fillStyle = this.highlightColor;
-            context.fillRect(localX, localY, this.width, this.height);
-            context.restore();
-            this.isHighlighted = false;
-        }
-    });
+    this.events.subscribe(UIElement.EVENT_DRAW, "BUTTON_SQUARE", (context, localX, localY) => this.drawHighlight(context, localX, localY));
 }
 
 ButtonSquare.prototype = Object.create(Button.prototype);
@@ -38,4 +29,15 @@ ButtonSquare.prototype.collides = function(mouseX, mouseY, mouseRange) {
 ButtonSquare.prototype.setSize = function(width, height) {
     this.width = width;
     this.height = height;
+}
+
+ButtonSquare.prototype.drawHighlight = function(context, localX, localY) {
+    if(this.isHighlighted) {
+        context.save();
+        context.globalAlpha = this.highlightOpacity;
+        context.fillStyle = this.highlightColor;
+        context.fillRect(localX, localY, this.width, this.height);
+        context.restore();
+        this.isHighlighted = false;
+    }
 }

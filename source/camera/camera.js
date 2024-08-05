@@ -110,7 +110,7 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
             continue;
         }
 
-        if(tileRow === undefined || tileRow === null) {
+        if(!tileRow) {
             continue;
         }
         
@@ -130,7 +130,19 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
                 continue;
             }
 
-            if(tileRow[j] === undefined || tileRow[j] === null) {
+            if(tileRow[j] === undefined) {
+                continue;
+            }
+
+            if(tileRow[j] === null) {
+                const renderY = i * Camera.TILE_HEIGHT - this.viewportY;
+                const renderX = j * Camera.TILE_WIDTH - this.viewportX;
+                this.display.context.fillStyle = "purple";
+                this.display.context.fillRect(renderX, renderY, 8, 8);
+                this.display.context.fillRect(renderX + 8, renderY + 8, 8, 8);
+                this.display.context.fillStyle = "black";
+                this.display.context.fillRect(renderX + 8, renderY, 8, 8);
+                this.display.context.fillRect(renderX, renderY + 8, 8, 8);
                 continue;
             }
 
@@ -170,8 +182,8 @@ Camera.prototype.drawUI = function(gameContext) {
     const { texts, drawableElements } = uiManager;
     const deltaTime = timer.getDeltaTime();
 
-    drawableElements.forEach(element => element.draw(this.display.context, 0, 0, 0, 0));
     drawableElements.forEach(element => element.drawDebug(this.display.context, 0, 0, 0, 0));
+    drawableElements.forEach(element => element.draw(this.display.context, 0, 0, 0, 0));
     
     texts.forEach(text => text.receiveUpdate(deltaTime));
 }

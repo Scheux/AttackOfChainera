@@ -15,6 +15,9 @@
             "wood": {"x":16,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
             "water": {"x":0,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}},
             "meadow": {"x":16,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}}
+        },
+        "animations": {
+            "test": { "id": "test", "frameTime": 0.3, "frames": [ "grass", "water", "wood", "meadow" ]}
         }
     },
     "test_raycast": { 

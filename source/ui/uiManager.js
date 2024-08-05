@@ -2,6 +2,7 @@ import { Camera } from "../camera/camera.js";
 import { ButtonCircle } from "./elements/button/buttonCircle.js";
 import { ButtonSquare } from "./elements/button/buttonSquare.js";
 import { Container } from "./elements/container.js";
+import { Icon } from "./elements/icon.js";
 import { TextElement } from "./elements/textElement.js";
 import { UIElement } from "./uiElement.js";
 
@@ -13,16 +14,14 @@ export const UIManager = function() {
     this.buttons = new Map();
     this.texts = new Map();
     this.containers = new Map();
-    this.customElements = new Map();
     this.drawableElements = new Map();
     this.elementsToUpdate = new Map();
 }
 
-//TODO Use the same collision code for clicking ui elements. This has to be done recursively.
-
 UIManager.ELEMENT_TYPE_TEXT = "TEXT";
 UIManager.ELEMENT_TYPE_BUTTON = "BUTTON";
 UIManager.ELEMENT_TYPE_CONTAINER = "CONTAINER";
+UIManager.ELEMENT_TYPE_ICON = "ICON";
 UIManager.BUTTON_TYPE_CIRCLE = "CIRCLE";
 UIManager.BUTTON_TYPE_SQUARE = "SQUARE";
 UIManager.EFFECT_TYPE_FADE_IN = "FADE_IN";
@@ -98,10 +97,16 @@ UIManager.prototype.update = function(gameContext) {
         text.receiveUpdate(deltaTime);
     }
 
-    this.handleCollision(cursor.position.x, cursor.position.y, cursor.radius, false);
+    const collidedElements = this.checkCollisions(cursor.position.x, cursor.position.y, cursor.radius);
+
+    for(const element of collidedElements) {
+        element.events.emit(UIElement.EVENT_COLLIDES);
+    }
 }
 
-UIManager.prototype.handleCollision = function(mouseX, mouseY, mouseRange, isClick) {
+UIManager.prototype.checkCollisions = function(mouseX, mouseY, mouseRange) {
+    const collidedElements = [];
+
     for(const [key, element] of this.drawableElements) {
         const isColliding = element.collides(mouseX, mouseY, mouseRange);
 
@@ -109,10 +114,13 @@ UIManager.prototype.handleCollision = function(mouseX, mouseY, mouseRange, isCli
             continue;
         }
 
-        element.handleCollision(mouseX, mouseY, mouseRange, isClick);
+        element.handleCollision(mouseX, mouseY, mouseRange, collidedElements);
     }
+
+    return collidedElements;
 }
 
+//#region PARSE
 UIManager.prototype.parseEffects = function(element, effects) {
     if(!effects) {
         return;
@@ -134,6 +142,19 @@ UIManager.prototype.parseEffects = function(element, effects) {
         }
     }
 }
+
+UIManager.prototype.parseIcon = function(config) {
+    const icon = new Icon();
+
+    icon.id = config.id;
+    icon.DEBUG_NAME = config.id;
+    icon.setConfig(config);
+    icon.setOpacity(config.opacity);
+    icon.position.x = config.position.x;
+    icon.position.y = config.position.y;
+
+    return icon;
+} 
 
 UIManager.prototype.parseText = function(config) {
     const text = new TextElement();
@@ -225,6 +246,12 @@ UIManager.prototype.parseElement = function(config) {
             return container;
         }
 
+        case UIManager.ELEMENT_TYPE_ICON: {
+            const icon = this.parseIcon(config);
+            this.icons.set(config.id, icon);
+            return icon;
+        }
+
         default: {
             console.warn(`UIElement ${config.type} does not exist! Returning null...`);
             return null;
@@ -270,18 +297,24 @@ UIManager.prototype.parseUI = function(userInterfaceID, gameContext) {
             this.drawableElements.set(element.id, element);
         }
 
-        if(parents.has(element.id)) {
-            for(const childID of config.children) {
-                const { element: child } = parsedElements.get(childID);
-                element.addChild(child, child.id);
+        if(!parents.has(element.id)) {
+            continue;
+        }
+
+        for(const childID of config.children) {
+            if(!parsedElements.has(childID)) {
+                console.warn(`Child ${childID} is not loaded! Continuing...`);
+                continue;
             }
+
+            const { element: child } = parsedElements.get(childID);
+            element.addChild(child, child.id);
         }
     }
 }
 
 UIManager.prototype.unparseElement = function(config) {
     switch(config.type) {
-
         case UIManager.ELEMENT_TYPE_TEXT: {
 
             if(!this.texts.has(config.id)) {
@@ -311,7 +344,8 @@ UIManager.prototype.unparseElement = function(config) {
                 return;
             }
 
-            this.drawableElements.get(config.id).closeFamily();
+            this.containers.get(config.id).closeFamily();
+            this.containers.delete(config.id);
             break;
         }
     }
@@ -336,7 +370,7 @@ UIManager.prototype.unparseUI = function(userInterfaceID, gameContext) {
         }
     }
 }
-
+//#endregion PARSE
 UIManager.prototype.addFetch = function(textID, callback) {
     if(!this.texts.has(textID)) {
         console.warn(`Text ${textID} does not exist! Returning...`);
@@ -385,12 +419,4 @@ UIManager.prototype.addFadeInEffect = function(element, fadeIncrement, fadeThres
 
     element.goals.set(id, fadeFunction);
     this.elementsToUpdate.set(element.id, element);
-}
-
-UIManager.prototype.addCustomElement = function(element) {
-    this.customElements.set(element.id, element);
-}
-
-UIManager.prototype.removeCustomElement = function(elementID) {
-    this.customElements.delete(elementID);
 }

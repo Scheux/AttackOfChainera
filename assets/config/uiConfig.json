@@ -28,7 +28,7 @@
             "position": { "x": 0, "y": 15 },
             "text": "FPS",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "left",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -39,7 +39,7 @@
             "position": { "x": 0, "y": 25 },
             "text": "PLAY",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "left",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -50,7 +50,7 @@
             "position": { "x": 0, "y": 25 },
             "text": "EDIT",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "left",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -75,7 +75,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "SAVE",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -98,7 +98,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "LOAD",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -121,7 +121,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "CREATE",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -144,7 +144,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "RESIZE",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -167,7 +167,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "L1",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -190,7 +190,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "L2",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -213,7 +213,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "L3",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -236,7 +236,7 @@
             "position": { "x": 50, "y": 25 },
             "text": "LC",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 0.5,
             "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
@@ -246,18 +246,58 @@
             "type": "CONTAINER",
             "anchor": "TOP_RIGHT",
             "position": { "x": 0, "y": 0 },
-            "width": 300,
-            "height": 600,
+            "width": 350,
+            "height": 500,
             "opacity": 1,
-            "children": [ "TEXT_TILESET", "BUTTON_TILESET_RIGHT", "BUTTON_TILESET_LEFT" ]
+            "children": [ "TEXT_TILESET", "BUTTON_TILESET_RIGHT", "BUTTON_TILESET_LEFT", "BUTTON_TILESET_MODE", "BUTTON_PAGE_NEXT", "BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8" ]
+        },
+        "BUTTON_PAGE_NEXT": {
+            "id": "BUTTON_PAGE_NEXT",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 0, "y": 450 },
+            "width": 350,
+            "height": 50,
+            "opacity": 1,
+            "children": [ "TEXT_PAGE_NEXT" ]
+        },
+        "TEXT_PAGE_NEXT": {
+            "id": "TEXT_PAGE_NEXT",
+            "type": "TEXT",
+            "position": { "x": 175, "y": 25 },
+            "text": "<PAGE>",
+            "font": "20px Arial",
+            "color": "#eeeeee",
+            "align": "center",
+            "opacity": 1
         },
         "TEXT_TILESET": {
             "id": "TEXT_TILESET",
             "type": "TEXT",
-            "position": { "x": 150, "y": 25 },
+            "position": { "x": 175, "y": 25 },
             "text": "<TILESET>",
             "font": "20px Arial",
-            "color": "#80fff0",
+            "color": "#eeeeee",
+            "align": "center",
+            "opacity": 1
+        },
+        "BUTTON_TILESET_MODE": {
+            "id": "BUTTON_TILESET_MODE",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 50, "y": 50 },
+            "width": 250,
+            "height": 50,
+            "opacity": 1,
+            "children": [ "TEXT_TILESET_MODE" ]
+        },
+        "TEXT_TILESET_MODE": {
+            "id": "TEXT_TILESET_MODE",
+            "type": "TEXT",
+            "position": { "x": 125, "y": 25 },
+            "text": "<MODE>",
+            "font": "20px Arial",
+            "color": "#eeeeee",
             "align": "center",
             "opacity": 1
         },
@@ -265,20 +305,121 @@
             "id": "BUTTON_TILESET_RIGHT",
             "type": "BUTTON",
             "shape": "SQUARE",
-            "position": { "x": 0, "y": 0 },
-            "radius": 50,
+            "position": { "x": 300, "y": 0 },
             "width": 50,
             "height": 100,
+            "opacity": 1,
+            "children": [ "TEXT_TILESET_RIGHT" ]
+        },
+        "TEXT_TILESET_RIGHT": {
+            "id": "TEXT_TILESET_RIGHT",
+            "type": "TEXT",
+            "position": { "x": 25, "y": 50 },
+            "text": ">>",
+            "font": "20px Arial",
+            "color": "#eeeeee",
+            "align": "center",
             "opacity": 1
         },
         "BUTTON_TILESET_LEFT": {
             "id": "BUTTON_TILESET_LEFT",
             "type": "BUTTON",
             "shape": "SQUARE",
-            "position": { "x": 250, "y": 0 },
-            "radius": 50,
+            "position": { "x": 0, "y": 0 },
             "width": 50,
             "height": 100,
+            "opacity": 1,
+            "children": [ "TEXT_TILESET_LEFT" ]
+        },
+        "TEXT_TILESET_LEFT": {
+            "id": "TEXT_TILESET_LEFT",
+            "type": "TEXT",
+            "position": { "x": 25, "y": 50 },
+            "text": "<<",
+            "font": "20px Arial",
+            "color": "#eeeeee",
+            "align": "center",
+            "opacity": 1
+        },
+        "BUTTON_0": {
+            "id": "BUTTON_0",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 50, "y": 150 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_1": {
+            "id": "BUTTON_1",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 150, "y": 150 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_2": {
+            "id": "BUTTON_2",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 250, "y": 150 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_3": {
+            "id": "BUTTON_3",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 50, "y": 250 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_4": {
+            "id": "BUTTON_4",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 150, "y": 250 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_5": {
+            "id": "BUTTON_5",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 250, "y": 250 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_6": {
+            "id": "BUTTON_6",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 50, "y": 350 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_7": {
+            "id": "BUTTON_7",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 150, "y": 350 },
+            "width": 50,
+            "height": 50,
+            "opacity": 1
+        },
+        "BUTTON_8": {
+            "id": "BUTTON_8",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 250, "y": 350 },
+            "width": 50,
+            "height": 50,
             "opacity": 1
         }
     }
