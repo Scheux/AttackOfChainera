@@ -5,7 +5,7 @@ export const MapEditor = function() {
     this.brushColumn = 0;
     this.brushRow = 0;
 
-    this.selectedBrush = [];
+    this.selectedBrush = null;
 
     this.tileSets = {};
     this.tileSetKeys = [];
@@ -55,13 +55,18 @@ MapEditor.prototype.getPageElements = function(availableSlots) {
             continue;
         }
 
-        pageElements.push([tileSetID, this.pageElements[index], this.brushModeTypes[this.brushModeIndex]]);
+        pageElements.push([
+            tileSetID,
+            this.pageElements[index],
+            this.brushModes[this.brushModeIndex],
+            this.brushModeTypes[this.brushModeIndex]
+        ]);
     }
 
     return pageElements;
 }
 
-MapEditor.prototype.refreshPageElements = function() {
+MapEditor.prototype.reloadPageElements = function() {
     this.clearPageElements();
     const brushMode = this.getBrushModeID();
     const tileSet = this.getCurrentSet();

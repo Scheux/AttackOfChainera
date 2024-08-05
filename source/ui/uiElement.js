@@ -159,10 +159,15 @@ UIElement.prototype.drawDebug = function(context, viewportX, viewportY, rootLoca
     });
 }
 
+UIElement.prototype.postDraw = function(context, localX, localY) {
+
+}
+
 UIElement.prototype.draw = function(context, viewportX, viewportY, rootLocalX, rootLocalY) {
     const localX = rootLocalX + this.position.x;
     const localY = rootLocalY + this.position.y;
 
     this.events.emit(UIElement.EVENT_DRAW, context, localX, localY);
+    this.postDraw(context, localX, localY);
     this.drawChildren(context, viewportX, viewportY, localX, localY);
 }

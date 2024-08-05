@@ -19,22 +19,12 @@ GameMap.prototype.generateEmptyLayer = function(layerID) {
         this.layers[layerID][i] = [];
 
         for(let j = 0; j < this.width; j++) {
-            this.layers[layerID][i][j] = 0;
+            this.layers[layerID][i][j] = null;
         }
     }
 }
 
 GameMap.prototype.resize = function(width, height) {
-    if(width < 0 || height < 0) {
-        console.warn(`Width or Height cannot be below 0! Returning...`);
-        return;
-    }
-
-    if(width > 200 || height > 200) {
-        console.warn(`Width or Height cannot exceed 200! Returning...`);
-        return;
-    }
-
     for(const key in this.layers) {
         const layer = this.layers[key];
 
@@ -71,7 +61,7 @@ GameMap.prototype.resize = function(width, height) {
     this.height = height;
 }
 
-GameMap.prototype.placeTile = function(placeType, layerID, tileX, tileY) {
+GameMap.prototype.placeTile = function(graphics, layerID, tileX, tileY) {
     if(!this.layers[layerID]) {
         console.warn(`Layer ${layerID} does not exist! Returning...`);
         return;
@@ -91,7 +81,7 @@ GameMap.prototype.placeTile = function(placeType, layerID, tileX, tileY) {
         return;
     }
 
-    row[tileX] = placeType;
+    row[tileX] = graphics;
 }
 
 GameMap.prototype.getConnections = function() {

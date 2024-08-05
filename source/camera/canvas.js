@@ -12,6 +12,10 @@ Canvas.prototype.clear = function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 }
 
+Canvas.prototype.copyBuffer = function() {
+
+}
+
 Canvas.prototype.resize = function(width, height) {
     this.clear();
 

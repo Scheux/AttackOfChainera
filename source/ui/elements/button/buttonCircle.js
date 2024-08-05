@@ -15,8 +15,6 @@ export const ButtonCircle = function() {
         context.fill();
         context.restore();
     });
-
-    this.events.subscribe(UIElement.EVENT_DRAW, "BUTTON_CIRCLE", (context, localX, localY) => this.drawHighlight(context, localX, localY));
 }
 
 ButtonCircle.prototype = Object.create(Button.prototype);
@@ -31,7 +29,7 @@ ButtonCircle.prototype.setRadius = function(radius) {
     this.radius = radius;
 }
 
-ButtonCircle.prototype.drawHighlight = function(context, localX, localY) {
+ButtonCircle.prototype.postDraw = function(context, localX, localY) {
     if(this.isHighlighted) {
         context.save();
         context.globalAlpha = this.highlightOpacity;
@@ -42,3 +40,4 @@ ButtonCircle.prototype.drawHighlight = function(context, localX, localY) {
         this.isHighlighted = false;
     }
 }
+

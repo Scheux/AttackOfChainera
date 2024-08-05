@@ -301,7 +301,7 @@ TileManager.prototype.loadTiles = function(mapWidth, mapHeight) {
 
         for(let j = 0; j < mapWidth; j++) {
 
-            if(this.tiles[i][j] === undefined) { 
+            if(this.tiles[i][j] === undefined || this.tiles[i][j] === null) { 
                 this.tiles[i][j] = this.createTile(null, new Vec2(j, i));
                 continue;
             }

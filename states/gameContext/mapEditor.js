@@ -1,3 +1,6 @@
+import { Camera } from "../../source/camera/camera.js";
+import { Canvas } from "../../source/camera/canvas.js";
+import { Cursor } from "../../source/client/cursor.js";
 import { saveTemplateAsFile } from "../../source/helpers.js";
 import { MapEditor } from "../../source/map/mapEditor.js";
 import { State } from "../../source/state/state.js";
@@ -13,7 +16,7 @@ MapEditorState.prototype.constructor = MapEditorState;
 MapEditorState.prototype.enter = function(stateMachine) {
     const gameContext = stateMachine.getContext();
     const editor = new MapEditor();
-    const { mapLoader, client, uiManager, spriteManager, renderer, timer } = gameContext;
+    const { mapLoader, client, uiManager, spriteManager, renderer, timer, tileManager } = gameContext;
     const { cursor, musicPlayer } = client;
     const editorMapID = "MAP_EDITOR";
     const mapEditorSubscriberID = "MAP_EDITOR";
@@ -33,7 +36,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
                 continue;
             }
 
-            const [tileSetID, frameID, brushMode] = element;
+            const [tileSetID, frameID, brushModeID, brushModeType] = element;
             const tileSet = spriteManager.tileSprites[tileSetID];
 
             uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_DRAW, mapEditorSubscriberID, (context, localX, localY) => {
@@ -48,6 +51,46 @@ MapEditorState.prototype.enter = function(stateMachine) {
         }
     }
 
+    const placeTile = () => {
+        const cursorTile = gameContext.getViewportTile();
+        const gameMap = mapLoader.getCachedMap(editorMapID);
+
+        if(!cursorTile || !gameMap) {
+            return;
+        }
+
+        const [tileSetID, frameID, brushModeID, brushModeType] = editor.selectedBrush;
+
+        gameMap.placeTile([tileSetID, frameID], "bottom", cursorTile.position.x, cursorTile.position.y);
+    }
+
+    renderer.events.subscribe(Camera.EVENT_MAP_RENDER_COMPLETE, mapEditorSubscriberID, (renderer) => {
+        const cursorTile = gameContext.getViewportTile();
+
+        if(!cursorTile || !editor.selectedBrush) {
+            return;
+        }
+
+        const renderX = cursorTile.position.x * Camera.TILE_WIDTH * Camera.SCALE - renderer.viewportX * Camera.SCALE;
+        const renderY = cursorTile.position.y * Camera.TILE_HEIGHT * Camera.SCALE - renderer.viewportY * Camera.SCALE;
+        const [tileSetID, frameID, brushModeID, brushModeType] = editor.selectedBrush;
+        const tileSet = spriteManager.tileSprites[tileSetID];
+        const realTime = timer.getRealTime();
+        const buffer = tileSet.getAnimationFrame(frameID, realTime)[0];
+
+        renderer.display.context.globalAlpha = 0.7;
+        renderer.display.context.drawImage(buffer.bitmap, renderX, renderY, Camera.TILE_WIDTH * Camera.SCALE, Camera.TILE_HEIGHT * Camera.SCALE);
+        renderer.display.context.globalAlpha = 1;
+    });
+
+    cursor.events.subscribe(Cursor.RIGHT_MOUSE_DRAG, mapEditorSubscriberID, () => {
+        placeTile();
+    });
+
+    cursor.events.subscribe(Cursor.RIGHT_MOUSE_CLICK, mapEditorSubscriberID, () => {
+        placeTile();
+    });
+
     musicPlayer.loadTrack("surfing");
     
     musicPlayer.loadTrack("e2m3");
@@ -58,7 +101,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
     uiManager.parseUI("MAP_EDITOR", gameContext);
 
-    editor.refreshPageElements();
+    editor.reloadPageElements();
 
     displayPageElements(editor.getPageElements(availableButtonSlots));
 
@@ -70,19 +113,19 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
     uiManager.addClick("BUTTON_TILESET_MODE", () => {
         editor.scrollBrushMode(1);
-        editor.refreshPageElements();
+        editor.reloadPageElements();
         displayPageElements(editor.getPageElements(availableButtonSlots));
     });
 
     uiManager.addClick("BUTTON_TILESET_LEFT", () => {
         editor.scrollCurrentSet(-1);
-        editor.refreshPageElements();
+        editor.reloadPageElements();
         displayPageElements(editor.getPageElements(availableButtonSlots));
     });
 
     uiManager.addClick("BUTTON_TILESET_RIGHT", () => {
         editor.scrollCurrentSet(1);
-        editor.refreshPageElements();
+        editor.reloadPageElements();
         displayPageElements(editor.getPageElements(availableButtonSlots));
     });
 
@@ -129,15 +172,25 @@ MapEditorState.prototype.enter = function(stateMachine) {
         const gameMap = mapLoader.getCachedMap(editorMapID);
 
         if(!gameMap) {
+            console.warn(`GameMap cannot be undefined! Returning...`);
             return;
         }
 
         const newWidth = parseInt(prompt("MAP_WIDTH"));
         const newHeight = parseInt(prompt("MAP_HEIGHT"));
 
-        gameMap.resize(newWidth, newHeight);
+        if(newWidth < 0 || newHeight < 0) {
+            console.warn(`Width or Height cannot be below 0! Returning...`);
+            return;
+        }
+    
+        if(newWidth > 200 || newHeight > 200) {
+            console.warn(`Width or Height cannot exceed 200! Returning...`);
+            return;
+        }
 
-        console.log(gameMap);
+        gameMap.resize(newWidth, newHeight);
+        tileManager.loadTiles(newWidth, newHeight);
     }); 
 }
 
@@ -148,3 +201,5 @@ MapEditorState.prototype.exit = function(stateMachine) {
     mapLoader.unparseUI("MAP_EDITOR", gameContext);
 }
 
+//TODO: ADD SIZE SELECTION FOR EDITOR
+//TODO: CLEANUP TILES

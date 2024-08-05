@@ -13,18 +13,18 @@ export const Icon = function() {
         context.fillRect(localX, localY, this.width, this.height);
         context.restore();
     });
-
-    this.events.subscribe(UIElement.EVENT_DRAW, "ICON", (context, localX, localY) => {
-        if(!this.image) {
-            return;
-        }
-
-        context.drawImage(this.image, localX, localY, this.width, this.height);
-    });
 }
 
 Icon.prototype = Object.create(UIElement.prototype);
 Icon.prototype.constructor = Icon;
+
+Icon.prototype.postDraw = function(context, localX, localY) {
+    if(!this.image) {
+        return;
+    }
+
+    context.drawImage(this.image, localX, localY, this.width, this.height);
+}
 
 Icon.prototype.setImage = function(image) {
     this.image = image;

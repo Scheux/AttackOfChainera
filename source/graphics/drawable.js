@@ -47,10 +47,20 @@ Drawable.prototype.closeFamily = function() {
 }
 
 Drawable.prototype.setVisible = function(visible) {
+    if(visible === undefined) {
+        console.warn(`IsVisible cannot be undefined! Returning...`);
+        return;
+    }
+
     this.isVisible = visible;
 }
 
 Drawable.prototype.setOpacity = function(opacity) {
+    if(opacity === undefined) {
+        console.warn(`Opacity cannot be undefined! Returning...`);
+        return;
+    }
+
     this.opacity = opacity;
 }
 

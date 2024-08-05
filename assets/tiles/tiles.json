@@ -10,6 +10,12 @@
         "offset": { "x": 0, "y": 0 },
         "frameTime": 1,
         "allowFlip": false,
+        "patterns": {
+            "grass-big": [
+                ["grass", "grass"],
+                ["grass", "grass"]
+            ]
+        },
         "frames": {
             "grass": {"x":0,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
             "wood": {"x":16,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},

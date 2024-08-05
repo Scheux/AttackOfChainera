@@ -19,6 +19,7 @@ export const Camera = function(screenWidth, screenHeight) {
 
     this.events = new EventEmitter();
     this.events.listen(Camera.EVENT_SCREEN_RESIZE);
+    this.events.listen(Camera.EVENT_MAP_RENDER_COMPLETE);
 
     window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight));
 }
@@ -29,6 +30,7 @@ Camera.SCALE = 4;
 Camera.TILE_WIDTH = 16;
 Camera.TILE_HEIGHT = 16;
 Camera.EVENT_SCREEN_RESIZE = 0;
+Camera.EVENT_MAP_RENDER_COMPLETE = 1;
 
 Camera.prototype.drawSprites = function(gameContext) {
     const { timer, spriteManager } = gameContext;
@@ -62,13 +64,12 @@ Camera.prototype.drawSprites = function(gameContext) {
     }
 }
 
-Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileID) {
+Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileGraphics) {
     const { timer, spriteManager } = gameContext;
     const realTime = timer.getRealTime();
 
     const renderY = tileY * Camera.TILE_HEIGHT - this.viewportY;
     const renderX = tileX * Camera.TILE_WIDTH - this.viewportX;
-    const tileGraphics = tileID === 1 ? ["wall", "default"] : tileID === 2 ? ["test", "grass"] : ["test", "wood"]; //tileID;
     const [tileSetID, tileSetAnimationID] = tileGraphics;
     const tileSet = spriteManager.tileSprites[tileSetID];
     const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
@@ -205,6 +206,7 @@ Camera.prototype.update = function(gameContext) {
 
     if(Camera.DRAW_2D_MAP) {
         this.draw2DMap(gameContext);
+        this.events.emit(Camera.EVENT_MAP_RENDER_COMPLETE, this);
     }
 
     if(Camera.DRAW_RAYCAST) {

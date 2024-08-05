@@ -11,19 +11,6 @@ export const TextElement = function() {
     this.isLooping = false;
     this.isRevealing = false;
     this.lettersPerSecond = 2;
-
-    this.events.subscribe(UIElement.EVENT_DRAW, "TEXT_ELEMENT", (context, localX, localY) => {    
-        this.fetch(this);
-    
-        context.save();
-        context.font = this.font;
-        context.fillStyle = this.fillStyle;
-        context.textAlign = this.textAlignment;
-        context.globalAlpha = this.opacity;
-        context.textBaseline = "middle";
-        context.fillText(this.revealedText, localX, localY);
-        context.restore();
-    });
 }
 
 TextElement.prototype = Object.create(UIElement.prototype);
@@ -32,6 +19,19 @@ TextElement.prototype.constructor = TextElement;
 TextElement.TEXT_ALIGN_RIGHT = "right";
 TextElement.TEXT_ALIGN_LEFT = "left";
 TextElement.TEXT_ALIGN_CENTER = "center";
+
+TextElement.prototype.postDraw = function(context, localX, localY) {
+    this.fetch(this);
+    
+    context.save();
+    context.font = this.font;
+    context.fillStyle = this.fillStyle;
+    context.textAlign = this.textAlignment;
+    context.globalAlpha = this.opacity;
+    context.textBaseline = "middle";
+    context.fillText(this.revealedText, localX, localY);
+    context.restore();
+}
 
 TextElement.prototype.setFont = function(font, alignment, fillStyle = "#000000") {
     this.font = font;
@@ -53,7 +53,7 @@ TextElement.prototype.revealLetter = function() {
     }
 }
 
-TextElement.setRevealing = function(isRevealing) {
+TextElement.prototype.setRevealing = function(isRevealing) {
     this.isRevealing = isRevealing;
 }
 

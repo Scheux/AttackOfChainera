@@ -59,7 +59,6 @@ UIManager.prototype.workStart = function() {
 }
 
 UIManager.prototype.workEnd = function() {
-    this.customElements.clear();
     this.texts.clear();
     this.buttons.clear();
     this.icons.clear();

@@ -14,8 +14,6 @@ export const ButtonSquare = function() {
         context.fillRect(localX, localY, this.width, this.height);
         context.restore();
     });
-
-    this.events.subscribe(UIElement.EVENT_DRAW, "BUTTON_SQUARE", (context, localX, localY) => this.drawHighlight(context, localX, localY));
 }
 
 ButtonSquare.prototype = Object.create(Button.prototype);
@@ -31,7 +29,7 @@ ButtonSquare.prototype.setSize = function(width, height) {
     this.height = height;
 }
 
-ButtonSquare.prototype.drawHighlight = function(context, localX, localY) {
+ButtonSquare.prototype.postDraw = function(context, localX, localY) {
     if(this.isHighlighted) {
         context.save();
         context.globalAlpha = this.highlightOpacity;
