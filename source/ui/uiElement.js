@@ -4,6 +4,8 @@ import { EventEmitter } from "../events/eventEmitter.js";
 export const UIElement = function(DEBUG_NAME) {
     Drawable.call(this, DEBUG_NAME);
 
+    this.width = 0;
+    this.height = 0;
     this.config = null;
     this.goals = new Map();
     this.goalsReached = new Set();
@@ -170,4 +172,9 @@ UIElement.prototype.draw = function(context, viewportX, viewportY, rootLocalX, r
     this.events.emit(UIElement.EVENT_DRAW, context, localX, localY);
     this.postDraw(context, localX, localY);
     this.drawChildren(context, viewportX, viewportY, localX, localY);
+}
+
+UIElement.prototype.setDimensions = function(width = 0, height = 0) {
+    this.width = width;
+    this.height = height;
 }

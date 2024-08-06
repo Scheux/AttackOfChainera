@@ -252,12 +252,6 @@ MapEditorState.prototype.enter = function(stateMachine) {
         placeTile();
     });
 
-    musicPlayer.loadTrack("surfing");
-    
-    musicPlayer.loadTrack("e2m3");
-
-    musicPlayer.loadTrack("e2m1");
-
     editor.loadTileSets(spriteManager.tileSprites);
 
     uiManager.parseUI("MAP_EDITOR", gameContext);

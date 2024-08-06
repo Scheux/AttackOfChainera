@@ -180,7 +180,7 @@ UIManager.prototype.parseButtonSquare = function(config) {
     button.DEBUG_NAME = config.id;
     button.setConfig(config);
     button.setOpacity(config.opacity);
-    button.setSize(config.width, config.height);
+    button.setDimensions(config.width, config.height);
     button.position.x = config.position.x;
     button.position.y = config.position.y;
 

@@ -4,8 +4,6 @@ import { Button } from "../button.js";
 
 export const ButtonSquare = function() {
     Button.call(this, "BUTTON_SQUARE");
-    this.width = 0;
-    this.height = 0;
 
     this.events.subscribe(UIElement.EVENT_DEBUG, "BUTTON_SQUARE", (context, localX, localY) => {
         context.save();
@@ -22,11 +20,6 @@ ButtonSquare.prototype.constructor = ButtonSquare;
 ButtonSquare.prototype.collides = function(mouseX, mouseY, mouseRange) {
     const collision = rectangularCollision(this.position.x, this.position.y, this.width, this.height, mouseX, mouseY, mouseRange, mouseRange);
     return collision;
-}
-
-ButtonSquare.prototype.setSize = function(width, height) {
-    this.width = width;
-    this.height = height;
 }
 
 ButtonSquare.prototype.postDraw = function(context, localX, localY) {

@@ -15,6 +15,7 @@ import { MainMenuState } from "./states/gameContext/mainMenu.js";
 import { MapEditorState } from "./states/gameContext/mapEditor.js";
 import { ActionQueue } from "./source/action/actionQueue.js";
 import { UIElement } from "./source/ui/uiElement.js";
+import { PlayGameState } from "./states/gameContext/playGame.js";
 
 export const GameContext = function() {
     this.client = new Client();
@@ -31,6 +32,7 @@ export const GameContext = function() {
     
     this.states.addState(GameContext.STATE_MAIN_MENU, new MainMenuState());
     this.states.addState(GameContext.STATE_MAP_EDITOR, new MapEditorState());
+    this.states.addState(GameContext.STATE_PLAY_GAME, new PlayGameState());
 
     this.timer.inputFunction = () => {
         this.client.update(this);
@@ -66,6 +68,7 @@ export const GameContext = function() {
 
 GameContext.STATE_MAIN_MENU = 0;
 GameContext.STATE_MAP_EDITOR = 1;
+GameContext.STATE_PLAY_GAME = 2;
 
 GameContext.prototype.loadResources = function(resources) {
     this.uiManager.loadFontTypes(null);

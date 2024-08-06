@@ -127,7 +127,7 @@ SpriteManager.prototype.removeFromRoot = function(sprite) {
     }
 }
 
-SpriteManager.prototype.updateSprite = function(spriteID, newSpriteTypeID, newSpriteAnimationID) {
+SpriteManager.prototype.updateSprite = function(spriteID, setID, animationID) {
     const sprite = this.sprites.get(spriteID);
 
     if(!sprite) {
@@ -135,23 +135,24 @@ SpriteManager.prototype.updateSprite = function(spriteID, newSpriteTypeID, newSp
         return;
     }
 
-    if(!newSpriteTypeID) {
-        console.warn(`SpriteType ${newSpriteTypeID} does not exist! Returning...`);
+    if(!setID) {
+        console.warn(`SpriteSet ${setID} does not exist! Returning...`);
         return;
     }
 
-    if(!newSpriteAnimationID) {
-        console.warn(`SpriteAnimation ${newSpriteAnimationID} on SpriteType ${newSpriteTypeID} does not exist. Using "default". Proceeding...`);
+    if(!animationID) {
+        console.warn(`SpriteAnimation ${animationID} on SpriteSet ${setID} does not exist. Using "default". Proceeding...`);
+        animationID = "default";
     }
 
-    const spriteConfig = this.spriteTypes[newSpriteTypeID];
+    const setConfig = this.spriteTypes[setID];
 
-    if(!spriteConfig) {
-        console.warn(`SpriteType ${newSpriteTypeID} does not exist! Returning...`);
+    if(!setConfig) {
+        console.warn(`SpriteSet ${setID} does not exist! Returning...`);
         return;
     }
 
-    const animationConfig = spriteConfig.getAnimation(newSpriteAnimationID);
+    const animationConfig = setConfig.getAnimation(animationID);
 
-    sprite.override(spriteConfig, animationConfig);
+    sprite.override(setConfig, animationConfig);
 }

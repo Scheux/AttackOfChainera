@@ -3,9 +3,7 @@ import { UIElement } from "../uiElement.js";
 export const Icon = function() {
     UIElement.call(this, "ICON");
     this.image = null;
-    this.width = 0;
-    this.height = 0;
-
+    
     this.events.subscribe(UIElement.EVENT_DEBUG, "ICON", (context, localX, localY) => {
         context.save();
         context.globalAlpha = 0.5;

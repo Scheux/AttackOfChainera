@@ -25,8 +25,6 @@ Sprite.FINISHED = 0;
 Sprite.prototype = Object.create(Drawable.prototype);
 Sprite.prototype.constructor = Sprite;
 
-Sprite.prototype.onFinish = function(sprite) {}
-
 Sprite.prototype.override = function(config, animation) {
     this.config = config;
     this.animation = animation;
@@ -44,6 +42,10 @@ Sprite.prototype.setLastCallTime = function(lastCallTime) {
 
 Sprite.prototype.getConfig = function() {
     return this.config;
+}
+
+Sprite.prototype.getAnimation = function() {
+    return this.animation;
 }
 
 Sprite.prototype.getCurrentFrame = function() {
