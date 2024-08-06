@@ -23,6 +23,6 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
   gameContext.loadResources(resources);
   gameContext.timer.start();
   console.log(gameContext);
-  //gameContext.states.setNextState(GameContext.STATE_MAP_EDITOR);
-  gameContext.loadMap("MAP");  
+  gameContext.states.setNextState(GameContext.STATE_MAP_EDITOR);
+  //gameContext.loadMap("MAP");  
 });
