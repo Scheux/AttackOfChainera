@@ -5,9 +5,8 @@ import { MapEditor } from "../../source/map/mapEditor.js";
 import { State } from "../../source/state/state.js";
 import { UIElement } from "../../source/ui/uiElement.js";
 
-//TODO: WHEN LAODING OTHER MAP, SET THAT MAPS ID TO EDITOR ID!!!
-
-var EDITOR_MAP_ID = `${Date.now()}`;
+var EDITOR_MAP_ID = null;
+const MAP_ID = `${Date.now()}`;
 const MAX_MAP_WIDTH = 200;
 const MAX_MAP_HEIGHT = 200;
 const MAP_EDITOR_ID = "MAP_EDITOR";
@@ -318,7 +317,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
     });
 
     uiManager.addClick("BUTTON_CREATE", () => {
-        const gameMap = mapLoader.createEmptyMap(EDITOR_MAP_ID, 10, 10);
+        const gameMap = mapLoader.createEmptyMap(MAP_ID, 10, 10);
         mapLoader.cacheMap(gameMap);
     });
 
@@ -326,12 +325,12 @@ MapEditorState.prototype.enter = function(stateMachine) {
         const mapID = prompt("MAP-ID?");
 
         if(mapID.length === 0) {
-            const loadSuccess = await gameContext.loadMap(EDITOR_MAP_ID);
+            const loadSuccess = await gameContext.loadMap(MAP_ID);
+            EDITOR_MAP_ID = MAP_ID;
             return;
         }
 
         const loadSuccess = await gameContext.loadMap(mapID);
-
         EDITOR_MAP_ID = mapID;
     });
 
@@ -358,6 +357,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
         gameMap.resize(newWidth, newHeight);
         tileManager.loadTiles(newWidth, newHeight);
+        mapLoader.loadMapConnections(EDITOR_MAP_ID);
     }); 
 
     uiManager.addClick("BUTTON_VIEW_ALL", () => {

@@ -299,7 +299,7 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         "floor": ${stringify2DArray(layers["floor"])},
         "top": ${stringify2DArray(layers["top"])}
     },
-    "tiles": []
+    "tiles": [],
     "connections": [],
     "entities" : [],
     "flags" : {}
