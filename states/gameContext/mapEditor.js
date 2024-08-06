@@ -5,15 +5,12 @@ import { MapEditor } from "../../source/map/mapEditor.js";
 import { State } from "../../source/state/state.js";
 import { UIElement } from "../../source/ui/uiElement.js";
 
-//TODO: ADD GIVING AN ID
-//TODO: ADD SETTING MUSIC
-//TODO: ADD LOADING MAPS - CRUCIAL!
-//TODO: WHEN LAODING OTHER MAP, SET THAT MAPS IT TO EDITOR ID!!!
+//TODO: WHEN LAODING OTHER MAP, SET THAT MAPS ID TO EDITOR ID!!!
 
+var EDITOR_MAP_ID = `${Date.now()}`;
 const MAX_MAP_WIDTH = 200;
 const MAX_MAP_HEIGHT = 200;
 const MAP_EDITOR_ID = "MAP_EDITOR";
-const EDITOR_MAP_ID = `${Date.now()}`;
 const STATE_COLORS = ["#cf3723", "#eeeeee", "#fcfc3f"];
 const AVAILABLE_BUTTON_SLOTS = ["BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8"];
 const LAYER_BUTTONS = { 
@@ -335,7 +332,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
         const loadSuccess = await gameContext.loadMap(mapID);
 
-        console.log(gameContext)
+        EDITOR_MAP_ID = mapID;
     });
 
     uiManager.addClick("BUTTON_RESIZE", () => {

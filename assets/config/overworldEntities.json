@@ -1,0 +1,3 @@
+{
+    "player": { "id": "player", "name": "PLAYER", "sprites": { "walk": null }, "sounds": { "walk": null } }
+}

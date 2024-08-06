@@ -119,14 +119,7 @@ MapLoader.prototype.loadMapConnections = function(mapID) {
     const connections = [];
     const gameMap = this.getLoadedMap(mapID);
 
-    if(!gameMap.connections) {
-        gameMap.connections = connections;
-        return;
-    }
-
-    for(const key in gameMap.connections) {
-        const connection = gameMap.connections[key];
-        
+    for(const connection of gameMap.connections) {
         if(!connection) {
             continue;
         }
@@ -255,14 +248,7 @@ MapLoader.prototype.clearLoadedMaps = function() {
 MapLoader.prototype.createEmptyMap = function(id, width, height) {
     const config = {
         "width": width,
-        "height": height,
-        "music": null,
-        "layerOpacity": { "collision": 1, "bottom": 1, "floor": 1, "top": 1 },
-        "layers": {},
-        "tiles": [],
-        "connections": [],
-        "entities": [],
-        "flags": {}
+        "height": height
     }
 
     const gameMap = new GameMap(id, config);
@@ -313,7 +299,8 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         "floor": ${stringify2DArray(layers["floor"])},
         "top": ${stringify2DArray(layers["top"])}
     },
-    "connections": {},
+    "tiles": []
+    "connections": [],
     "entities" : [],
     "flags" : {}
 }`;

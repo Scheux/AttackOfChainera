@@ -1,5 +1,4 @@
 {
-    "music": null,
     "width": 10,
     "height": 10,
     "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
@@ -52,9 +51,5 @@
             [null,null,null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null]
         ]
-    },
-    "tiles": [],
-    "connections": {},
-    "entities" : [],
-    "flags" : {}
+    }
 }

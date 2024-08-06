@@ -2,15 +2,51 @@ export const GameMap = function(id, config) {
     const { music, width, height, layerOpacity, layers, tiles, connections, entities, flags } = config;
 
     this.id = id;
-    this.music = music;
-    this.width = width;
-    this.height = height;
-    this.layerOpacity = layerOpacity;
-    this.layers = layers;
-    this.tiles = tiles;
-    this.connections = connections;
-    this.entities = entities;
-    this.flags = flags;
+    this.music = null;
+    this.width = 0;
+    this.height = 0;
+    this.layerOpacity = { "collision": 1, "bottom": 1, "floor": 1, "top": 1 };
+    this.layers = { "collision": [], "bottom": [], "floor": [], "top": [] };
+    this.tiles = [];
+    this.connections = [];
+    this.entities = [];
+    this.flags = {};
+
+    if(music) {
+        this.music = music;
+    }
+
+    if(width) {
+        this.width = width;
+    }
+
+    if(height) {
+        this.height = height;
+    }
+
+    if(layerOpacity) {
+        this.layerOpacity = layerOpacity;
+    }
+
+    if(layers) {
+        this.layers = layers;
+    }
+    
+    if(tiles) {
+        this.tiles = tiles;
+    }
+
+    if(connections) {
+        this.connections = connections;
+    }
+
+    if(entities) {
+        this.entities = entities;
+    }
+
+    if(flags) {
+        this.flags = flags;
+    }
 }
 
 GameMap.prototype.generateEmptyLayer = function(layerID, placementID) {

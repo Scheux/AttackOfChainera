@@ -116,7 +116,8 @@
         "rock": 2,
         "steel": 2,
         "grass": 0.5,
-        "bug": 0.5
+        "bug": 0.5,
+        "flying": 0
       }
     },
     "flying": {
@@ -177,7 +178,8 @@
       "matchups": {
         "psychic": 2,
         "ghost": 2,
-        "dark": 0.5
+        "dark": 0.5,
+        "normal": 0
       }
     },
     "dragon": {
