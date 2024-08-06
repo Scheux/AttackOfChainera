@@ -38,6 +38,45 @@ MapEditorState.prototype.enter = function(stateMachine) {
     let currentLayer = null;
     let currentLayerButtonID = null;
 
+    const setLayerOpacity = () => {
+        const editorMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
+
+        if(!editorMap) {
+            return;
+        }
+
+        for(const key in LAYER_BUTTONS) {
+            const layerButton = LAYER_BUTTONS[key];
+
+            switch(layerButton.state) {
+                case 0: {
+                    editorMap.layerOpacity[layerButton.layer] = 0;
+                    break;
+                }
+
+                case 1: {
+                    editorMap.layerOpacity[layerButton.layer] = 1;
+                    break;
+                }
+
+                case 2: {
+                    editorMap.layerOpacity[layerButton.layer] = 1;
+                    break;
+                }
+            }
+        }
+
+        if(currentLayerButtonID !== null) {
+            for(const key in LAYER_BUTTONS) {
+                const layerButton = LAYER_BUTTONS[key];
+
+                if(layerButton.state === 1) {
+                    editorMap.layerOpacity[layerButton.layer] = 0.5;
+                }
+            }
+        }
+    }
+
     const scollLayerButton = button => {
         button.state ++;
 
@@ -70,6 +109,8 @@ MapEditorState.prototype.enter = function(stateMachine) {
                 break;
             }
         }
+
+        setLayerOpacity();
        
         uiManager.texts.get(button.text).fillStyle = STATE_COLORS[button.state];
     }
@@ -319,13 +360,14 @@ MapEditorState.prototype.enter = function(stateMachine) {
     uiManager.addClick("BUTTON_VIEW_ALL", () => {
         for(const key in LAYER_BUTTONS) {
             const button = LAYER_BUTTONS[key];
-
             button.state = 1;
             uiManager.texts.get(button.text).fillStyle = STATE_COLORS[button.state];
         }
 
         currentLayer = null;
         currentLayerButtonID = null;
+
+        setLayerOpacity();
     });
 }
 

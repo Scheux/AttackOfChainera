@@ -257,6 +257,7 @@ MapLoader.prototype.createEmptyMap = function(id, width, height) {
         "width": width,
         "height": height,
         "music": null,
+        "layerOpacity": { "collision": 1, "bottom": 1, "floor": 1, "top": 1 },
         "layers": {},
         "tiles": [],
         "connections": [],

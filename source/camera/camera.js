@@ -89,6 +89,13 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
     const { mapLoader } = gameContext;
     const neighbors = gameMap.getConnections();
     const layer = gameMap.layers[layerID];
+    const opacity = gameMap.layerOpacity[layerID];
+
+    if(!opacity) {
+        return;
+    }
+
+    this.display.context.globalAlpha = opacity;
 
     for(let i = startY; i <= endY; i++) {
         const tileRow = layer[i];
@@ -138,6 +145,8 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
             this.drawTile(gameContext, j, i, tileRow[j]);
         }
     }
+
+    this.display.context.globalAlpha = 1;
 }
 
 Camera.prototype.draw2DMapOutlines = function(gameContext) {
@@ -185,6 +194,7 @@ Camera.prototype.draw2DMap = function(gameContext) {
     this.drawLayer(gameContext, gameMap, "floor", startX, startY, endX, endY);
     this.drawSprites(gameContext, startX, startY, endX, endY)
     this.drawLayer(gameContext, gameMap, "top", startX, startY, endX, endY);
+    this.drawLayer(gameContext, gameMap, "collision", startX, startY, endX, endY);
 
     this.display.context.restore();
 }

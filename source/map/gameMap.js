@@ -1,10 +1,11 @@
 export const GameMap = function(id, config) {
-    const { music, width, height, layers, tiles, connections, entities, flags } = config;
+    const { music, width, height, layerOpacity, layers, tiles, connections, entities, flags } = config;
 
     this.id = id;
     this.music = music;
     this.width = width;
     this.height = height;
+    this.layerOpacity = layerOpacity;
     this.layers = layers;
     this.tiles = tiles;
     this.connections = connections;
