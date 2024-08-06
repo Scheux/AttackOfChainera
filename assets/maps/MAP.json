@@ -54,8 +54,10 @@
         ]
     },
     "connections": {
-        "east": { "type": "east", "id": "MAP_2", "scroll": 2}
+        "east": { "type": "east", "id": "MAP_2", "scroll": 2},
+        "west": { "type": "west", "id": "MAP_2", "scroll": -2}
     },
+    "tiles": [],
     "entities" : [],
     "flags" : {}
 }

@@ -8,11 +8,12 @@ import { UIElement } from "../../source/ui/uiElement.js";
 //TODO: ADD GIVING AN ID
 //TODO: ADD SETTING MUSIC
 //TODO: ADD LOADING MAPS - CRUCIAL!
+//TODO: WHEN LAODING OTHER MAP, SET THAT MAPS IT TO EDITOR ID!!!
 
 const MAX_MAP_WIDTH = 200;
 const MAX_MAP_HEIGHT = 200;
 const MAP_EDITOR_ID = "MAP_EDITOR";
-const EDITOR_MAP_ID = "MAP";
+const EDITOR_MAP_ID = `${Date.now()}`;
 const STATE_COLORS = ["#cf3723", "#eeeeee", "#fcfc3f"];
 const AVAILABLE_BUTTON_SLOTS = ["BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8"];
 const LAYER_BUTTONS = { 
@@ -325,11 +326,16 @@ MapEditorState.prototype.enter = function(stateMachine) {
     });
 
     uiManager.addClick("BUTTON_LOAD", async () => {
-        const loadSuccess = await gameContext.loadMap(EDITOR_MAP_ID);
+        const mapID = prompt("MAP-ID?");
 
-        if(!loadSuccess){
+        if(mapID.length === 0) {
+            const loadSuccess = await gameContext.loadMap(EDITOR_MAP_ID);
             return;
         }
+
+        const loadSuccess = await gameContext.loadMap(mapID);
+
+        console.log(gameContext)
     });
 
     uiManager.addClick("BUTTON_RESIZE", () => {
