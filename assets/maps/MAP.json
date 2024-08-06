@@ -1,0 +1,61 @@
+{
+    "music": null,
+    "width": 10,
+    "height": 10,
+    "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
+    "layers": {
+        "collision": [
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null]
+        ],
+        "bottom": [
+            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand2"],["set_field","sand"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","mud"]],
+            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand"],["set_field","sand2"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","mud"],["set_field","grass"]],
+            [["set_field","sand"],["set_field","sand2"],["set_field","sand2"],["set_field","sand2"],["set_field","sand"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","grass"]],
+            [["set_field","sand"],["set_field","sand"],["set_field","sand2"],["set_field","sand"],["set_field","sand2"],["set_field","sand2"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"]],
+            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand2"],["set_field","sand2"],["set_field","sand2"],["set_field","sand"],["set_field","sand2"],["set_field","sand"]],
+            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand"],["set_field","sand2"],["set_field","sand2"],["set_field","sand2"],["set_field","sand"]],
+            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"]],
+            [["set_field","grass2"],["set_field","grass"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"]],
+            [["set_field","mud"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","grass2"],["set_field","grass"]],
+            [["set_field","mud"],["set_field","grass2"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","mud"],["set_field","grass2"],["set_field","grass2"],["set_field","grass2"]]
+        ],
+        "floor": [
+            [null,null,null,null,null,null,null,null,["set_field","flowers"],null],
+            [null,null,null,null,null,null,null,["set_field","flowers"],null,null],
+            [null,null,null,null,null,null,null,null,["set_field","flowers"],null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [["set_field","flowers"],null,["set_field","flowers"],null,null,null,null,null,null,null],
+            [null,["set_field","flowers"],null,null,["set_field","flowers"],null,null,["set_field","flowers"],["set_field","flowers"],null],
+            [null,["set_field","flowers"],["set_field","flowers"],null,null,null,null,["set_field","flowers"],["set_field","flowers"],["set_field","flowers"]]
+        ],
+        "top": [
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null]
+        ]
+    },
+    "connections": {
+        "east": { "type": "east", "id": "MAP_2", "scroll": 2}
+    },
+    "entities" : [],
+    "flags" : {}
+}

@@ -65,6 +65,10 @@ Camera.prototype.drawSprites = function(gameContext) {
 }
 
 Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileGraphics) {
+    if(tileGraphics === undefined || tileGraphics === null) {
+        return;
+    }
+
     const { timer, spriteManager } = gameContext;
     const realTime = timer.getRealTime();
 
@@ -135,10 +139,6 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
                         this.drawTile(gameContext, j, i, neighborTile);
                     }
                 }
-                continue;
-            }
-
-            if(tileRow[j] === undefined || tileRow[j] === null) {
                 continue;
             }
 
