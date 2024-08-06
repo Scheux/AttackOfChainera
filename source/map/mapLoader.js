@@ -276,7 +276,7 @@ MapLoader.prototype.createEmptyMap = function(id, width, height) {
 
 MapLoader.prototype.saveMap = function(gameMapID) {
     const gameMap = this.getCachedMap(gameMapID);
-    
+
     if(!gameMap) {
         console.warn(`No GameMap given! Returning...`);
         return `{ "ERROR": "NO_MAP_CACHED! USE CREATE!" }`;
@@ -305,6 +305,7 @@ MapLoader.prototype.saveMap = function(gameMapID) {
     "music": ${music},
     "width": ${width},
     "height": ${height},
+    "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
     "layers": {
         "collision": ${stringify2DArray(layers["collision"])},
         "bottom": ${stringify2DArray(layers["bottom"])},

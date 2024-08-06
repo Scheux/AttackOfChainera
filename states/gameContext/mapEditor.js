@@ -9,7 +9,18 @@ import { UIElement } from "../../source/ui/uiElement.js";
 //TODO: ADD SETTING MUSIC
 //TODO: ADD LOADING MAPS - CRUCIAL!
 
+const MAX_MAP_WIDTH = 200;
+const MAX_MAP_HEIGHT = 200;
 const MAP_EDITOR_ID = "MAP_EDITOR";
+const EDITOR_MAP_ID = "MAP";
+const STATE_COLORS = ["#cf3723", "#eeeeee", "#fcfc3f"];
+const AVAILABLE_BUTTON_SLOTS = ["BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8"];
+const LAYER_BUTTONS = { 
+    "L1": { "id": "L1", "state": 1, "text": "TEXT_L1", "layer": "bottom" },
+    "L2": { "id": "L2", "state": 1, "text": "TEXT_L2", "layer": "floor" },
+    "L3": { "id": "L3", "state": 1, "text": "TEXT_L3", "layer": "top" },
+    "LC": { "id": "LC", "state": 1, "text": "TEXT_LC", "layer": "collision" }
+}
 
 export const MapEditorState = function() {
     State.call(this);
@@ -23,62 +34,69 @@ MapEditorState.prototype.enter = function(stateMachine) {
     const editor = new MapEditor();
     const { mapLoader, client, uiManager, spriteManager, renderer, timer, tileManager } = gameContext;
     const { cursor, musicPlayer } = client;
-    const editorMapID = "MAP_EDITOR";
-    const availableButtonSlots = ["BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8"];
-    const layerButtons = { 
-        "L1": { "id": "L1", "state": 1, "text": "TEXT_L1", "layer": "bottom" },
-        "L2": { "id": "L2", "state": 1, "text": "TEXT_L2", "layer": "floor" },
-        "L3": { "id": "L3", "state": 1, "text": "TEXT_L3", "layer": "top" },
-        "LC": { "id": "LC", "state": 1, "text": "TEXT_LC", "layer": "collision" }
-    }
 
     let currentLayer = null;
     let currentLayerButtonID = null;
 
     const scollLayerButton = button => {
-        const stateColors = ["#cf3723", "#eeeeee", "#fcfc3f"];
-
         button.state ++;
-
-        if(button.state === 2) {
-            if(layerButtons[currentLayerButtonID]) {
-                const currentButton = layerButtons[currentLayerButtonID];
-                currentButton.state = 1;
-                uiManager.texts.get(currentButton.text).fillStyle = stateColors[currentButton.state];
-            }
-
-            if(currentLayerButtonID !== button.id) {
-                currentLayer = button.layer;
-                currentLayerButtonID = button.id;
-            } else {
-                currentLayer = null;
-                currentLayerButtonID = null;
-            }
-        } else {
-            if(button.id === currentLayerButtonID) {
-                currentLayerButtonID = null;
-                currentLayer = null;
-            }
-        }
 
         if(button.state > 2) {
             button.state = 0;
         }
 
-        uiManager.texts.get(button.text).fillStyle = stateColors[button.state];
+        switch(button.state) {
+            case 2: {
+                if(LAYER_BUTTONS[currentLayerButtonID]) {
+                    const currentButton = LAYER_BUTTONS[currentLayerButtonID];
+                    currentButton.state = 1;
+                    uiManager.texts.get(currentButton.text).fillStyle = STATE_COLORS[currentButton.state];
+                    currentLayer = null;
+                    currentLayerButtonID = null;
+                }
+    
+                currentLayer = button.layer;
+                currentLayerButtonID = button.id;
+
+                break;
+            }
+
+            default: {
+                if(button.id === currentLayerButtonID) {
+                    currentLayerButtonID = null;
+                    currentLayer = null;
+                }
+
+                break;
+            }
+        }
+       
+        uiManager.texts.get(button.text).fillStyle = STATE_COLORS[button.state];
     }
 
     const loadPageElementsEvents = (pageElements) => {
-        for(const buttonID of availableButtonSlots) {
+        for(const buttonID of AVAILABLE_BUTTON_SLOTS) {
             uiManager.buttons.get(buttonID).events.unsubscribe(UIElement.EVENT_CLICKED, MAP_EDITOR_ID);
             uiManager.buttons.get(buttonID).events.unsubscribe(UIElement.EVENT_DRAW, MAP_EDITOR_ID);
         }
 
         for(let i = 0; i < pageElements.length; i++) {
             const element = pageElements[i];
-            const buttonID = availableButtonSlots[i];
+            const buttonID = AVAILABLE_BUTTON_SLOTS[i];
 
-            if(!element) {
+            if(!element === undefined) {
+                continue;
+            }
+
+            if(element === null) {
+                uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_DRAW, MAP_EDITOR_ID, (context, localX, localY) => {
+                    context.fillStyle = "#701867";
+                    context.fillRect(localX, localY, 25, 25);
+                    context.fillRect(localX + 25, localY + 25, 25, 25);
+                    context.fillStyle = "#000000";
+                    context.fillRect(localX + 25, localY, 25, 25);
+                    context.fillRect(localX, localY + 25, 25, 25);
+                });
                 continue;
             }
 
@@ -99,7 +117,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
     const placeTile = () => {
         const cursorTile = gameContext.getViewportTile();
-        const gameMap = mapLoader.getCachedMap(editorMapID);
+        const gameMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
         const brush = editor.getSelectedBrush();
 
         if(!cursorTile || !gameMap || brush === undefined) {
@@ -140,13 +158,21 @@ MapEditorState.prototype.enter = function(stateMachine) {
             return;
         }
 
-        const renderX = cursorTile.position.x * Camera.TILE_WIDTH * Camera.SCALE - renderer.viewportX * Camera.SCALE;
-        const renderY = cursorTile.position.y * Camera.TILE_HEIGHT * Camera.SCALE - renderer.viewportY * Camera.SCALE;
+        const tileWidth = Camera.TILE_WIDTH * Camera.SCALE;
+        const tileHeight = Camera.TILE_HEIGHT * Camera.SCALE;
+        const halfTileWidth = tileWidth / 2;
+        const halfTileHeight = tileHeight / 2;
+        const renderX = cursorTile.position.x * tileWidth - renderer.viewportX * Camera.SCALE;
+        const renderY = cursorTile.position.y * tileHeight - renderer.viewportY * Camera.SCALE;
 
         if(brush === null) {
-            renderer.display.context.fillStyle = "#701867";
             renderer.display.context.globalAlpha = 0.7;
-            renderer.display.context.fillRect(renderX, renderY, Camera.TILE_WIDTH * Camera.SCALE, Camera.TILE_HEIGHT * Camera.SCALE);
+            renderer.display.context.fillStyle = "#701867";
+            renderer.display.context.fillRect(renderX, renderY, halfTileWidth, halfTileHeight);
+            renderer.display.context.fillRect(renderX + halfTileWidth, renderY + halfTileHeight, halfTileWidth, halfTileHeight);
+            renderer.display.context.fillStyle = "#000000";
+            renderer.display.context.fillRect(renderX + halfTileWidth, renderY, halfTileWidth, halfTileHeight);
+            renderer.display.context.fillRect(renderX, renderY + halfTileHeight, halfTileWidth, halfTileHeight);
             renderer.display.context.globalAlpha = 1;
             return;
         }
@@ -161,13 +187,13 @@ MapEditorState.prototype.enter = function(stateMachine) {
             const pattern = tileSet.patterns[frameID];
 
             for(let i = 0; i < pattern.length; i++) {
-                const drawY = renderY + i * Camera.TILE_HEIGHT * Camera.SCALE;
+                const drawY = renderY + i * tileHeight;
                 for(let j = 0; j < pattern[i].length; j++) {
-                    const drawX = renderX + j * Camera.TILE_WIDTH * Camera.SCALE;
+                    const drawX = renderX + j * tileWidth;
                     const patternFrameID = pattern[i][j];
                     const patternFrameBuffer = tileSet.getAnimationFrame(patternFrameID, realTime)[0];
 
-                    renderer.display.context.drawImage(patternFrameBuffer.bitmap, drawX, drawY, Camera.TILE_WIDTH * Camera.SCALE, Camera.TILE_HEIGHT * Camera.SCALE);
+                    renderer.display.context.drawImage(patternFrameBuffer.bitmap, drawX, drawY, tileWidth, tileHeight);
                 }
             }
 
@@ -176,7 +202,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
         }
 
         renderer.display.context.globalAlpha = 0.7;
-        renderer.display.context.drawImage(buffer.bitmap, renderX, renderY, Camera.TILE_WIDTH * Camera.SCALE, Camera.TILE_HEIGHT * Camera.SCALE);
+        renderer.display.context.drawImage(buffer.bitmap, renderX, renderY, tileWidth, tileHeight);
         renderer.display.context.globalAlpha = 1;
     });
 
@@ -200,65 +226,65 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
     editor.reloadPageElements();
 
-    loadPageElementsEvents(editor.getPageElements(availableButtonSlots));
+    loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
 
     uiManager.addFetch("TEXT_TILESET_MODE", element => element.setText(`MODE: ${editor.getBrushModeID()}`));
 
     uiManager.addFetch("TEXT_TILESET", element => element.setText(`${editor.getCurrentSetID()}`));
 
-    uiManager.addFetch("TEXT_PAGE_NEXT", element => element.setText(`PAGE: ${editor.pageIndex} / ${Math.floor(editor.pageElements.length / availableButtonSlots.length - 0.1)}`));
+    uiManager.addFetch("TEXT_PAGE_NEXT", element => element.setText(`PAGE: ${editor.pageIndex} / ${Math.floor(editor.pageElements.length / AVAILABLE_BUTTON_SLOTS.length - 0.1)}`));
 
     uiManager.addClick("BUTTON_TILESET_MODE", () => {
         editor.scrollBrushMode(1);
         editor.reloadPageElements();
-        loadPageElementsEvents(editor.getPageElements(availableButtonSlots));
+        loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
     });
 
     uiManager.addClick("BUTTON_TILESET_LEFT", () => {
         editor.scrollCurrentSet(-1);
         editor.reloadPageElements();
-        loadPageElementsEvents(editor.getPageElements(availableButtonSlots));
+        loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
     });
 
     uiManager.addClick("BUTTON_TILESET_RIGHT", () => {
         editor.scrollCurrentSet(1);
         editor.reloadPageElements();
-        loadPageElementsEvents(editor.getPageElements(availableButtonSlots));
+        loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
     });
 
     uiManager.addClick("BUTTON_PAGE_NEXT", () => {
-        editor.scrollPage(availableButtonSlots);
-        loadPageElementsEvents(editor.getPageElements(availableButtonSlots));
+        editor.scrollPage(AVAILABLE_BUTTON_SLOTS);
+        loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
     });  
 
     uiManager.addClick("BUTTON_L1", () => {
-        scollLayerButton(layerButtons["L1"]);
+        scollLayerButton(LAYER_BUTTONS["L1"]);
     });
 
     uiManager.addClick("BUTTON_L2", () => {
-        scollLayerButton(layerButtons["L2"]);
+        scollLayerButton(LAYER_BUTTONS["L2"]);
     });
 
     uiManager.addClick("BUTTON_L3", () => {
-        scollLayerButton(layerButtons["L3"]);
+        scollLayerButton(LAYER_BUTTONS["L3"]);
     });
 
     uiManager.addClick("BUTTON_LC", () => {
-        scollLayerButton(layerButtons["LC"]);
+        scollLayerButton(LAYER_BUTTONS["LC"]);
     });
 
     uiManager.addClick("BUTTON_SAVE", () => {
-        const saveData = mapLoader.saveMap(editorMapID);
-        saveTemplateAsFile(editorMapID + ".json", saveData);
+        const saveData = mapLoader.saveMap(EDITOR_MAP_ID);
+        saveTemplateAsFile(EDITOR_MAP_ID + ".json", saveData);
     });
 
     uiManager.addClick("BUTTON_CREATE", () => {
-        const gameMap = mapLoader.createEmptyMap(editorMapID, 10, 10);
+        const gameMap = mapLoader.createEmptyMap(EDITOR_MAP_ID, 10, 10);
         mapLoader.cacheMap(gameMap);
     });
 
     uiManager.addClick("BUTTON_LOAD", async () => {
-        const loadSuccess = await gameContext.loadMap(editorMapID);
+        const loadSuccess = await gameContext.loadMap(EDITOR_MAP_ID);
 
         if(!loadSuccess){
             return;
@@ -266,7 +292,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
     });
 
     uiManager.addClick("BUTTON_RESIZE", () => {
-        const gameMap = mapLoader.getCachedMap(editorMapID);
+        const gameMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
 
         if(!gameMap) {
             console.warn(`GameMap cannot be undefined! Returning...`);
@@ -281,7 +307,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
             return;
         }
     
-        if(newWidth > 200 || newHeight > 200) {
+        if(newWidth > MAX_MAP_WIDTH || newHeight > MAX_MAP_HEIGHT) {
             console.warn(`Width or Height cannot exceed 200! Returning...`);
             return;
         }
@@ -291,16 +317,11 @@ MapEditorState.prototype.enter = function(stateMachine) {
     }); 
 
     uiManager.addClick("BUTTON_VIEW_ALL", () => {
-        for(const key in layerButtons) {
-            const button = layerButtons[key];
+        for(const key in LAYER_BUTTONS) {
+            const button = LAYER_BUTTONS[key];
 
             button.state = 1;
-
-            const stateColors = ["#cf3723", "#eeeeee", "#fcfc3f"];
-            const stateColor = stateColors[button.state];
-            const text = uiManager.texts.get(button.text);
-
-            text.fillStyle = stateColor;
+            uiManager.texts.get(button.text).fillStyle = STATE_COLORS[button.state];
         }
 
         currentLayer = null;

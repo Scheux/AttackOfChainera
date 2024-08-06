@@ -2,6 +2,7 @@
     "music": "surfing",
     "width": 30,
     "height": 30,
+    "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
     "layers": {
         "collision": [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
