@@ -12,14 +12,14 @@ export const GameMap = function(id, config) {
     this.flags = flags;
 }
 
-GameMap.prototype.generateEmptyLayer = function(layerID) {
+GameMap.prototype.generateEmptyLayer = function(layerID, placementID) {
     this.layers[layerID] = [];
 
     for(let i = 0; i < this.height; i++) {
         this.layers[layerID][i] = [];
 
         for(let j = 0; j < this.width; j++) {
-            this.layers[layerID][i][j] = null;
+            this.layers[layerID][i][j] = placementID;
         }
     }
 }

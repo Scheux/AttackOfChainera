@@ -266,10 +266,53 @@ MapLoader.prototype.createEmptyMap = function(id, width, height) {
 
     const gameMap = new GameMap(id, config);
 
-    gameMap.generateEmptyLayer("collision");
-    gameMap.generateEmptyLayer("bottom");
-    gameMap.generateEmptyLayer("floor");
-    gameMap.generateEmptyLayer("top");
+    gameMap.generateEmptyLayer("collision", null);
+    gameMap.generateEmptyLayer("bottom", null);
+    gameMap.generateEmptyLayer("floor", null);
+    gameMap.generateEmptyLayer("top", null);
 
     return gameMap;
+}
+
+MapLoader.prototype.saveMap = function(gameMapID) {
+    const gameMap = this.getCachedMap(gameMapID);
+    
+    if(!gameMap) {
+        console.warn(`No GameMap given! Returning...`);
+        return `{ "ERROR": "NO_MAP_CACHED! USE CREATE!" }`;
+    }
+
+    const stringify2DArray = array => {
+        const rows = array.map(row => JSON.stringify(row));
+        return `[
+            ${rows.join(`,
+            `)}
+        ]`;
+    }
+
+    const {
+        music,
+        width,
+        height,
+        layers,
+        tiles,
+        connections,
+        entities,
+        flags
+    } = gameMap;
+
+    return `{
+    "music": ${music},
+    "width": ${width},
+    "height": ${height},
+    "layers": {
+        "collision": ${stringify2DArray(layers["collision"])},
+        "bottom": ${stringify2DArray(layers["bottom"])},
+        "floor": ${stringify2DArray(layers["floor"])},
+        "top": ${stringify2DArray(layers["top"])}
+    },
+    "connections": {},
+    "entities" : [],
+    "flags" : {}
+}`;
 }

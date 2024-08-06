@@ -111,7 +111,7 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
             continue;
         }
 
-        if(!tileRow) {
+        if(tileRow === undefined) {
             continue;
         }
         
@@ -131,19 +131,7 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
                 continue;
             }
 
-            if(tileRow[j] === undefined) {
-                continue;
-            }
-
-            if(tileRow[j] === null) {
-                const renderY = i * Camera.TILE_HEIGHT - this.viewportY;
-                const renderX = j * Camera.TILE_WIDTH - this.viewportX;
-                this.display.context.fillStyle = "purple";
-                this.display.context.fillRect(renderX, renderY, 8, 8);
-                this.display.context.fillRect(renderX + 8, renderY + 8, 8, 8);
-                this.display.context.fillStyle = "black";
-                this.display.context.fillRect(renderX + 8, renderY, 8, 8);
-                this.display.context.fillRect(renderX, renderY + 8, 8, 8);
+            if(tileRow[j] === undefined || tileRow[j] === null) {
                 continue;
             }
 
@@ -151,6 +139,33 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
         }
     }
 }
+
+Camera.prototype.draw2DMapOutlines = function(gameContext) {
+    const { mapLoader } = gameContext;
+    const gameMap = mapLoader.getActiveMap();
+    const lineColor = "#dddddd";
+
+    if (!gameMap) {
+        return;
+    }
+
+    const ctx = this.display.context;
+    ctx.fillStyle = lineColor;
+
+    const startX = Math.floor(this.viewportX / (Camera.TILE_WIDTH * Camera.SCALE)) * Camera.TILE_WIDTH * Camera.SCALE - this.viewportX * Camera.SCALE;
+    const startY = Math.floor(this.viewportY / (Camera.TILE_HEIGHT * Camera.SCALE)) * Camera.TILE_HEIGHT * Camera.SCALE - this.viewportY * Camera.SCALE;
+
+    for (let i = 0; i <= gameMap.height; i++) {
+        const renderY = i * Camera.TILE_HEIGHT * Camera.SCALE - this.viewportY * Camera.SCALE;
+        ctx.fillRect(0, renderY, this.viewportWidth, 1);
+    }
+
+    for (let j = 0; j <= gameMap.width; j++) {
+        const renderX = j * Camera.TILE_WIDTH * Camera.SCALE - this.viewportX * Camera.SCALE;
+        ctx.fillRect(renderX, 0, 1, this.viewportHeight);
+    }
+}
+
 
 Camera.prototype.draw2DMap = function(gameContext) {
     const { mapLoader } = gameContext;
@@ -171,9 +186,9 @@ Camera.prototype.draw2DMap = function(gameContext) {
     this.display.context.scale(Camera.SCALE, Camera.SCALE);
 
     this.drawLayer(gameContext, gameMap, "bottom", startX, startY, endX, endY);
-    //this.drawLayer(gameContext, gameMap, "floor", startX, startY, endX, endY);
+    this.drawLayer(gameContext, gameMap, "floor", startX, startY, endX, endY);
     this.drawSprites(gameContext, startX, startY, endX, endY)
-    //this.drawLayer(gameContext, gameMap, "top", startX, startY, endX, endY);
+    this.drawLayer(gameContext, gameMap, "top", startX, startY, endX, endY);
 
     this.display.context.restore();
 }

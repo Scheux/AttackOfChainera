@@ -12,7 +12,7 @@
         "allowFlip": false,
         "patterns": {
             "grass-big": [
-                ["grass", "grass"],
+                ["grass", "test"],
                 ["grass", "grass"]
             ]
         },
@@ -38,6 +38,22 @@
             "water": {"x":64,"y":0,"w":64,"h":64,"offset":{"x":0,"y":0}},
             "meadow": {"x":0,"y":64,"w":64,"h":64,"offset":{"x":0,"y":0}},
             "ocean": {"x":64,"y":64,"w":64,"h":64,"offset":{"x":0,"y":0}}
+        }
+    },
+    "sprite_test": { 
+        "id": "sprite_test",
+        "directory": "assets/tiles",
+        "source": "sprittest.png",
+        "offset": { "x": 0, "y": 0 },
+        "frameTime": 1,
+        "allowFlip": false,
+        "frames": {
+            "grass": {"x":0,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
+            "flowers1": {"x":16,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
+            "flowers2": {"x":0,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}}
+        },
+        "animations": {
+            "flowers": { "id": "flowers", "frameTime": 0.3, "frames": [ "flowers1", "flowers2" ]}
         }
     }
 }
