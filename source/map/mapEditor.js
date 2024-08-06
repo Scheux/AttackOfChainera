@@ -11,8 +11,7 @@ export const MapEditor = function() {
     this.tileSetKeys = [];
     this.currentSetIndex = 0;
 
-    this.brushModeTypes = ["frames", "patterns", "animations"];
-    this.brushModes = [MapEditor.MODE_TYPE_TILE, MapEditor.MODE_TYPE_PATTERN, MapEditor.MODE_TYPE_ANIMATION];
+    this.brushModes = [ MapEditor.MODE_TYPE_TILE, MapEditor.MODE_TYPE_PATTERN, MapEditor.MODE_TYPE_ANIMATION, MapEditor.MODE_TYPE_ERASE ];
     this.brushModeIndex = 0;
 
     this.pageElements = [];
@@ -22,13 +21,19 @@ export const MapEditor = function() {
 MapEditor.MODE_TYPE_TILE = "TILE";
 MapEditor.MODE_TYPE_PATTERN = "PATTERN";
 MapEditor.MODE_TYPE_ANIMATION = "ANIMATION";
+MapEditor.MODE_TYPE_ERASE = "ERASE";
+
 MapEditor.BRUSH_SIZE_SMALL = 0;
 MapEditor.BRUSH_SIZE_MEDIUM = 1;
 MapEditor.BRUSH_SIZE_LARGE = 2;
 MapEditor.BRUSH_SIZE_EXTRALARGE = 3;
 MapEditor.BRUSH_SIZE_COLOSSAL = 4;
 
-MapEditor.prototype.selectBrush = function(brush) {
+MapEditor.prototype.getSelectedBrush = function() {
+    return this.selectedBrush;
+}
+
+MapEditor.prototype.setSelectedBrush = function(brush) {
     if(!brush) {
         console.warn(`Brush cannot be undefined! Returning...`);
         return;
@@ -49,17 +54,17 @@ MapEditor.prototype.getPageElements = function(availableSlots) {
 
     for(let i = 0; i < availableSlots.length; i++) {
         const index = availableSlots.length * this.pageIndex + i;
+        const pageElement = this.pageElements[index];
 
-        if(!this.pageElements[index]) {
+        if(!pageElement) {
             pageElements.push(null);
             continue;
         }
 
         pageElements.push([
             tileSetID,
-            this.pageElements[index],
-            this.brushModes[this.brushModeIndex],
-            this.brushModeTypes[this.brushModeIndex]
+            pageElement,
+            brushModeID
         ]);
     }
 
@@ -68,15 +73,23 @@ MapEditor.prototype.getPageElements = function(availableSlots) {
 
 MapEditor.prototype.reloadPageElements = function() {
     this.clearPageElements();
-    const brushMode = this.getBrushModeID();
+    const brushModeID = this.getBrushModeID();
     const tileSet = this.getCurrentSet();
     
-    if(!tileSet || !brushMode) {
+    this.selectedBrush = undefined;
+    
+    if(!tileSet || !brushModeID) {
         console.warn(`Refreshing PageElements failed! Returning...`);
         return;
     }
 
-    const brushType = this.brushModeTypes[this.brushModeIndex];
+    if(brushModeID === MapEditor.MODE_TYPE_ERASE) {
+        this.selectedBrush = null;
+        return;
+    }
+
+    const brushTypes = ["frames", "patterns", "animations"]; //Hackity-Hack.
+    const brushType = brushTypes[this.brushModeIndex];
     const brushElements = tileSet[brushType];
 
     for(const key in brushElements) {
@@ -85,13 +98,18 @@ MapEditor.prototype.reloadPageElements = function() {
 }
 
 MapEditor.prototype.loadTileSets = function(tileSets) {
+    if(!tileSets) {
+        console.warn(`TileSets cannot be undefined! Returning...`);
+        return;
+    }
+
     this.tileSets = tileSets;
     this.tileSetKeys = Object.keys(tileSets);
 }
 
 MapEditor.prototype.getCurrentSet = function() {
     if(!this.tileSetKeys[this.currentSetIndex]) {
-        console.warn(`CurrentSetIndex cannot be null! Returning null...`);
+        console.warn(`CurrentSetIndex cannot be undefined! Returning null...`);
         return null;
     }
 
@@ -100,7 +118,7 @@ MapEditor.prototype.getCurrentSet = function() {
 
 MapEditor.prototype.getCurrentSetID = function() {
     if(!this.tileSetKeys[this.currentSetIndex]) {
-        console.warn(`CurrentSetIndex cannot be null! Returning null...`);
+        console.warn(`CurrentSetIndex cannot be undefined! Returning null...`);
         return null;
     }
 
@@ -109,7 +127,7 @@ MapEditor.prototype.getCurrentSetID = function() {
 
 MapEditor.prototype.getBrushModeID = function() {
     if(!this.brushModes[this.brushModeIndex]) {
-        console.warn(`BrushModeIndex cannot be null! Returning null...`);
+        console.warn(`BrushModeIndex cannot be undefined! Returning null...`);
         return null;
     }
 
@@ -133,7 +151,7 @@ MapEditor.prototype.scrollPage = function(availableButtonSlots) {
     if(index === this.pageIndex) {
         return;
     }
-    //TODO: ONLY SCROLLS FORWARD. ALLOW BACKWARD - LOW PRIORITY
+
     this.pageIndex = index;
 }
 

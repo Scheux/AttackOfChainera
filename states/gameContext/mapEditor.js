@@ -5,6 +5,10 @@ import { MapEditor } from "../../source/map/mapEditor.js";
 import { State } from "../../source/state/state.js";
 import { UIElement } from "../../source/ui/uiElement.js";
 
+//TODO: ADD GIVING AN ID
+//TODO: ADD SETTING MUSIC
+//TODO: ADD LOADING MAPS - CRUCIAL!
+
 const MAP_EDITOR_ID = "MAP_EDITOR";
 
 export const MapEditorState = function() {
@@ -78,7 +82,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
                 continue;
             }
 
-            const [tileSetID, frameID, brushModeID, brushModeType] = element;
+            const [tileSetID, frameID, brushModeID] = element;
             const tileSet = spriteManager.tileSprites[tileSetID];
 
             uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_DRAW, MAP_EDITOR_ID, (context, localX, localY) => {
@@ -88,7 +92,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
             });
 
             uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_CLICKED, MAP_EDITOR_ID, () => {
-                editor.selectBrush(element);
+                editor.setSelectedBrush(element);
             });
         }
     }
@@ -96,12 +100,18 @@ MapEditorState.prototype.enter = function(stateMachine) {
     const placeTile = () => {
         const cursorTile = gameContext.getViewportTile();
         const gameMap = mapLoader.getCachedMap(editorMapID);
+        const brush = editor.getSelectedBrush();
 
-        if(!cursorTile || !gameMap || !editor.selectedBrush) {
+        if(!cursorTile || !gameMap || brush === undefined) {
             return;
         }
 
-        const [tileSetID, frameID, brushModeID, brushModeType] = editor.selectedBrush;
+        if(brush === null) {
+            gameMap.placeTile(null, currentLayer, cursorTile.position.x, cursorTile.position.y);
+            return;
+        }
+
+        const [tileSetID, frameID, brushModeID] = brush;
         const tileSet = spriteManager.tileSprites[tileSetID];
 
         if(brushModeID === MapEditor.MODE_TYPE_PATTERN) {
@@ -122,16 +132,26 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
     renderer.events.subscribe(Camera.EVENT_MAP_RENDER_COMPLETE, MAP_EDITOR_ID, (renderer) => {
         const cursorTile = gameContext.getViewportTile();
+        const brush = editor.getSelectedBrush();
 
         renderer.draw2DMapOutlines(gameContext);
 
-        if(!cursorTile || !editor.selectedBrush) {
+        if(!cursorTile || brush === undefined) {
             return;
         }
 
         const renderX = cursorTile.position.x * Camera.TILE_WIDTH * Camera.SCALE - renderer.viewportX * Camera.SCALE;
         const renderY = cursorTile.position.y * Camera.TILE_HEIGHT * Camera.SCALE - renderer.viewportY * Camera.SCALE;
-        const [tileSetID, frameID, brushModeID, brushModeType] = editor.selectedBrush;
+
+        if(brush === null) {
+            renderer.display.context.fillStyle = "#701867";
+            renderer.display.context.globalAlpha = 0.7;
+            renderer.display.context.fillRect(renderX, renderY, Camera.TILE_WIDTH * Camera.SCALE, Camera.TILE_HEIGHT * Camera.SCALE);
+            renderer.display.context.globalAlpha = 1;
+            return;
+        }
+
+        const [tileSetID, frameID, brushModeID] = brush;
         const tileSet = spriteManager.tileSprites[tileSetID];
         const realTime = timer.getRealTime();
         const buffer = tileSet.getAnimationFrame(frameID, realTime)[0];

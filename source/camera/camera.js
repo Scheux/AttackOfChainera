@@ -149,20 +149,16 @@ Camera.prototype.draw2DMapOutlines = function(gameContext) {
         return;
     }
 
-    const ctx = this.display.context;
-    ctx.fillStyle = lineColor;
-
-    const startX = Math.floor(this.viewportX / (Camera.TILE_WIDTH * Camera.SCALE)) * Camera.TILE_WIDTH * Camera.SCALE - this.viewportX * Camera.SCALE;
-    const startY = Math.floor(this.viewportY / (Camera.TILE_HEIGHT * Camera.SCALE)) * Camera.TILE_HEIGHT * Camera.SCALE - this.viewportY * Camera.SCALE;
+    this.display.context.fillStyle = lineColor;
 
     for (let i = 0; i <= gameMap.height; i++) {
         const renderY = i * Camera.TILE_HEIGHT * Camera.SCALE - this.viewportY * Camera.SCALE;
-        ctx.fillRect(0, renderY, this.viewportWidth, 1);
+        this.display.context.fillRect(0, renderY, this.viewportWidth, 1);
     }
 
     for (let j = 0; j <= gameMap.width; j++) {
         const renderX = j * Camera.TILE_WIDTH * Camera.SCALE - this.viewportX * Camera.SCALE;
-        ctx.fillRect(renderX, 0, 1, this.viewportHeight);
+        this.display.context.fillRect(renderX, 0, 1, this.viewportHeight);
     }
 }
 
