@@ -9,8 +9,12 @@ export const Entity = function(id, DEBUG_NAME) {
 
     this.components = new ComponentLoader();
     this.states = new StateMachine(this);
+
     this.events = new EventEmitter();
+    this.events.listen(Entity.EVENT_POSITION_UPDATE);
 }
+
+Entity.EVENT_POSITION_UPDATE = 0;
 
 Entity.prototype.update = function(gameContext) {
     this.states.update(gameContext);
@@ -21,3 +25,11 @@ Entity.prototype.setConfig = function(config) {
         this.config = config;
     }
 } 
+
+Entity.prototype.getConfig = function() {
+    return this.config;
+}
+
+Entity.prototype.getID = function() {
+    return this.id;
+}

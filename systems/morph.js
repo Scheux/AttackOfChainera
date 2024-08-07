@@ -24,7 +24,7 @@ MorphSystem.morphSprite = function(gameContext, entity, spriteData, config) {
 
     const { spriteManager } = gameContext;
     const spriteComponent = entity.components.getComponent(SpriteComponent);
-    const spriteID = spriteComponent.getSpriteID();
+    const spriteID = spriteComponent.spriteID;
 
     const sprite = spriteManager.getSprite(spriteID);
     const [spriteSetID, spriteAnimationID] = spriteData;

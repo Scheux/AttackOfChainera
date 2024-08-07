@@ -26,5 +26,11 @@
     },
 	"abilityTypes": {
 		"levitate": { "id": "levitate", "name": "LEVITATE", "description": "LEVITATE", "eventHandler": null }
-	}
+	},
+    "objectTypes": {
+        "Player": { "id": "Player" },
+        "Monster": { "id": "Monster" },
+        "NPC": { "id": "NPC" },
+        "Sign": { "id": "Sign" }
+    }
 }

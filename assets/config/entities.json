@@ -1,3 +1,30 @@
 {
-    "player": { "id": "player", "name": "PLAYER", "sprites": { "walk": null }, "sounds": { "walk": null } }
+    "player": {
+        "id": "player",
+        "name": "PLAYER",
+        "dimX": 1,
+        "dimY": 1,
+        "dimZ": 0,
+        "objectType": "Player",
+        "sprites": { 
+            "idle_up": ["player", "idle_up"],
+            "idle_down": ["player", "idle_down"],
+            "idle_left": ["player", "idle_left"],
+            "idle_right": ["player", "idle_right"], 
+            "bike_idle_up": ["player", "bike_idle_up"],
+            "bike_idle_down": ["player", "bike_idle_down"],
+            "bike_idle_left": ["player", "bike_idle_left"],
+            "bike_idle_right": ["player", "bike_idle_right"], 
+            "walk_up": ["player", "walk_up"],
+            "walk_down": ["player", "walk_down"],
+            "walk_left": ["player", "walk_left"],
+            "walk_right": ["player", "walk_right"], 
+            "bike_up": ["player", "bike_up"],
+            "bike_down": ["player", "bike_down"],
+            "bike_left": ["player", "bike_left"],
+            "bike_right": ["player", "bike_right"]
+        },
+        "sounds": { 
+        } 
+    }
 }

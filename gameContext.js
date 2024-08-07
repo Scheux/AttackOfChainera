@@ -6,7 +6,7 @@ import { EntityManager } from "./source/entity/entityManager.js";
 import { EventEmitter } from "./source/events/eventEmitter.js";
 import { SpriteManager } from "./source/graphics/spriteManager.js";
 import { UIManager } from "./source/ui/uiManager.js";
-import { getViewportTile } from "./source/helpers.js";
+import { getViewportTile, tileToPosition_corner } from "./source/helpers.js";
 import { MapLoader } from "./source/map/mapLoader.js";
 import { StateMachine } from "./source/state/stateMachine.js";
 import { TileManager } from "./source/tile/tileManager.js";
@@ -16,6 +16,9 @@ import { MapEditorState } from "./states/gameContext/mapEditor.js";
 import { ActionQueue } from "./source/action/actionQueue.js";
 import { UIElement } from "./source/ui/uiElement.js";
 import { PlayGameState } from "./states/gameContext/playGame.js";
+import { PositionComponent } from "./components/position.js";
+import { SpriteComponent } from "./components/sprite.js";
+import { Entity } from "./source/entity/entity.js";
 
 export const GameContext = function() {
     this.config = {};
@@ -107,7 +110,7 @@ GameContext.prototype.loadMap = async function(mapID) {
     this.mapLoader.setActiveMap(mapID);
     this.tileManager.workStart(gameMap.tiles);
     this.spriteManager.workStart();
-    this.entityManager.workStart(gameMap.entities);
+    this.entityManager.workStart();
     this.renderer.loadViewport(gameMap.width, gameMap.height);
     this.client.musicPlayer.loadTrack(gameMap.music);
     this.tileManager.loadTiles(gameMap.width, gameMap.height);
@@ -181,4 +184,76 @@ GameContext.prototype.getConfigElement = function(key) {
     }
 
     return this.config[key];
+}
+
+GameContext.prototype.removeEntity = function(mapID, entityID) {
+    const gameMap = this.mapLoader.getCachedMap(mapID);
+
+    if(!gameMap || !entityID) {
+        console.warn(`Entity deletion failed! Returning...`);
+        return;
+    }
+
+    const entity = this.entityManager.getEntity(entityID);
+
+    if(!entity) {
+        console.warn(`Entity deletion failed! Returning...`);
+        return;
+    }
+
+    const positionComponent = entity.components.getComponent(PositionComponent);
+    const spriteComponent = entity.components.getComponent(SpriteComponent);
+
+    this.entityManager.removeEntity(entityID);
+    this.spriteManager.removeSprite(spriteComponent.spriteID);
+    this.tileManager.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
+}
+
+GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY) {
+    const gameMap = this.mapLoader.getCachedMap(mapID);
+
+    if(!gameMap || tileX === undefined || tileY === undefined || !this.entityManager.entityTypes[entityTypeID]) {
+        console.warn(`Entity creation failed! Returning...`);
+        return;
+    }
+
+    const entityType = this.entityManager.entityTypes[entityTypeID];
+    const entity = this.entityManager.createEntity(entityTypeID);
+    const entityID = entity.getID();
+    const positionVector = tileToPosition_corner(tileX, tileY);
+
+    const [spriteSetID, spriteAnimationID] = entityType.sprites["walk_down"];
+    const sprite = this.spriteManager.createSprite(spriteSetID, true, spriteAnimationID);
+    const spriteID = sprite.getID();
+
+    sprite.setPositionRaw(positionVector.x, positionVector.y);
+
+    const positionComponent = new PositionComponent();
+    const spriteComponent = new SpriteComponent();
+
+    positionComponent.positionX = positionVector.x;
+    positionComponent.positionY = positionVector.y;
+    positionComponent.tileX = tileX;
+    positionComponent.tileY = tileY;
+    positionComponent.dimX = entityType.dimX;
+    positionComponent.dimY = entityType.dimY;
+    spriteComponent.spriteID = spriteID;
+
+    entity.components.addComponent(positionComponent);
+    entity.components.addComponent(spriteComponent);  
+    
+    switch(entityType.objectType) {
+        case "Player": {
+            break;
+        }
+
+        default: {
+            console.warn(`objectType ${entityType.objectType} is not valid!`);
+            break;
+        }
+    }
+
+    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (positionX, positionY) => sprite.setPositionRaw(positionX, positionY));
+
+    this.tileManager.setPointers(tileX, tileY, entityType.dimX, entityType.dimY, entityID);
 }

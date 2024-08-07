@@ -14,7 +14,7 @@ EntityManager.prototype.update = function(gameContext) {
 }
 
 EntityManager.prototype.workStart = function(entityList) {
-    this.entities = entityList;
+    //this.entities = entityList;
 }
 
 EntityManager.prototype.workEnd = function() {
@@ -47,6 +47,8 @@ EntityManager.prototype.createEntity = function(entityType) {
 
     if(config) {
         entity.setConfig(config);
+    } else {
+        console.warn(`EntityType ${entityType} does not exist! Using empty config! Proceeding...`);
     }
 
     this.entities.set(entityID, entity)

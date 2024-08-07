@@ -1,3 +1,4 @@
+import { Cursor } from "../../source/client/cursor.js";
 import { State } from "../../source/state/state.js";
 
 const PLAY_GAME_ID = "PLAY_GAME";
@@ -26,6 +27,8 @@ PlayGameState.prototype.enter = async function(stateMachine) {
     spriteManager.createSprite("player", true, "bike_up").setPositionRaw(0, 48);
     spriteManager.createSprite("player", true, "bike_right").setPositionRaw(16, 32);
     spriteManager.createSprite("player", true, "bike_left").setPositionRaw(32, 32);
+
+    gameContext.createEntity("MAP", "player", 5, 5);
 }
 
 PlayGameState.prototype.exit = function(stateMachine) {

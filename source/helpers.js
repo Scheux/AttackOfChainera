@@ -51,3 +51,39 @@ export const saveTemplateAsFile = (filename, dataObjToWrite) => {
   link.dispatchEvent(evt);
   link.remove();
 };
+
+export const tileToPosition_center = function(tileX, tileY) {
+  const renderWidth = Camera.TILE_WIDTH;
+  const renderHeight = Camera.TILE_HEIGHT;
+
+  const positionX = tileX * renderWidth + renderWidth / 2;
+  const positionY = tileY * renderHeight + renderHeight / 2;
+
+  const pixelPosition = new Vec2(positionX, positionY);
+
+  return pixelPosition;
+}
+
+export const tileToPosition_corner = function(tileX, tileY) {
+  const renderWidth = Camera.TILE_WIDTH;
+  const renderHeight = Camera.TILE_HEIGHT;
+
+  const positionX = tileX * renderWidth;
+  const positionY = tileY * renderHeight;
+
+  const pixelPosition = new Vec2(positionX, positionY);
+
+  return pixelPosition;
+}
+
+export const positionToTile = function(positionX, positionY) {
+  const renderWidth = Camera.TILE_WIDTH;
+  const renderHeight = Camera.TILE_HEIGHT;
+
+  const tileX = Math.trunc(positionX / renderWidth);
+  const tileY = Math.trunc(positionY / renderHeight);
+
+  const tilePosition = new Vec2(tileX, tileY);
+
+  return tilePosition;
+}

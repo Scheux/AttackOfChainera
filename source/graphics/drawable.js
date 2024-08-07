@@ -37,7 +37,6 @@ Drawable.prototype.setPositionRaw = function(positionX, positionY) {
     this.position.y = positionY;
 }
 
-
 Drawable.prototype.openFamily = function(customName) {
     if(this.family) {
         console.warn(`Drawable ${this.DEBUG_NAME} already has family ${this.family.customName} open! Cannot create new family! Returning...`);
@@ -124,4 +123,8 @@ Drawable.prototype.removeChild = function(customChildID) {
     child.onRemove();
 
     return child;
+}
+
+Drawable.prototype.getID = function() {
+    return this.id;
 }

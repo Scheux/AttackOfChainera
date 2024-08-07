@@ -238,11 +238,11 @@ TileManager.prototype.autoTile8Bit = function(tileVector, getResult) {
     return finalValue;
 }
 
-TileManager.prototype.removePointers = function(tileVector, rangeX, rangeY, pointer) {
+TileManager.prototype.removePointers = function(tileX, tileY, rangeX, rangeY, pointer) {
     for(let i = 0; i < rangeY; i++) {
         for(let j = 0; j < rangeX; j++) {
-            const locationX = tileVector.x + j;
-            const locationY = tileVector.y + i;
+            const locationX = tileX + j;
+            const locationY = tileY + i;
             const tile = this.getTile(locationX, locationY);
             
             if(!tile) {
@@ -255,11 +255,11 @@ TileManager.prototype.removePointers = function(tileVector, rangeX, rangeY, poin
     }
 }
 
-TileManager.prototype.setPointers = function(tileVector, rangeX, rangeY, pointer) {
+TileManager.prototype.setPointers = function(tileX, tileY, rangeX, rangeY, pointer) {
     for(let i = 0; i < rangeY; i++) {
         for(let j = 0; j < rangeX; j++) {
-            const locationX = tileVector.x + j;
-            const locationY = tileVector.y + i;
+            const locationX = tileX + j;
+            const locationY = tileY + i;
             const tile = this.getTile(locationX, locationY);
             
             if(!tile) {
