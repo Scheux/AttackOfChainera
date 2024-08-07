@@ -1,4 +1,78 @@
 {
+    "overworld_day": { 
+        "id": "overworld_day",
+        "directory": "assets/tiles",
+        "source": "overworld_day.png",
+        "offset": { "x": 0, "y": 0 },
+        "frameTime": 1,
+        "allowFlip": false,
+        "frames": {
+            "grass": {"x":0,"y":0,"w":16,"h":16},
+            "sand": {"x":16,"y":0,"w":16,"h":16},
+            "flowers": {"x":32,"y":0,"w":16,"h":16},
+            "clean": {"x":48,"y":0,"w":16,"h":16},
+
+            "sign": {"x":0,"y":16,"w":16,"h":16},
+            "tree_small": {"x":16,"y":16,"w":16,"h":16},
+            "tree_small_cut": {"x":32,"y":16,"w":16,"h":16},
+            "tree_large_top": {"x":48,"y":16,"w":16,"h":16},
+            "tree_large_bottom": {"x":64,"y":16,"w":16,"h":16},
+            "tree_large_middle": {"x":80,"y":16,"w":16,"h":16},
+            "tall_grass": {"x":96,"y":16,"w":16,"h":16},
+
+            "rock_small": {"x":0,"y":48,"w":16,"h":16},
+            "cave_wall_nw": {"x":16,"y":48,"w":16,"h":16},
+            "cave_wall_n": {"x":32,"y":48,"w":16,"h":16},
+            "cave_wall_ne": {"x":48,"y":48,"w":16,"h":16},
+            "cave_Wall_w": {"x":64,"y":48,"w":16,"h":16},
+            "cave_wall_c": {"x":80,"y":48,"w":16,"h":16},
+            "cave_wall_e": {"x":96,"y":48,"w":16,"h":16},
+            "cave_wall_sw": {"x":112,"y":48,"w":16,"h":16},
+            "cave_wall_s": {"x":128,"y":48,"w":16,"h":16},
+            "cave_wall_se": {"x":144,"y":48,"w":16,"h":16},
+            "cave_entrance": {"x":160,"y":48,"w":16,"h":16},
+            "rock_large_nw": {"x":176,"y":48,"w":16,"h":16},
+            "rock_large_ne": {"x":192,"y":48,"w":16,"h":16},
+            "rock_large_sw": {"x":208,"y":48,"w":16,"h":16},
+            "rock_large_se": {"x":224,"y":48,"w":16,"h":16},
+            "rock_large_bottom": {"x":240,"y":48,"w":16,"h":16},
+
+            "fence_nw": {"x":0,"y":80,"w":16,"h":16},
+            "fence_n": {"x":16,"y":80,"w":16,"h":16},
+            "fence_ne": {"x":32,"y":80,"w":16,"h":16},
+            "fence_w": {"x":48,"y":80,"w":16,"h":16},
+            "fence_e": {"x":64,"y":80,"w":16,"h":16},
+
+            "house_1": {"x":0,"y":96,"w":16,"h":16},
+            "house_2": {"x":16,"y":96,"w":16,"h":16},
+            "house_3": {"x":32,"y":96,"w":16,"h":16},
+            "house_4": {"x":48,"y":96,"w":16,"h":16},
+            "house_5": {"x":0,"y":112,"w":16,"h":16},
+            "house_6": {"x":16,"y":112,"w":16,"h":16},
+            "house_7": {"x":32,"y":112,"w":16,"h":16},
+            "house_8": {"x":48,"y":112,"w":16,"h":16},
+            "house_9": {"x":0,"y":128,"w":16,"h":16},
+            "house_10": {"x":16,"y":128,"w":16,"h":16},
+            "house_11": {"x":32,"y":128,"w":16,"h":16},
+            "house_12": {"x":48,"y":128,"w":16,"h":16}
+        },
+        "patterns": {
+            "tree_large": [
+                ["tree_large_top"],
+                ["tree_large_bottom"]
+            ],
+            "rock_large": [
+                ["rock_large_nw", "rock_large_ne"],
+                ["rock_large_sw", "rock_large_se"]
+            ],
+            "house": [
+                ["house_1", "house_2", "house_3", "house_4"],
+                ["house_5", "house_6", "house_7", "house_8"],
+                ["house_9", "house_10", "house_11", "house_12"]
+            ]
+        },
+        "animations": {}
+    },
     "set_field": { 
         "id": "set_field",
         "directory": "assets/tiles",
@@ -13,13 +87,13 @@
             ]
         },
         "frames": {
-            "grass": {"x":0,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
-            "grass2": {"x":16,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
-            "mud": {"x":32,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
-            "sand": {"x":48,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}},
-            "flowers1": {"x":0,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}},
-            "flowers2": {"x":16,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}},
-            "sand2": {"x":32,"y":16,"w":16,"h":16,"offset":{"x":0,"y":0}}
+            "grass": {"x":0,"y":0,"w":16,"h":16},
+            "grass2": {"x":16,"y":0,"w":16,"h":16},
+            "mud": {"x":32,"y":0,"w":16,"h":16},
+            "sand": {"x":48,"y":0,"w":16,"h":16},
+            "flowers1": {"x":0,"y":16,"w":16,"h":16},
+            "flowers2": {"x":16,"y":16,"w":16,"h":16},
+            "sand2": {"x":32,"y":16,"w":16,"h":16}
         },
         "animations": {
             "flowers": { "id": "flowers", "frameTime": 1, "frames": [ "flowers1", "flowers2" ]}

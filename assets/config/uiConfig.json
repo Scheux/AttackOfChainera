@@ -286,14 +286,44 @@
             "width": 350,
             "height": 500,
             "opacity": 1,
-            "children": [ "TEXT_TILESET", "BUTTON_TILESET_RIGHT", "BUTTON_TILESET_LEFT", "BUTTON_TILESET_MODE", "BUTTON_PAGE_NEXT", "BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8" ]
+            "children": [ "TEXT_TILESET", "BUTTON_TILESET_RIGHT", "BUTTON_TILESET_LEFT", "BUTTON_TILESET_MODE", "TEXT_PAGE", "BUTTON_PAGE_LAST", "BUTTON_PAGE_NEXT", "BUTTON_0", "BUTTON_1", "BUTTON_2", "BUTTON_3", "BUTTON_4", "BUTTON_5", "BUTTON_6", "BUTTON_7", "BUTTON_8" ]
+        },
+        "TEXT_PAGE": {
+            "id": "TEXT_PAGE",
+            "type": "TEXT",
+            "position": { "x": 175, "y": 475 },
+            "text": "PAGE",
+            "font": "20px Arial",
+            "color": "#eeeeee",
+            "align": "center",
+            "opacity": 1
+        },
+        "BUTTON_PAGE_LAST": {
+            "id": "BUTTON_PAGE_LAST",
+            "type": "BUTTON",
+            "shape": "SQUARE",
+            "position": { "x": 0, "y": 450 },
+            "width": 150,
+            "height": 50,
+            "opacity": 1,
+            "children": [ "TEXT_PAGE_LAST" ]
+        },
+        "TEXT_PAGE_LAST": {
+            "id": "TEXT_PAGE_LAST",
+            "type": "TEXT",
+            "position": { "x": 75, "y": 25 },
+            "text": "<<",
+            "font": "20px Arial",
+            "color": "#eeeeee",
+            "align": "center",
+            "opacity": 1
         },
         "BUTTON_PAGE_NEXT": {
             "id": "BUTTON_PAGE_NEXT",
             "type": "BUTTON",
             "shape": "SQUARE",
-            "position": { "x": 0, "y": 450 },
-            "width": 350,
+            "position": { "x": 200, "y": 450 },
+            "width": 150,
             "height": 50,
             "opacity": 1,
             "children": [ "TEXT_PAGE_NEXT" ]
@@ -301,8 +331,8 @@
         "TEXT_PAGE_NEXT": {
             "id": "TEXT_PAGE_NEXT",
             "type": "TEXT",
-            "position": { "x": 175, "y": 25 },
-            "text": "<PAGE>",
+            "position": { "x": 75, "y": 25 },
+            "text": ">>",
             "font": "20px Arial",
             "color": "#eeeeee",
             "align": "center",

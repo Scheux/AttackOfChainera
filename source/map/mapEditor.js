@@ -143,16 +143,25 @@ MapEditor.prototype.setBrushSize = function(brushSize) {
     this.brushSize = this.availableBrushSizes.get(brushSize);
 }
 
-MapEditor.prototype.scrollPage = function(availableButtonSlots) {
-    const maxElementsPossibleSoFar = (this.pageIndex + 1) * availableButtonSlots.length;
-    const continuesOnNextPage = this.pageElements.length > maxElementsPossibleSoFar;
-    const index = continuesOnNextPage ? this.pageIndex + 1 : 0;
+MapEditor.prototype.scrollPage = function(availableButtonSlots, value) {
+    const maxElementsPerPage = availableButtonSlots.length;
+    const maxPagesNeeded = Math.ceil(this.pageElements.length / maxElementsPerPage);
+    let nextIndex = this.pageIndex + value;
 
-    if(index === this.pageIndex) {
+    if(maxPagesNeeded === 0) {
+        this.pageIndex = 0;
         return;
     }
 
-    this.pageIndex = index;
+    if(nextIndex < 0) {
+        nextIndex = maxPagesNeeded - 1;
+    } else if(nextIndex >= maxPagesNeeded) {
+        nextIndex = 0;
+    }
+
+    if(nextIndex !== this.pageIndex) {
+        this.pageIndex = nextIndex;
+    }
 }
 
 MapEditor.prototype.scrollBrushMode = function(value) {

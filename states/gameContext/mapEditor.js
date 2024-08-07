@@ -144,14 +144,20 @@ MapEditorState.prototype.enter = function(stateMachine) {
             const [tileSetID, frameID, brushModeID] = element;
             const tileSet = spriteManager.tileSprites[tileSetID];
 
+            uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_CLICKED, MAP_EDITOR_ID, () => {
+                editor.setSelectedBrush(element);
+            });
+
             uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_DRAW, MAP_EDITOR_ID, (context, localX, localY) => {
+                if(brushModeID === MapEditor.MODE_TYPE_PATTERN) {
+                    context.fillText(frameID, localX, localY + 25);
+                    
+                    return;
+                }
+
                 const realTime = timer.getRealTime();
                 const buffer = tileSet.getAnimationFrame(frameID, realTime)[0];
                 context.drawImage(buffer.bitmap, localX, localY, 50, 50);
-            });
-
-            uiManager.buttons.get(buttonID).events.subscribe(UIElement.EVENT_CLICKED, MAP_EDITOR_ID, () => {
-                editor.setSelectedBrush(element);
             });
         }
     }
@@ -293,7 +299,13 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
     uiManager.addFetch("TEXT_TILESET", element => element.setText(`${editor.getCurrentSetID()}`));
 
-    uiManager.addFetch("TEXT_PAGE_NEXT", element => element.setText(`PAGE: ${editor.pageIndex} / ${Math.floor(editor.pageElements.length / AVAILABLE_BUTTON_SLOTS.length - 0.1)}`));
+    uiManager.addFetch("TEXT_PAGE", element => {
+        const maxElementsPerPage = AVAILABLE_BUTTON_SLOTS.length;
+        const maxPagesNeeded = Math.ceil(editor.pageElements.length / maxElementsPerPage);
+        const showMaxPagesNeeded = maxPagesNeeded === 0 ? 1 : maxPagesNeeded;
+        
+        element.setText(`${editor.pageIndex + 1} / ${showMaxPagesNeeded}`);
+    });
 
     uiManager.addClick("BUTTON_TILESET_MODE", () => {
         editor.scrollBrushMode(1);
@@ -313,8 +325,13 @@ MapEditorState.prototype.enter = function(stateMachine) {
         loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
     });
 
+    uiManager.addClick("BUTTON_PAGE_LAST", () => {
+        editor.scrollPage(AVAILABLE_BUTTON_SLOTS, -1);
+        loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
+    });  
+
     uiManager.addClick("BUTTON_PAGE_NEXT", () => {
-        editor.scrollPage(AVAILABLE_BUTTON_SLOTS);
+        editor.scrollPage(AVAILABLE_BUTTON_SLOTS, 1);
         loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));
     });  
 
