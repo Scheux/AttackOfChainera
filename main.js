@@ -25,8 +25,8 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
 }).then(async resources => {
   gameContext.loadResources(resources);
   gameContext.timer.start();
-  console.log(gameContext);
   gameContext.states.setNextState(GameContext.STATE_MAIN_MENU);
-  //gameContext.states.setNextState(GameContext.STATE_MAP_EDITOR);
-  //await gameContext.loadMap("MAP");  
+  console.log(gameContext);
 });
+
+//AFTER ENTITY MOVED -> CHECK FOR BATTLE OR SMTH.

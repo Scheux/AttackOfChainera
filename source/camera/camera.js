@@ -224,6 +224,7 @@ Camera.prototype.update = function(gameContext) {
 
     this.display.clear();
     this.calculateFPS(deltaTime);
+    this.follow({"x": 0, "y": 0}, 2 * deltaTime, 1);
 
     if(Camera.DRAW_2D_MAP) {
         this.draw2DMap(gameContext);
@@ -349,4 +350,26 @@ Camera.prototype.getViewportWidth = function() {
 
 Camera.prototype.getViewportHeight = function() {
     return this.viewportHeight/Camera.SCALE;
+}
+
+Camera.prototype.follow = function(position, smoothFactor, threshold) {
+    const targetX = position.x - this.getViewportWidth() / 2;
+    const targetY = position.y - this.getViewportHeight() / 2;
+    const distanceX = targetX - this.viewportX;
+    const distanceY = targetY - this.viewportY;
+
+    if (Math.abs(distanceX) < threshold && Math.abs(distanceY) < threshold) {
+        this.viewportX = targetX;
+        this.viewportY = targetY;
+        return;
+    }
+
+    if (smoothFactor) {
+        this.viewportX += (targetX - this.viewportX) * smoothFactor;
+        this.viewportY += (targetY - this.viewportY) * smoothFactor;
+        return;
+    }
+
+    this.viewportX = targetX;
+    this.viewportY = targetY;
 }

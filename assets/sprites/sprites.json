@@ -1,22 +1,13 @@
 {
-    "crosshair": {
-        "id": "crosshair",
+    "player": {
+        "id": "player",
         "directory": "assets/sprites",
-        "source": "crosshair.png"
-    },
-    "shotgun": { 
-        "id": "shotgun",
-        "directory": "assets/sprites",
-        "source": "shotgun.png"
-    },
-    "enemy": { 
-        "id": "enemy",
-        "directory": "assets/sprites",
-        "source": "enemy.png"
-    },
-    "enemy_two": { 
-        "id": "enemy_two",
-        "directory": "assets/sprites",
-        "source": "enemy_two.png"
+        "source": "player.png",
+        "frames": {
+            "idle_down": {"x":0,"y":0,"w":16,"h":16,"offset":{"x":0,"y":0}}
+        },
+        "animations": {
+            "walk_down": { "id": "walk_down", "frameTime": 0.6, "frames": ["idle_down"] }
+        }
     }
 }

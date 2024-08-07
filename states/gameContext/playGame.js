@@ -11,13 +11,13 @@ PlayGameState.prototype.constructor = PlayGameState;
 
 PlayGameState.prototype.enter = async function(stateMachine) {
     const gameContext = stateMachine.getContext();
-    const { uiManager } = gameContext;
+    const { uiManager, spriteManager } = gameContext;
 
     uiManager.parseUI("PLAY_GAME", gameContext);
     
-    gameContext.loadMap("MAP").then(result => {
-        console.log(result);
-    });
+    await gameContext.loadMap("MAP");
+
+    spriteManager.createSprite("player", true);
 }
 
 PlayGameState.prototype.exit = function(stateMachine) {
