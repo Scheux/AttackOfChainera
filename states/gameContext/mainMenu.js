@@ -17,8 +17,9 @@ MainMenuState.prototype.enter = function(stateMachine) {
 
     musicPlayer.loadTrack("surfing");
 
+    uiManager.parseUI("FPS_COUNTER", gameContext);
+    uiManager.addFetch("FPS_COUNTER_TEXT_FPS", element => element.setText(`FPS: ${Math.floor(renderer.smoothedFPS)}`));
     uiManager.parseUI("MAIN_MENU", gameContext);
-    uiManager.addFetch("TEXT_FPS", element => element.setText(`FPS: ${Math.floor(renderer.smoothedFPS)}`));
     uiManager.addClick("BUTTON_PLAY", () => stateMachine.setNextState(GameContext.STATE_PLAY_GAME));
     uiManager.addClick("BUTTON_EDIT", () => stateMachine.setNextState(GameContext.STATE_MAP_EDITOR));
 }

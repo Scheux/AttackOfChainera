@@ -1,4 +1,17 @@
 {
+    "FPS_COUNTER": {
+        "FPS_COUNTER_TEXT_FPS": {
+            "id": "FPS_COUNTER_TEXT_FPS",
+            "type": "TEXT",
+            "anchor": "TOP_LEFT",
+            "position": { "x": 0, "y": 25 },
+            "text": "FPS",
+            "font": "50px Arial",
+            "color": "#eeeeee",
+            "align": "left",
+            "opacity": 1
+        }
+    },
     "MAIN_MENU": {
         "TEXT_TITLE": {
             "id": "TEXT_TITLE",
@@ -33,17 +46,6 @@
             "height": 100,
             "opacity": 1,
             "children": [ "TEXT_EDIT" ]
-        },
-        "TEXT_FPS": {
-            "id": "TEXT_FPS",
-            "type": "TEXT",
-            "position": { "x": 0, "y": 25 },
-            "text": "FPS",
-            "font": "50px Arial",
-            "color": "#eeeeee",
-            "align": "left",
-            "opacity": 0.5,
-            "effects": [ { "type": "FADE_IN", "threshold": 1, "value": 0.3 } ]
         },
         "TEXT_PLAY": {
             "id": "TEXT_PLAY",

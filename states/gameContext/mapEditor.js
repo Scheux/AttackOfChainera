@@ -32,6 +32,9 @@ MapEditorState.prototype.enter = function(stateMachine) {
     const { mapLoader, client, uiManager, spriteManager, renderer, timer, tileManager } = gameContext;
     const { cursor, musicPlayer } = client;
 
+    uiManager.unparseUI("FPS_COUNTER", gameContext);
+    uiManager.parseUI("MAP_EDITOR", gameContext);
+
     let currentLayer = null;
     let currentLayerButtonID = null;
 
@@ -186,6 +189,27 @@ MapEditorState.prototype.enter = function(stateMachine) {
         gameMap.placeTile([tileSetID, frameID], currentLayer, cursorTile.position.x, cursorTile.position.y);
     }
 
+    const incrementCollisionIndex = () => {
+        const cursorTile = gameContext.getViewportTile();
+        const gameMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
+        const collisionTypes = gameContext.getConfigElement("collisionTypes");
+        const collisionTypesKeys = Object.keys(collisionTypes);
+
+        if(!cursorTile || !gameMap) {
+            return;
+        }
+
+        const currentIndex = gameMap.getTile("collision", cursorTile.position.x, cursorTile.position.y);
+        const nextIndex = currentIndex + 1;
+
+        if(nextIndex > collisionTypesKeys.length - 1) {
+            gameMap.placeTile(0, "collision", cursorTile.position.x, cursorTile.position.y);
+            return;
+        }
+
+        gameMap.placeTile(nextIndex, "collision", cursorTile.position.x, cursorTile.position.y);
+    }
+
     renderer.events.subscribe(Camera.EVENT_MAP_RENDER_COMPLETE, MAP_EDITOR_ID, (renderer) => {
         const cursorTile = gameContext.getViewportTile();
         const brush = editor.getSelectedBrush();
@@ -245,17 +269,22 @@ MapEditorState.prototype.enter = function(stateMachine) {
     });
 
     cursor.events.subscribe(Cursor.RIGHT_MOUSE_DRAG, MAP_EDITOR_ID, () => {
-        placeTile();
+        if(currentLayerButtonID !== LAYER_BUTTONS["LC"].id) {
+            placeTile();
+            return;
+        }
     });
 
     cursor.events.subscribe(Cursor.RIGHT_MOUSE_CLICK, MAP_EDITOR_ID, () => {
-        placeTile();
+        if(currentLayerButtonID !== LAYER_BUTTONS["LC"].id) {
+            placeTile();
+            return;
+        }
+
+        incrementCollisionIndex();
     });
 
     editor.loadTileSets(spriteManager.tileSprites);
-
-    uiManager.parseUI("MAP_EDITOR", gameContext);
-
     editor.reloadPageElements();
 
     loadPageElementsEvents(editor.getPageElements(AVAILABLE_BUTTON_SLOTS));

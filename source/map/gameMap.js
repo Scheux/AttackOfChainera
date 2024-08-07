@@ -124,3 +124,21 @@ GameMap.prototype.placeTile = function(graphics, layerID, tileX, tileY) {
 GameMap.prototype.getConnections = function() {
     return this.connections;
 }
+
+GameMap.prototype.outOfBounds = function(tileX, tileY) {
+    return tileX < 0 || tileX >= this.width || tileY < 0 || tileY >= this.width;
+}
+
+GameMap.prototype.getTile = function(layerID, tileX, tileY) {
+    if(!this.layers[layerID]) {
+        console.warn(`Layer ${layerID} does not exist! Returning null...`);
+        return null;
+    }
+
+    if(!this.layers[layerID][tileY]) {
+        console.warn(`Row ${tileY} of layer ${layerID} does not exist! Returning null...`);
+        return null;
+    }
+
+    return this.layers[layerID][tileY][tileX];
+}

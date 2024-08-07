@@ -4,16 +4,16 @@
     "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
     "layers": {
         "collision": [
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null]
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
         ],
         "bottom": [
             [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand2"],["set_field","sand"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","mud"]],

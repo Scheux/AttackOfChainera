@@ -253,7 +253,7 @@ MapLoader.prototype.createEmptyMap = function(id, width, height) {
 
     const gameMap = new GameMap(id, config);
 
-    gameMap.generateEmptyLayer("collision", null);
+    gameMap.generateEmptyLayer("collision", 0);
     gameMap.generateEmptyLayer("bottom", null);
     gameMap.generateEmptyLayer("floor", null);
     gameMap.generateEmptyLayer("top", null);

@@ -18,6 +18,7 @@ import { UIElement } from "./source/ui/uiElement.js";
 import { PlayGameState } from "./states/gameContext/playGame.js";
 
 export const GameContext = function() {
+    this.config = {};
     this.client = new Client();
     this.renderer = new Camera(window.innerWidth, window.innerHeight);
     this.timer = new Timer(60);
@@ -71,6 +72,7 @@ GameContext.STATE_MAP_EDITOR = 1;
 GameContext.STATE_PLAY_GAME = 2;
 
 GameContext.prototype.loadResources = function(resources) {
+    this.config = resources.config;
     this.uiManager.loadFontTypes(null);
     this.uiManager.loadIconTypes(null);
     this.uiManager.loadUserInterfaceTypes(resources.uiConfig);
@@ -170,4 +172,13 @@ GameContext.prototype.setupPlayer3D = function() {
             position3D.pitch = -8;
         }
     });
+}
+
+GameContext.prototype.getConfigElement = function(key) {
+    if(!this.config[key]) {
+        console.warn(`ConfigElement ${key} does not exist! Returning null...`);
+        return null;
+    }
+
+    return this.config[key];
 }

@@ -12,7 +12,7 @@ export const Camera = function(screenWidth, screenHeight) {
 
     this.fps = 0;
     this.smoothedFPS = 60;
-    this.smoothingFactor = 0.02;
+    this.smoothingFactor = 0.01;
     
     this.raycaster = null;
     this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
@@ -65,13 +65,12 @@ Camera.prototype.drawSprites = function(gameContext) {
 }
 
 Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileGraphics) {
-    if(tileGraphics === undefined || tileGraphics === null) {
+    if(!tileGraphics) {
         return;
     }
 
     const { timer, spriteManager } = gameContext;
     const realTime = timer.getRealTime();
-
     const renderY = tileY * Camera.TILE_HEIGHT - this.viewportY;
     const renderX = tileX * Camera.TILE_WIDTH - this.viewportX;
     const [tileSetID, tileSetAnimationID] = tileGraphics;
@@ -79,17 +78,51 @@ Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileGraphics) {
     const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
     const buffer = buffers[0];
 
-    this.display.context.drawImage(buffer.bitmap, 
+    this.display.context.drawImage(
+        buffer.bitmap, 
         0, 0, buffer.width, buffer.height,
         renderX + buffer.offset.x, renderY + buffer.offset.y, Camera.TILE_WIDTH, Camera.TILE_HEIGHT
     );
 }
 
-Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, startY, endX, endY) {
-    if(!layerID) {
+Camera.prototype.drawCollisionLayer = function(gameContext, gameMap, layerID, startX, startY, endX, endY) {
+    const collisionTypes = gameContext.getConfigElement("collisionTypes");
+    const layer = gameMap.layers[layerID];
+    const opacity = gameMap.layerOpacity[layerID];
+
+    if(!opacity || !collisionTypes) {
         return;
     }
 
+    this.display.context.globalAlpha = opacity;
+    this.display.context.font = "8px Arial";
+    this.display.context.textBaseline = "middle";
+    this.display.context.textAlign = "center";
+
+    for(let i = startY; i <= endY; i++) {
+        const tileRow = layer[i];
+        
+        if(tileRow === undefined) {
+            continue;
+        }
+        
+        for(let j = startX; j <= endX; j++) {
+            const tileID = tileRow[j];
+
+            if(tileID === undefined || tileID === null) {
+                continue;
+            }
+
+            const renderY = i * Camera.TILE_HEIGHT - this.viewportY;
+            const renderX = j * Camera.TILE_WIDTH - this.viewportX;
+
+            this.display.context.fillStyle = collisionTypes[tileID].color;
+            this.display.context.fillText(tileID, renderX + Camera.TILE_WIDTH / 2, renderY + Camera.TILE_HEIGHT / 2);
+        }
+    }
+}
+
+Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, startY, endX, endY) {
     const { mapLoader } = gameContext;
     const neighbors = gameMap.getConnections();
     const layer = gameMap.layers[layerID];
@@ -102,47 +135,55 @@ Camera.prototype.drawLayer = function(gameContext, gameMap, layerID, startX, sta
     this.display.context.globalAlpha = opacity;
 
     for(let i = startY; i <= endY; i++) {
-        const tileRow = layer[i];
 
         if(i < 0 || i >= gameMap.height) {
-            for(const neighbor of neighbors) {
-                if(i >= neighbor.startY && i < neighbor.endY) {
-                    const neighborMap = mapLoader.getLoadedMap(neighbor.id);
-                    const neighborLayer = neighborMap.layers[layerID];
-                    const neighborRow = neighborLayer[i - neighbor.startY];
+            for(let n = 0; n < neighbors.length; n++) {
+                const neighbor = neighbors[n];
 
-                    for(let j = startX; j <= endX; j++) {
-                        if(j >= neighbor.startX && j < neighbor.endX) {
-                            const neighborTile = neighborRow[j - neighbor.startX];
-                            this.drawTile(gameContext, j, i, neighborTile);
-                        }
+                if(i < neighbor.startY || i >= neighbor.endY) {
+                    continue;
+                }
+
+                const neighborMap = mapLoader.getLoadedMap(neighbor.id);
+                const neighborLayer = neighborMap.layers[layerID];
+                const neighborRow = neighborLayer[i - neighbor.startY];
+
+                for(let j = startX; j <= endX; j++) {
+                    
+                    if(j < neighbor.startX || j >= neighbor.endX) {
+                        continue;
                     }
+
+                    const neighborTile = neighborRow[j - neighbor.startX];
+                    this.drawTile(gameContext, j, i, neighborTile);
                 }
             }
-            continue;
-        }
 
-        if(tileRow === undefined) {
             continue;
         }
         
         for(let j = startX; j <= endX; j++) {
             
             if(j < 0 || j >= gameMap.width) {
-                for(const neighbor of neighbors) {
-                    if(j >= neighbor.startX && j < neighbor.endX && i >= neighbor.startY && i < neighbor.endY) {
-                        const neighborMap = mapLoader.getLoadedMap(neighbor.id);
-                        const neighborLayer = neighborMap.layers[layerID];
-                        const neighborRow = neighborLayer[i - neighbor.startY];
-                        const neighborTile = neighborRow[j - neighbor.startX];
-                        
-                        this.drawTile(gameContext, j, i, neighborTile);
+                for(let n = 0; n < neighbors.length; n++) {
+                    const neighbor = neighbors[n];
+
+                    if(j < neighbor.startX || j >= neighbor.endX || i < neighbor.startY || i >= neighbor.endY) {
+                        continue;
                     }
+
+                    const neighborMap = mapLoader.getLoadedMap(neighbor.id);
+                    const neighborLayer = neighborMap.layers[layerID];
+                    const neighborRow = neighborLayer[i - neighbor.startY];
+                    const neighborTile = neighborRow[j - neighbor.startX];
+                    
+                    this.drawTile(gameContext, j, i, neighborTile);
                 }
+
                 continue;
             }
 
-            this.drawTile(gameContext, j, i, tileRow[j]);
+            this.drawTile(gameContext, j, i, layer[i][j]);
         }
     }
 
@@ -171,7 +212,6 @@ Camera.prototype.draw2DMapOutlines = function(gameContext) {
     }
 }
 
-
 Camera.prototype.draw2DMap = function(gameContext) {
     const { mapLoader } = gameContext;
     const gameMap = mapLoader.getActiveMap();
@@ -192,9 +232,9 @@ Camera.prototype.draw2DMap = function(gameContext) {
 
     this.drawLayer(gameContext, gameMap, "bottom", startX, startY, endX, endY);
     this.drawLayer(gameContext, gameMap, "floor", startX, startY, endX, endY);
-    this.drawSprites(gameContext, startX, startY, endX, endY)
+    this.drawSprites(gameContext, startX, startY, endX, endY);
     this.drawLayer(gameContext, gameMap, "top", startX, startY, endX, endY);
-    this.drawLayer(gameContext, gameMap, "collision", startX, startY, endX, endY);
+    this.drawCollisionLayer(gameContext, gameMap, "collision", startX, startY, endX, endY);
 
     this.display.context.restore();
 }
@@ -224,7 +264,7 @@ Camera.prototype.update = function(gameContext) {
 
     this.display.clear();
     this.calculateFPS(deltaTime);
-    this.follow({"x": 0, "y": 0}, 2 * deltaTime, 1);
+    //this.follow({"x": 0, "y": 0}, 2 * deltaTime, 1);
 
     if(Camera.DRAW_2D_MAP) {
         this.draw2DMap(gameContext);
