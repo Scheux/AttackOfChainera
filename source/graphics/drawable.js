@@ -27,6 +27,17 @@ Drawable.prototype.setPosition = function(positionVector) {
     this.position = positionVector;
 }
 
+Drawable.prototype.setPositionRaw = function(positionX, positionY) {
+    if(positionX === undefined || positionY === undefined) {
+        console.warn(`PositionX or PositionY of ${this.DEBUG_NAME} cannot be undefined! Returning...`);
+        return;
+    }
+
+    this.position.x = positionX;
+    this.position.y = positionY;
+}
+
+
 Drawable.prototype.openFamily = function(customName) {
     if(this.family) {
         console.warn(`Drawable ${this.DEBUG_NAME} already has family ${this.family.customName} open! Cannot create new family! Returning...`);

@@ -216,7 +216,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
 
         renderer.draw2DMapOutlines(gameContext);
 
-        if(!cursorTile || brush === undefined) {
+        if(!cursorTile || brush === undefined || currentLayerButtonID === LAYER_BUTTONS["LC"].id) {
             return;
         }
 

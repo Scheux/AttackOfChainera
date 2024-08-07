@@ -1,6 +1,6 @@
 {
     "config": { "id": "config", "directory": "assets/config", "source": "config.json" },
-    "entities": { "id": "entities", "directory": "assets/config", "source": "overworldEntities.json" },
+    "entities": { "id": "entities", "directory": "assets/config", "source": "entities.json" },
     "sprites": { "id": "sprites", "directory": "assets/sprites", "source": "sprites.json" },
     "tiles": { "id": "tiles", "directory": "assets/tiles", "source": "tiles.json" },
     "maps": { "id": "maps", "directory": "assets/maps", "source": "maps.json" },
