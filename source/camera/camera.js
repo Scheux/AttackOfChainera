@@ -56,7 +56,7 @@ Camera.prototype.drawSprites = function(gameContext) {
     }
 
     visibleSprites.sort((a, b) => (a.position.y) - (b.position.y));
-
+    console.log(visibleSprites)
     for(let i = 0; i < visibleSprites.length; i++) {
         const sprite = visibleSprites[i];
         sprite.receiveUpdate(realTime, timeStep);

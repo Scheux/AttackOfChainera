@@ -305,3 +305,11 @@ MapLoader.prototype.saveMap = function(gameMapID) {
     "flags" : {}
 }`;
 }
+
+MapLoader.prototype.hasLoadedMap = function(mapID) {
+    return this.loadedMaps.has(mapID);
+}
+
+MapLoader.prototype.hasCachedMap = function(mapID) {
+    return this.cachedMaps.has(mapID);
+}

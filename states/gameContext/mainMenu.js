@@ -29,6 +29,6 @@ MainMenuState.prototype.exit = function(stateMachine) {
     const { uiManager, client } = gameContext;
     const { musicPlayer } = client;
 
-    musicPlayer.swapTrack("surfing", 0.1);
+    //musicPlayer.swapTrack("surfing", 0.1);
     uiManager.unparseUI("MAIN_MENU", gameContext);
 }

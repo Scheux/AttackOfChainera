@@ -98,35 +98,175 @@ GameContext.prototype.loadMap = async function(mapID) {
     }
 
     if(activeMapID) {
-
         if(activeMapID === mapID) {
             console.warn(`Map ${mapID} is already loaded and active! Returning...`);
             return false;
         }
 
-        this.unloadMap(activeMapID); //TODO: ADD dynamic loading system.
+        this.unloadProcess(mapID);
     }
 
     this.mapLoader.setActiveMap(mapID);
     this.tileManager.workStart(gameMap.tiles);
-    this.spriteManager.workStart();
-    this.entityManager.workStart();
-    this.renderer.loadViewport(gameMap.width, gameMap.height);
+    this.renderer.loadViewport(gameMap.width, gameMap.height); //Muss das sein? Eigentlich nicht, wenn immer auf Spieler gecentered.
     this.client.musicPlayer.loadTrack(gameMap.music);
-    this.tileManager.loadTiles(gameMap.width, gameMap.height);
+    this.tileManager.loadTiles(gameMap.width, gameMap.height); //Das frisst nur RAM.
     this.actionQueue.workStart();
+
+    for(const [entityID, entity] of this.entityManager.entities) {
+        const positionComponent = entity.components.getComponent(PositionComponent);
+
+        if(positionComponent.mapID === mapID) {
+            this.enableEntity(entityID, 0, 0);
+        }
+
+        for(const connection of gameMap.connections) {
+            if(connection.id === positionComponent.mapID) {
+                const offsetX = Camera.TILE_WIDTH * connection.startX;
+                const offsetY = Camera.TILE_HEIGHT * connection.startY;
+                
+                this.enableEntity(entityID, offsetX, offsetY);
+                break;
+            }
+        }
+    }
 
     return true;
 }
 
-GameContext.prototype.unloadMap = function(mapID) {
-    this.mapLoader.unloadMap(mapID);
-    this.tileManager.workEnd();
-    this.spriteManager.workEnd();
-    this.entityManager.workEnd();
+GameContext.prototype.unloadProcess = function(mapID) {
+    const coreMap = this.mapLoader.getLoadedMap(mapID);
+    const mapsToIgnore = new Set([mapID]);
 
-    //TODO find what map was unloaded and check where the sprites were from.
-    //unload only the sprites that were in the now unloaded map!
+    for(const key of coreMap.connections) {
+        const connection = coreMap.connections[key];
+        mapsToIgnore.add(connection.id);
+    }
+
+    for(const [mapID, map] of this.mapLoader.loadedMaps) {
+        if(mapsToIgnore.has(mapID)) {
+            continue;
+        }
+
+        this.mapLoader.unloadMap(mapID);
+       
+        for(const [entityID, entity] of this.entityManager.entities) {
+            const positionComponent = entity.components.getComponent(PositionComponent);
+
+            if(positionComponent.mapID !== mapID) {
+                continue;
+            }
+
+            this.disableEntity(entityID);
+        }
+    }
+}
+
+GameContext.prototype.removeEntity = function(mapID, entityID) {
+    const gameMap = this.mapLoader.getCachedMap(mapID);
+
+    if(!gameMap || !entityID) {
+        console.warn(`Entity deletion failed! Returning...`);
+        return;
+    }
+
+    const entity = this.entityManager.getEntity(entityID);
+
+    if(!entity) {
+        console.warn(`Entity deletion failed! Returning...`);
+        return;
+    }
+
+    const positionComponent = entity.components.getComponent(PositionComponent);
+    const spriteComponent = entity.components.getComponent(SpriteComponent);
+
+    this.entityManager.removeEntity(entityID);
+    this.spriteManager.removeSprite(spriteComponent.spriteID);
+    this.tileManager.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
+}
+
+GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY) {
+    if(!this.mapLoader.mapTypes[mapID] || tileX === undefined || tileY === undefined || !this.entityManager.entityTypes[entityTypeID]) {
+        console.warn(`Entity creation failed! Returning...`);
+        return;
+    }
+
+    const entityType = this.entityManager.entityTypes[entityTypeID];
+    const entity = this.entityManager.createEntity(entityTypeID);
+    const entityID = entity.getID();
+    const positionVector = tileToPosition_corner(tileX, tileY);
+
+    const positionComponent = new PositionComponent();
+    const spriteComponent = new SpriteComponent();
+
+    positionComponent.positionX = positionVector.x;
+    positionComponent.positionY = positionVector.y;
+    positionComponent.tileX = tileX;
+    positionComponent.tileY = tileY;
+    positionComponent.dimX = entityType.dimX;
+    positionComponent.dimY = entityType.dimY;
+    positionComponent.mapID = mapID;
+
+    entity.components.addComponent(positionComponent);
+    entity.components.addComponent(spriteComponent);  
+    
+    switch(entityType.objectType) {
+        case "Player": {
+            break;
+        }
+
+        default: {
+            console.warn(`objectType ${entityType.objectType} is not valid!`);
+            break;
+        }
+    }
+
+    //TODO: What if entities are outside the main map?
+    this.tileManager.setPointers(tileX, tileY, entityType.dimX, entityType.dimY, entityID);
+
+    return entityID;
+}
+
+GameContext.prototype.enableEntity = function(entityID, mapOffsetX, mapOffsetY) {
+    const entity = this.entityManager.getEntity(entityID);
+
+    if(!entity) {
+        return;
+    }
+
+    this.entityManager.changeEntityState(entityID, true);
+
+    const entityType = entity.config;
+    const [spriteSetID, spriteAnimationID] = entityType.sprites["walk_down"];
+    const sprite = this.spriteManager.createSprite(spriteSetID, true, spriteAnimationID);
+    const spriteID = sprite.getID();
+
+    const positionComponent = entity.components.getComponent(PositionComponent);
+    const spriteComponent = entity.components.getComponent(SpriteComponent);
+
+    spriteComponent.spriteID = spriteID;
+    spriteComponent.spriteType = "walk_down";
+
+    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (positionX, positionY) => sprite.setPositionRaw(positionX, positionY));
+    entity.events.emit(Entity.EVENT_POSITION_UPDATE, positionComponent.positionX + mapOffsetX, positionComponent.positionY + mapOffsetY);
+}
+
+GameContext.prototype.disableEntity = function(entityID) {
+    const entity = this.entityManager.getEntity(entityID);
+
+    if(!entity) {
+        return;
+    }
+
+    const positionComponent = entity.components.getComponent(PositionComponent);
+    const spriteComponent = entity.components.getComponent(SpriteComponent);
+
+    this.entityManager.changeEntityState(entityID, false);
+    this.spriteManager.removeSprite(spriteComponent.spriteID);
+
+    spriteComponent.spriteID = null;
+
+    entity.events.unsubscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT");
 }
 
 GameContext.prototype.getViewportTile = function() {
@@ -184,76 +324,4 @@ GameContext.prototype.getConfigElement = function(key) {
     }
 
     return this.config[key];
-}
-
-GameContext.prototype.removeEntity = function(mapID, entityID) {
-    const gameMap = this.mapLoader.getCachedMap(mapID);
-
-    if(!gameMap || !entityID) {
-        console.warn(`Entity deletion failed! Returning...`);
-        return;
-    }
-
-    const entity = this.entityManager.getEntity(entityID);
-
-    if(!entity) {
-        console.warn(`Entity deletion failed! Returning...`);
-        return;
-    }
-
-    const positionComponent = entity.components.getComponent(PositionComponent);
-    const spriteComponent = entity.components.getComponent(SpriteComponent);
-
-    this.entityManager.removeEntity(entityID);
-    this.spriteManager.removeSprite(spriteComponent.spriteID);
-    this.tileManager.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
-}
-
-GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY) {
-    const gameMap = this.mapLoader.getCachedMap(mapID);
-
-    if(!gameMap || tileX === undefined || tileY === undefined || !this.entityManager.entityTypes[entityTypeID]) {
-        console.warn(`Entity creation failed! Returning...`);
-        return;
-    }
-
-    const entityType = this.entityManager.entityTypes[entityTypeID];
-    const entity = this.entityManager.createEntity(entityTypeID);
-    const entityID = entity.getID();
-    const positionVector = tileToPosition_corner(tileX, tileY);
-
-    const [spriteSetID, spriteAnimationID] = entityType.sprites["walk_down"];
-    const sprite = this.spriteManager.createSprite(spriteSetID, true, spriteAnimationID);
-    const spriteID = sprite.getID();
-
-    sprite.setPositionRaw(positionVector.x, positionVector.y);
-
-    const positionComponent = new PositionComponent();
-    const spriteComponent = new SpriteComponent();
-
-    positionComponent.positionX = positionVector.x;
-    positionComponent.positionY = positionVector.y;
-    positionComponent.tileX = tileX;
-    positionComponent.tileY = tileY;
-    positionComponent.dimX = entityType.dimX;
-    positionComponent.dimY = entityType.dimY;
-    spriteComponent.spriteID = spriteID;
-
-    entity.components.addComponent(positionComponent);
-    entity.components.addComponent(spriteComponent);  
-    
-    switch(entityType.objectType) {
-        case "Player": {
-            break;
-        }
-
-        default: {
-            console.warn(`objectType ${entityType.objectType} is not valid!`);
-            break;
-        }
-    }
-
-    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (positionX, positionY) => sprite.setPositionRaw(positionX, positionY));
-
-    this.tileManager.setPointers(tileX, tileY, entityType.dimX, entityType.dimY, entityID);
 }

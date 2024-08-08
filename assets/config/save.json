@@ -1,0 +1,15 @@
+{
+    "coreMap": "CORE",
+    "cachedMaps": ["CORE", "SUS", "AMOGUS"], 
+    "player": {
+        "money": 0,
+        "monsters": []
+    },
+    "flags": {
+        "FLAG": false
+    },
+    "entities": [
+        { "id": "0", "map": "CORE", "entityType": "player", "tileX": 0, "tileY": 0, "spriteType": "idle_down" },
+        { "id": "0", "map": "SUS", "entityType": "amogus", "tileX": 0, "tileY": 0, "spriteType": "idle_down" }
+    ]
+}

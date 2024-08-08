@@ -27,8 +27,6 @@ SpriteManager.prototype.loadTileSprites = function(tileSprites) {
     this.tileSprites = tileSprites;
 }
 
-SpriteManager.prototype.workStart = function() {}
-
 SpriteManager.prototype.workEnd = function() {
     this.rootSprites = [];
     this.sprites.clear();

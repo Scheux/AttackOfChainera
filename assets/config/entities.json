@@ -26,5 +26,25 @@
         },
         "sounds": { 
         } 
+    },
+    "rival": {
+        "id": "rival",
+        "name": "RIVAL",
+        "dimX": 1,
+        "dimY": 1,
+        "dimZ": 0,
+        "objectType": "NPC",
+        "sprites": { 
+            "idle_up": ["characters", "rival_idle_up"],
+            "idle_down": ["characters", "rival_idle_down"],
+            "idle_left": ["characters", "rival_idle_left"],
+            "idle_right": ["characters", "rival_idle_right"], 
+            "walk_up": ["characters", "rival_walk_up"],
+            "walk_down": ["characters", "rival_walk_down"],
+            "walk_left": ["characters", "rival_walk_left"],
+            "walk_right": ["characters", "rival_walk_right"]
+        },
+        "sounds": { 
+        } 
     }
 }

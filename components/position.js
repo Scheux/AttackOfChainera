@@ -6,4 +6,5 @@ export const PositionComponent = function() {
     this.dimX = 0;
     this.dimY = 0;
     this.rotation = 0;
+    this.mapID = null;
 }

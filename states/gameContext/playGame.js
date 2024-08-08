@@ -1,4 +1,3 @@
-import { Cursor } from "../../source/client/cursor.js";
 import { State } from "../../source/state/state.js";
 
 const PLAY_GAME_ID = "PLAY_GAME";
@@ -16,8 +15,11 @@ PlayGameState.prototype.enter = async function(stateMachine) {
 
     uiManager.parseUI("PLAY_GAME", gameContext);
     
+    gameContext.createEntity("MAP", "player", 5, 5);
+    gameContext.createEntity("MAP_2", "rival", 6, 5);
     await gameContext.loadMap("MAP");
 
+    /*
     spriteManager.createSprite("player", true, "walk_down").setPositionRaw(0, 0);
     spriteManager.createSprite("player", true, "walk_up").setPositionRaw(0, 16);
     spriteManager.createSprite("player", true, "walk_right").setPositionRaw(16, 0);
@@ -27,8 +29,9 @@ PlayGameState.prototype.enter = async function(stateMachine) {
     spriteManager.createSprite("player", true, "bike_up").setPositionRaw(0, 48);
     spriteManager.createSprite("player", true, "bike_right").setPositionRaw(16, 32);
     spriteManager.createSprite("player", true, "bike_left").setPositionRaw(32, 32);
+    */
 
-    gameContext.createEntity("MAP", "player", 5, 5);
+    //gameContext.loadMap("MAP_2");
 }
 
 PlayGameState.prototype.exit = function(stateMachine) {
