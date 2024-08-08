@@ -6,7 +6,7 @@ import { EntityManager } from "./source/entity/entityManager.js";
 import { EventEmitter } from "./source/events/eventEmitter.js";
 import { SpriteManager } from "./source/graphics/spriteManager.js";
 import { UIManager } from "./source/ui/uiManager.js";
-import { getViewportTile, tileToPosition_corner } from "./source/helpers.js";
+import { getViewportTile, saveTemplateAsFile, tileToPosition_corner } from "./source/helpers.js";
 import { MapLoader } from "./source/map/mapLoader.js";
 import { StateMachine } from "./source/state/stateMachine.js";
 import { TileManager } from "./source/tile/tileManager.js";
@@ -87,6 +87,10 @@ GameContext.prototype.loadResources = function(resources) {
     this.mapLoader.loadMapTypes(resources.maps);
     this.spriteManager.loadTileSprites(resources.tiles);
     this.spriteManager.loadSpriteTypes(resources.sprites);
+
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "s", () => {
+        this.saveGame();
+    })
 }
 
 //SCRAP! When loading a map in, always check if any of the entities of gameMap.entities has a "reset" flag
@@ -94,20 +98,64 @@ GameContext.prototype.loadResources = function(resources) {
 //if a map gets unloaded and an entity has the "reset" flag, that entity gets deleted. straight up. bye-bye.
 
 GameContext.prototype.saveGame = function() {
-    //goes through every entity of the entityManager and saves it to an array
-    // -> { type, map, tileX, tileY, id, sprite } sprite for seamlessness when loading
-    //also saves this.mapCache
-    //also saves this.mapLoader.getActiveMapID()
-    //also saves playerData. <- define what that is.
+    const entityData = [];
+    const mapCache = {};
+    
+    for (const key in this.mapCache) {
+        const cacheState = this.mapCache[key];
+        mapCache[key] = cacheState;
+    }
+    
+    for (const [entityID, entity] of this.entityManager.entities) {
+        const positionComponent = entity.components.getComponent(PositionComponent);
+        const spriteComponent = entity.components.getComponent(SpriteComponent);
+
+        entityData.push({
+            type: entity.config.id,
+            map: positionComponent.mapID,
+            tileX: positionComponent.tileX,
+            tileY: positionComponent.tileY,
+            spriteType: spriteComponent.spriteType
+        });
+    }
+    
+    const formattedEntityData = entityData.map(data => 
+        `{ "type": "${data.type}", "map": "${data.map}", "tileX": ${data.tileX}, "tileY": ${data.tileY}, "spriteType": "${data.spriteType}" }`
+    ).join(',\n        ');
+    
+    const formattedMapCache = Object.entries(mapCache)
+        .map(([key, value]) => `"${key}": ${value}`)
+        .join(', ');
+    
+    const jsonString = 
+`{
+    "entityData": [
+        ${formattedEntityData}
+    ],
+    "mapCache": { ${formattedMapCache} },
+    "mapID": "${this.mapLoader.getActiveMapID()}",
+    "playerData": null
+}`;
+    
+    saveTemplateAsFile("save.json", jsonString);
 }
 
-GameContext.prototype.loadGame = function() {
-    //1. Load every entity of the saved entities in. (create)
-    //2. Load the mapCache in, to stop redundant entity creations.
-    //3. Load the saved active map in.
-    //4. Function will automatically assign the entities.
+GameContext.prototype.loadGame = async function(gameData) {
+    const { entityData, mapID, mapCache, playerData } = gameData;
+    
+    for(const entity of entityData) {
+        const { type, map, tileX, tileY, spriteType } = entity;
 
+        if(!mapCache[map]) {
+            console.warn(`Error loading entity! Entity is on map (${map}) that was never cached! Continuing...`);
+            continue;
+        }
 
+        this.createEntity(map, type, tileX, tileY, spriteType);
+    }
+
+    this.mapCache = mapCache;
+    await this.loadMap(mapID);
 }
 
 GameContext.prototype.newGame = function() {
@@ -147,7 +195,7 @@ GameContext.prototype.loadMap = async function(mapID) {
 
     if(!this.mapCache[mapID]) {
         for(const entityConfig of gameMap.entities) {
-            this.createEntity(mapID, entityConfig.type, entityConfig.tileX, entityConfig.tileY);
+            this.createEntity(mapID, entityConfig.type, entityConfig.tileX, entityConfig.tileY, "idle_down");
         }
 
         this.mapCache[mapID] = 1;
@@ -158,7 +206,7 @@ GameContext.prototype.loadMap = async function(mapID) {
             const connectedMap = this.mapLoader.getLoadedMap(connection.id);
 
             for(const entityConfig of connectedMap.entities) {
-                this.createEntity(connection.id, entityConfig.type, entityConfig.tileX, entityConfig.tileY);
+                this.createEntity(connection.id, entityConfig.type, entityConfig.tileX, entityConfig.tileY, "idle_down");
             }
 
             this.mapCache[connection.id] = 1;
@@ -250,8 +298,8 @@ GameContext.prototype.removeEntity = function(mapID, entityID) {
     this.tileManager.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
 }
 
-GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY) {
-    if(!this.mapLoader.mapTypes[mapID] || tileX === undefined || tileY === undefined || !this.entityManager.entityTypes[entityTypeID]) {
+GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY, spriteType) {
+    if(!this.mapLoader.mapTypes[mapID] || tileX === undefined || spriteType === undefined || tileY === undefined || !this.entityManager.entityTypes[entityTypeID]) {
         console.warn(`Entity creation failed! Returning...`);
         return;
     }
@@ -271,6 +319,7 @@ GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY)
     positionComponent.dimX = entityType.dimX;
     positionComponent.dimY = entityType.dimY;
     positionComponent.mapID = mapID;
+    spriteComponent.spriteType = spriteType;
 
     entity.components.addComponent(positionComponent);
     entity.components.addComponent(spriteComponent);  
@@ -314,16 +363,15 @@ GameContext.prototype.enableEntity = function(entityID) {
 
     this.entityManager.changeEntityState(entityID, true);
 
-    const entityType = entity.config;
-    const [spriteSetID, spriteAnimationID] = entityType.sprites["walk_down"];
-    const sprite = this.spriteManager.createSprite(spriteSetID, true, spriteAnimationID);
-    const spriteID = sprite.getID();
-
     const positionComponent = entity.components.getComponent(PositionComponent);
     const spriteComponent = entity.components.getComponent(SpriteComponent);
 
+    const entityType = entity.config;
+    const [spriteSetID, spriteAnimationID] = entityType.sprites[spriteComponent.spriteType];
+    const sprite = this.spriteManager.createSprite(spriteSetID, true, spriteAnimationID);
+    const spriteID = sprite.getID();
+
     spriteComponent.spriteID = spriteID;
-    spriteComponent.spriteType = "walk_down";
 }
 
 GameContext.prototype.disableEntity = function(entityID) {

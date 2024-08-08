@@ -12,9 +12,11 @@ export const Entity = function(id, DEBUG_NAME) {
 
     this.events = new EventEmitter();
     this.events.listen(Entity.EVENT_POSITION_UPDATE);
+    this.events.listen(Entity.EVENT_TRANSITION_MAP);
 }
 
 Entity.EVENT_POSITION_UPDATE = 0;
+Entity.EVENT_TRANSITION_MAP = 1; 
 
 Entity.prototype.update = function(gameContext) {
     this.states.update(gameContext);

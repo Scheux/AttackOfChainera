@@ -48,7 +48,8 @@ MapLoader.prototype.loadMap = async function(mapID) {
         const map = this.cachedMaps.get(mapID);
 
         this.loadedMaps.set(mapID, map);
-        this.loadConnectedMaps(map.connections);
+        await this.loadConnectedMaps(map.connections);
+        this.loadMapConnections(mapID);
         return;
     }
 
@@ -67,12 +68,11 @@ MapLoader.prototype.loadMap = async function(mapID) {
         this.cachedMaps.set(mapID, gameMap);
 
         await this.loadConnectedMaps(mapFile.connections);
+        this.loadMapConnections(mapID);
     } catch (error) {
         console.error(error, `Error fetching map file! Returning...`);
         return;
     }
-
-    this.loadMapConnections(mapID);
 }
 
 MapLoader.prototype.loadConnectedMaps = async function(connections) {

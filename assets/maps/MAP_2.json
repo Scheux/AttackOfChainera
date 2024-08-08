@@ -53,7 +53,6 @@
         ]
     },
     "connections": [
-        { "type": "west", "id": "MAP", "scroll": -2}
     ]
     ,
     "entities": [
