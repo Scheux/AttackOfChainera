@@ -54,5 +54,9 @@
     },
     "connections": [
         { "type": "east", "id": "MAP_2", "scroll": 2}
+    ],
+    "entities": [
+        { "type": "player", "tileX": 4, "tileY": 4, "isResetting": true },
+        { "type": "rival", "tileX": 5, "tileY": 6, "isResetting": true }
     ]
 }

@@ -52,5 +52,13 @@
             [null,null,null,null,null,null,null,null,null,null]
         ]
     },
-    "connections": []
+    "connections": [
+        { "type": "west", "id": "MAP", "scroll": -2}
+    ]
+    ,
+    "entities": [
+        { "type": "rival", "tileX": 5, "tileY": 6, "isResetting": true },
+        { "type": "rival", "tileX": 6, "tileY": 6, "isResetting": true },
+        { "type": "rival", "tileX": 7, "tileY": 6, "isResetting": true }
+    ]
 }

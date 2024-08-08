@@ -68,6 +68,8 @@ export const GameContext = function() {
             element.events.emit(UIElement.EVENT_CLICKED);
         }
     });
+
+    this.mapCache = {}; //list of all maps that have been loaded
 }
 
 GameContext.STATE_MAIN_MENU = 0;
@@ -87,31 +89,81 @@ GameContext.prototype.loadResources = function(resources) {
     this.spriteManager.loadSpriteTypes(resources.sprites);
 }
 
+//SCRAP! When loading a map in, always check if any of the entities of gameMap.entities has a "reset" flag
+//if that flag exists, then create a new entity based on that flag
+//if a map gets unloaded and an entity has the "reset" flag, that entity gets deleted. straight up. bye-bye.
+
+GameContext.prototype.saveGame = function() {
+    //goes through every entity of the entityManager and saves it to an array
+    // -> { type, map, tileX, tileY, id, sprite } sprite for seamlessness when loading
+    //also saves this.mapCache
+    //also saves this.mapLoader.getActiveMapID()
+    //also saves playerData. <- define what that is.
+}
+
+GameContext.prototype.loadGame = function() {
+    //1. Load every entity of the saved entities in. (create)
+    //2. Load the mapCache in, to stop redundant entity creations.
+    //3. Load the saved active map in.
+    //4. Function will automatically assign the entities.
+
+
+}
+
+GameContext.prototype.newGame = function() {
+    //1. Creates a new game with all the cutscenes, ect.
+    //2. FUN
+}
+
+/**
+ * Loads a map with all its neighbors and entities.
+ * 
+ * @param {string} mapID The ID of the map to be loaded.
+ * @returns {boolean} If the loading process was successful.
+ */
 GameContext.prototype.loadMap = async function(mapID) {
     await this.mapLoader.loadMap(mapID);
     const gameMap = this.mapLoader.getLoadedMap(mapID);
-    const activeMapID = this.mapLoader.getActiveMapID();
+    const oldActiveMapID = this.mapLoader.getActiveMapID();
 
     if(!gameMap) {
         console.warn(`Error loading map! Returning...`);
         return false;
     }
 
-    if(activeMapID) {
-        if(activeMapID === mapID) {
+    if(oldActiveMapID) {
+        if(oldActiveMapID === mapID) {
             console.warn(`Map ${mapID} is already loaded and active! Returning...`);
             return false;
         }
-
+        
         this.unloadProcess(mapID);
     }
 
     this.mapLoader.setActiveMap(mapID);
-    this.tileManager.workStart(gameMap.tiles);
-    this.renderer.loadViewport(gameMap.width, gameMap.height); //Muss das sein? Eigentlich nicht, wenn immer auf Spieler gecentered.
     this.client.musicPlayer.loadTrack(gameMap.music);
-    this.tileManager.loadTiles(gameMap.width, gameMap.height); //Das frisst nur RAM.
+    this.tileManager.workStart(gameMap.tiles);
     this.actionQueue.workStart();
+
+    if(!this.mapCache[mapID]) {
+        for(const entityConfig of gameMap.entities) {
+            this.createEntity(mapID, entityConfig.type, entityConfig.tileX, entityConfig.tileY);
+        }
+
+        this.mapCache[mapID] = 1;
+    }
+
+    for(const connection of gameMap.connections) {
+        if(!this.mapCache[connection.id]) {
+            const connectedMap = this.mapLoader.getLoadedMap(connection.id);
+
+            for(const entityConfig of connectedMap.entities) {
+                this.createEntity(connection.id, entityConfig.type, entityConfig.tileX, entityConfig.tileY);
+            }
+
+            this.mapCache[connection.id] = 1;
+        }
+    }
 
     for(const [entityID, entity] of this.entityManager.entities) {
         const positionComponent = entity.components.getComponent(PositionComponent);
@@ -137,30 +189,39 @@ GameContext.prototype.loadMap = async function(mapID) {
     return true;
 }
 
+/**
+ * Unloads every loaded map that is no longer needed.
+ * Also unloads their entities.
+ * 
+ * @param {string} mapID The id of the new main map.
+ */
 GameContext.prototype.unloadProcess = function(mapID) {
     const coreMap = this.mapLoader.getLoadedMap(mapID);
-    const mapsToIgnore = new Set([mapID]);
+    const keptMaps = new Set([mapID]);
+    const removedMaps = new Set();
 
     for(const connection of coreMap.connections) {
-        mapsToIgnore.add(connection.id);
+        keptMaps.add(connection.id);
     }
 
     for(const [mapID, map] of this.mapLoader.loadedMaps) {
-        if(mapsToIgnore.has(mapID)) {
+        if(keptMaps.has(mapID)) {
             continue;
         }
 
         this.mapLoader.unloadMap(mapID);
        
-        for(const [entityID, entity] of this.entityManager.entities) {
-            const positionComponent = entity.components.getComponent(PositionComponent);
+        removedMaps.add(mapID);
+    }
 
-            if(positionComponent.mapID !== mapID) {
-                continue;
-            }
+    for(const [entityID, entity] of this.entityManager.entities) {
+        const positionComponent = entity.components.getComponent(PositionComponent);
 
-            this.disableEntity(entityID);
+        if(!removedMaps.has(positionComponent.mapID)) {
+            continue;
         }
+
+        this.disableEntity(entityID);
     }
 }
 
@@ -184,6 +245,8 @@ GameContext.prototype.removeEntity = function(mapID, entityID) {
 
     this.entityManager.removeEntity(entityID);
     this.spriteManager.removeSprite(spriteComponent.spriteID);
+
+    //TODO: What if entities are outside the main map?
     this.tileManager.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
 }
 
@@ -287,10 +350,6 @@ GameContext.prototype.getViewportTile = function() {
     return viewportTile;
 }
 
-GameContext.prototype.saveGame = function() {
-
-}
-
 GameContext.prototype.setupPlayer3D = function() {
     this.player = null;
     const position3D = this.player.position3D;
@@ -336,3 +395,6 @@ GameContext.prototype.getConfigElement = function(key) {
 
     return this.config[key];
 }
+
+//TODO: When first loading a map, load the entities.
+//TODO: Tile manager no longer operates on this.tiles. <- too much ram!

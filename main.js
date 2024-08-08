@@ -31,3 +31,5 @@ ResourceLoader.loadConfigFiles("assets/files.json").then(async files => {
 //it checks if that maps id is in the cachedMapsList. if the id is NOT in the list, the entity can use the unloaded entity data to check if it has passing rights
 //if the map is IN the cachedList, then the entity has to get everyEntity on that map (check if positionComponent.mapID === targetMapID). Then it checks if any entity on the same map
 //blocks its movement
+
+//flag: is resetting: if an entity has this flag, it gets reset once the map gets loaded again.

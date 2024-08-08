@@ -14,9 +14,6 @@ PlayGameState.prototype.enter = async function(stateMachine) {
     const { uiManager, spriteManager } = gameContext;
 
     uiManager.parseUI("PLAY_GAME", gameContext);
-    
-    gameContext.createEntity("MAP", "player", 5, 5);
-    gameContext.createEntity("MAP_2", "rival", 6, 5);
     await gameContext.loadMap("MAP");
     /*
     spriteManager.createSprite("player", true, "walk_down").setPositionRaw(0, 0);

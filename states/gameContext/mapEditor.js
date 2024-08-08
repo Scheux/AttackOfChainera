@@ -1,6 +1,6 @@
 import { Camera } from "../../source/camera/camera.js";
 import { Cursor } from "../../source/client/cursor.js";
-import { saveTemplateAsFile } from "../../source/helpers.js";
+import { getViewportTile, saveTemplateAsFile } from "../../source/helpers.js";
 import { MapEditor } from "../../source/map/mapEditor.js";
 import { State } from "../../source/state/state.js";
 import { UIElement } from "../../source/ui/uiElement.js";
@@ -29,7 +29,7 @@ MapEditorState.prototype.constructor = MapEditorState;
 MapEditorState.prototype.enter = function(stateMachine) {
     const gameContext = stateMachine.getContext();
     const editor = new MapEditor();
-    const { mapLoader, client, uiManager, spriteManager, renderer, timer, tileManager } = gameContext;
+    const { mapLoader, client, uiManager, spriteManager, renderer, timer } = gameContext;
     const { cursor, musicPlayer } = client;
 
     uiManager.unparseUI("FPS_COUNTER", gameContext);
@@ -163,16 +163,16 @@ MapEditorState.prototype.enter = function(stateMachine) {
     }
 
     const placeTile = () => {
-        const cursorTile = gameContext.getViewportTile();
+        const cursorTile = getViewportTile(client.cursor.position, renderer.viewportX, renderer.viewportY);
         const gameMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
         const brush = editor.getSelectedBrush();
 
-        if(!cursorTile || !gameMap || brush === undefined) {
+        if(!gameMap || brush === undefined) {
             return;
         }
 
         if(brush === null) {
-            gameMap.placeTile(null, currentLayer, cursorTile.position.x, cursorTile.position.y);
+            gameMap.placeTile(null, currentLayer, cursorTile.x, cursorTile.y);
             return;
         }
 
@@ -185,44 +185,44 @@ MapEditorState.prototype.enter = function(stateMachine) {
             for(let i = 0; i < pattern.length; i++) {
                 for(let j = 0; j < pattern[i].length; j++) {
                     const patternFrameID = pattern[i][j];
-                    gameMap.placeTile([tileSetID, patternFrameID], currentLayer, cursorTile.position.x + j, cursorTile.position.y + i);
+                    gameMap.placeTile([tileSetID, patternFrameID], currentLayer, cursorTile.x + j, cursorTile.y + i);
                 }
             }
 
             return;
         }
 
-        gameMap.placeTile([tileSetID, frameID], currentLayer, cursorTile.position.x, cursorTile.position.y);
+        gameMap.placeTile([tileSetID, frameID], currentLayer, cursorTile.x, cursorTile.y);
     }
 
     const incrementCollisionIndex = () => {
-        const cursorTile = gameContext.getViewportTile();
+        const cursorTile = getViewportTile(client.cursor.position, renderer.viewportX, renderer.viewportY);
         const gameMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
         const collisionTypes = gameContext.getConfigElement("collisionTypes");
         const collisionTypesKeys = Object.keys(collisionTypes);
 
-        if(!cursorTile || !gameMap) {
+        if(!gameMap) {
             return;
         }
 
-        const currentIndex = gameMap.getTile("collision", cursorTile.position.x, cursorTile.position.y);
+        const currentIndex = gameMap.getTile("collision", cursorTile.x, cursorTile.y);
         const nextIndex = currentIndex + 1;
 
         if(nextIndex > collisionTypesKeys.length - 1) {
-            gameMap.placeTile(0, "collision", cursorTile.position.x, cursorTile.position.y);
+            gameMap.placeTile(0, "collision", cursorTile.x, cursorTile.y);
             return;
         }
 
-        gameMap.placeTile(nextIndex, "collision", cursorTile.position.x, cursorTile.position.y);
+        gameMap.placeTile(nextIndex, "collision", cursorTile.x, cursorTile.y);
     }
 
     renderer.events.subscribe(Camera.EVENT_MAP_RENDER_COMPLETE, MAP_EDITOR_ID, (renderer) => {
-        const cursorTile = gameContext.getViewportTile();
+        const cursorTile = getViewportTile(client.cursor.position, renderer.viewportX, renderer.viewportY);
         const brush = editor.getSelectedBrush();
 
         renderer.draw2DMapOutlines(gameContext);
 
-        if(!cursorTile || brush === undefined || currentLayerButtonID === LAYER_BUTTONS["LC"].id) {
+        if(brush === undefined || currentLayerButtonID === LAYER_BUTTONS["LC"].id) {
             return;
         }
 
@@ -230,8 +230,8 @@ MapEditorState.prototype.enter = function(stateMachine) {
         const tileHeight = Camera.TILE_HEIGHT * Camera.SCALE;
         const halfTileWidth = tileWidth / 2;
         const halfTileHeight = tileHeight / 2;
-        const renderX = cursorTile.position.x * tileWidth - renderer.viewportX * Camera.SCALE;
-        const renderY = cursorTile.position.y * tileHeight - renderer.viewportY * Camera.SCALE;
+        const renderX = cursorTile.x * tileWidth - renderer.viewportX * Camera.SCALE;
+        const renderY = cursorTile.y * tileHeight - renderer.viewportY * Camera.SCALE;
 
         if(brush === null) {
             renderer.display.context.globalAlpha = 0.7;
@@ -303,7 +303,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
         const maxElementsPerPage = AVAILABLE_BUTTON_SLOTS.length;
         const maxPagesNeeded = Math.ceil(editor.pageElements.length / maxElementsPerPage);
         const showMaxPagesNeeded = maxPagesNeeded === 0 ? 1 : maxPagesNeeded;
-        
+
         element.setText(`${editor.pageIndex + 1} / ${showMaxPagesNeeded}`);
     });
 
@@ -396,7 +396,6 @@ MapEditorState.prototype.enter = function(stateMachine) {
         }
 
         gameMap.resize(newWidth, newHeight);
-        tileManager.loadTiles(newWidth, newHeight);
         mapLoader.loadMapConnections(EDITOR_MAP_ID);
     }); 
 
