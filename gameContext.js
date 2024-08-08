@@ -117,15 +117,18 @@ GameContext.prototype.loadMap = async function(mapID) {
         const positionComponent = entity.components.getComponent(PositionComponent);
 
         if(positionComponent.mapID === mapID) {
-            this.enableEntity(entityID, 0, 0);
+            this.enableEntity(entityID);
+            this.updateEntityPositionEvent(entityID, 0, 0);
+            continue;
         }
 
         for(const connection of gameMap.connections) {
             if(connection.id === positionComponent.mapID) {
                 const offsetX = Camera.TILE_WIDTH * connection.startX;
                 const offsetY = Camera.TILE_HEIGHT * connection.startY;
-                
-                this.enableEntity(entityID, offsetX, offsetY);
+
+                this.enableEntity(entityID);
+                this.updateEntityPositionEvent(entityID, offsetX, offsetY);
                 break;
             }
         }
@@ -138,8 +141,7 @@ GameContext.prototype.unloadProcess = function(mapID) {
     const coreMap = this.mapLoader.getLoadedMap(mapID);
     const mapsToIgnore = new Set([mapID]);
 
-    for(const key of coreMap.connections) {
-        const connection = coreMap.connections[key];
+    for(const connection of coreMap.connections) {
         mapsToIgnore.add(connection.id);
     }
 
@@ -227,10 +229,23 @@ GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY)
     return entityID;
 }
 
-GameContext.prototype.enableEntity = function(entityID, mapOffsetX, mapOffsetY) {
+GameContext.prototype.updateEntityPositionEvent = function(entityID, mapOffsetX, mapOffsetY) {
     const entity = this.entityManager.getEntity(entityID);
 
-    if(!entity) {
+    const positionComponent = entity.components.getComponent(PositionComponent);
+    const spriteComponent = entity.components.getComponent(SpriteComponent);
+
+    const sprite = this.spriteManager.getSprite(spriteComponent.spriteID);
+
+    entity.events.unsubscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT");
+    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (positionX, positionY) => sprite.setPositionRaw(positionX + mapOffsetX, positionY + mapOffsetY));
+    entity.events.emit(Entity.EVENT_POSITION_UPDATE, positionComponent.positionX, positionComponent.positionY);
+}
+
+GameContext.prototype.enableEntity = function(entityID) {
+    const entity = this.entityManager.getEntity(entityID);
+
+    if(!entity || this.entityManager.activeEntities.has(entityID)) {
         return;
     }
 
@@ -246,15 +261,12 @@ GameContext.prototype.enableEntity = function(entityID, mapOffsetX, mapOffsetY) 
 
     spriteComponent.spriteID = spriteID;
     spriteComponent.spriteType = "walk_down";
-
-    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (positionX, positionY) => sprite.setPositionRaw(positionX, positionY));
-    entity.events.emit(Entity.EVENT_POSITION_UPDATE, positionComponent.positionX + mapOffsetX, positionComponent.positionY + mapOffsetY);
 }
 
 GameContext.prototype.disableEntity = function(entityID) {
     const entity = this.entityManager.getEntity(entityID);
 
-    if(!entity) {
+    if(!entity || !this.entityManager.activeEntities.has(entityID)) {
         return;
     }
 
@@ -265,7 +277,6 @@ GameContext.prototype.disableEntity = function(entityID) {
     this.spriteManager.removeSprite(spriteComponent.spriteID);
 
     spriteComponent.spriteID = null;
-
     entity.events.unsubscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT");
 }
 

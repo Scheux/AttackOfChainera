@@ -53,8 +53,6 @@
         ]
     },
     "connections": [
-        { "type": "north", "id": "MAP_2", "scroll": 0},
-        { "type": "east", "id": "MAP_2", "scroll": 2},
-        { "type": "west", "id": "MAP_2", "scroll": -2}
+        { "type": "east", "id": "MAP_2", "scroll": 2}
     ]
 }
