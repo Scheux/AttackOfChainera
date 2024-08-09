@@ -5,10 +5,10 @@
     "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
     "layers": {
         "collision": [
-            [1,0,0,0,0,0,0,0,1,0],
-            [0,1,0,0,0,0,1,0,0,0],
-            [0,0,0,0,0,0,0,1,0,0],
-            [0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,1,0,0,1,0],
+            [0,1,0,0,0,1,1,0,0,0],
+            [0,0,0,0,0,0,1,1,0,0],
+            [0,0,0,0,0,0,1,1,1,1],
             [1,1,1,1,0,0,0,0,0,0],
             [0,0,0,1,1,0,0,0,0,0],
             [0,0,0,0,0,1,1,1,1,1],
@@ -29,10 +29,10 @@
             [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
         ],
         "floor": [
-            [["overworld_day","tree_small"],null,null,null,null,["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tree_small"],["overworld_day","tall_grass"]],
-            [null,["overworld_day","tree_small"],null,null,null,null,["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"]],
-            [null,null,null,null,null,null,null,["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"]],
-            [null,null,null,null,null,null,null,null,["overworld_day","tall_grass"],["overworld_day","tree_small"]],
+            [["overworld_day","tree_small"],null,null,null,null,["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tree_small"],["overworld_day","tall_grass"]],
+            [null,["overworld_day","tree_small"],null,null,null,["overworld_day","tree_small"],["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"]],
+            [null,null,null,null,null,null,["overworld_day","tree_small"],["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"]],
+            [null,null,null,null,null,null,["overworld_day","sign"],["overworld_day","tree_small"],["overworld_day","tree_small"],["overworld_day","tree_small"]],
             [["overworld_day","tree_large_bottom"],["overworld_day","tree_large_bottom"],["overworld_day","tree_large_bottom"],["overworld_day","tree_large_bottom"],null,null,null,null,null,null],
             [null,null,null,["overworld_day","rock_small"],["overworld_day","tree_large_bottom"],null,null,null,null,null],
             [null,["overworld_day","tall_grass"],["overworld_day","tall_grass"],null,null,["overworld_day","cave_wall_nw"],["overworld_day","cave_wall_n"],["overworld_day","cave_wall_n"],["overworld_day","cave_wall_n"],["overworld_day","cave_wall_ne"]],
@@ -66,9 +66,10 @@
         [{},{},{},{},{},{},{},{},{},{}]
     ],
     "connections": [
-        { "type": "west", "id": "MAP", "scroll": -2}
+        { "type": "west", "id": "MAP", "scroll": -2 },
+        { "type": "north", "id": "MAP_3", "scroll": 0 }    
     ],
-    "entities": [
+    "entities" : [
         { "type": "rival", "tileX": 2, "tileY": 1 },
         { "type": "rival", "tileX": 4, "tileY": 1 },
         { "type": "rival", "tileX": 7, "tileY": 9 }

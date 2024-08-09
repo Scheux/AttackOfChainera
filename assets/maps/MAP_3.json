@@ -1,0 +1,75 @@
+{
+    "music": null,
+    "width": 10,
+    "height": 10,
+    "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
+    "layers": {
+        "collision": [
+            [0,0,0,0,0,0,0,0,0,0],
+            [1,1,0,0,0,0,1,1,1,1],
+            [1,1,0,0,0,0,1,0,0,1],
+            [0,0,0,0,0,0,1,0,0,1],
+            [1,1,0,0,0,0,1,0,0,1],
+            [1,1,0,0,0,0,1,1,1,1],
+            [0,0,0,0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1,0,0,1],
+            [1,1,0,0,0,1,0,0,0,0],
+            [0,0,0,0,0,1,0,0,0,0]
+        ],
+        "bottom": [
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
+        ],
+        "floor": [
+            [null,null,null,null,null,null,null,null,null,null],
+            [["overworld_day","rock_large_nw"],["overworld_day","rock_large_ne"],null,null,null,null,["overworld_day","fence_nw"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_ne"]],
+            [["overworld_day","rock_large_sw"],["overworld_day","rock_large_se"],null,null,null,null,["overworld_day","fence_w"],["overworld_day","flowers"],["overworld_day","tall_grass"],["overworld_day","fence_e"]],
+            [null,["overworld_day","tree_small_cut"],null,null,null,null,["overworld_day","fence_w"],["overworld_day","tall_grass"],["overworld_day","flowers"],["overworld_day","fence_e"]],
+            [["overworld_day","rock_large_nw"],["overworld_day","rock_large_ne"],null,null,null,null,["overworld_day","fence_w"],["overworld_day","flowers"],["overworld_day","tall_grass"],["overworld_day","fence_e"]],
+            [["overworld_day","rock_large_sw"],["overworld_day","rock_large_se"],null,null,null,null,["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"]],
+            [null,["overworld_day","tree_small_cut"],null,null,null,null,null,null,["overworld_day","tree_large_bottom"],["overworld_day","tree_large_top"]],
+            [["overworld_day","rock_large_nw"],["overworld_day","rock_large_ne"],null,null,null,["overworld_day","tree_small"],["overworld_day","tree_large_bottom"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tree_large_bottom"]],
+            [["overworld_day","rock_large_sw"],["overworld_day","rock_large_se"],null,null,null,["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"]],
+            [null,null,null,null,null,["overworld_day","tree_small"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"]]
+        ],
+        "top": [
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,["overworld_day","tree_large_top"],null],
+            [null,null,null,null,null,null,["overworld_day","tree_large_top"],null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,null,null,null]
+        ]
+    },
+    "tiles": [
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}]
+    ],
+    "connections": [
+        { "type": "south", "id": "MAP_2", "scroll": 0 }    
+    ],
+    "entities" : [
+        
+    ],
+    "flags" : {}
+}
