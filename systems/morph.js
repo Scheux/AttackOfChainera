@@ -1,4 +1,5 @@
 import { SpriteComponent } from "../components/sprite.js";
+import { Entity } from "../source/entity/entity.js";
 
 export const MorphSystem = function() {
     this.id = "MorphSystem";

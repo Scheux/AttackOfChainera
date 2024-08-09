@@ -1,3 +1,4 @@
+import { PositionComponent } from "../../components/position.js";
 import { EventEmitter } from "../events/eventEmitter.js";
 import { Canvas } from "./canvas.js";
 import { Raycaster } from "./raycaster.js";
@@ -22,6 +23,8 @@ export const Camera = function(screenWidth, screenHeight) {
     this.events.listen(Camera.EVENT_MAP_RENDER_COMPLETE);
 
     window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight));
+
+    this.loading = false;
 }
 
 Camera.DRAW_2D_MAP = true;
@@ -60,7 +63,7 @@ Camera.prototype.drawSprites = function(gameContext) {
     for(let i = 0; i < visibleSprites.length; i++) {
         const sprite = visibleSprites[i];
         sprite.receiveUpdate(realTime, timeStep);
-        sprite.draw(this.display.context, this.viewportX, this.viewportY, 0, 0);
+        sprite.draw(this.display.context, this.viewportX, this.viewportY, 0, -2);
     }
 }
 
@@ -86,7 +89,7 @@ Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileGraphics) {
 }
 
 Camera.prototype.drawCollisionLayer = function(gameContext, gameMap, layerID, startX, startY, endX, endY) {
-    const collisionTypes = gameContext.getConfigElement("collisionTypes");
+    const collisionTypes = gameContext.getType("collisionTypes");
     const layer = gameMap.layers[layerID];
     const opacity = gameMap.layerOpacity[layerID];
 
@@ -264,7 +267,11 @@ Camera.prototype.update = function(gameContext) {
 
     this.display.clear();
     this.calculateFPS(deltaTime);
-    //this.follow({"x": 0, "y": 0}, 2 * deltaTime, 1);
+
+    if(gameContext.player && !this.loading) {
+        const positionComponent = gameContext.player.components.getComponent(PositionComponent);
+        this.follow(positionComponent.positionX, positionComponent.positionY, 2 * deltaTime, 1);
+    }
 
     if(Camera.DRAW_2D_MAP) {
         this.draw2DMap(gameContext);
@@ -371,7 +378,7 @@ Camera.prototype.resizeViewport = function(width, height) {
     this.viewportWidth = width;
     this.viewportHeight = height;
 
-    this.loadViewport(this.mapWidth, this.mapHeight);
+    //this.loadViewport(this.mapWidth, this.mapHeight);
     this.display.resize(width, height);
 
     if(this.raycaster) {
@@ -392,19 +399,20 @@ Camera.prototype.getViewportHeight = function() {
     return this.viewportHeight/Camera.SCALE;
 }
 
-Camera.prototype.follow = function(position, smoothFactor, threshold) {
-    const targetX = position.x - this.getViewportWidth() / 2;
-    const targetY = position.y - this.getViewportHeight() / 2;
+Camera.prototype.follow = function(positionX, positionY, smoothFactor, threshold) {
+    const targetX = positionX - this.getViewportWidth() / 2;
+    const targetY = positionY - this.getViewportHeight() / 2;
+
     const distanceX = targetX - this.viewportX;
     const distanceY = targetY - this.viewportY;
 
-    if (Math.abs(distanceX) < threshold && Math.abs(distanceY) < threshold) {
+    if(Math.abs(distanceX) < threshold && Math.abs(distanceY) < threshold) {
         this.viewportX = targetX;
         this.viewportY = targetY;
         return;
     }
 
-    if (smoothFactor) {
+    if(smoothFactor) {
         this.viewportX += (targetX - this.viewportX) * smoothFactor;
         this.viewportY += (targetY - this.viewportY) * smoothFactor;
         return;

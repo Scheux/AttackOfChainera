@@ -1,9 +1,10 @@
 {
-    "config": { "id": "config", "directory": "assets/config", "source": "config.json" },
+    "types": { "id": "types", "directory": "assets/config", "source": "types.json" },
     "entities": { "id": "entities", "directory": "assets/config", "source": "entities.json" },
     "sprites": { "id": "sprites", "directory": "assets/sprites", "source": "sprites.json" },
     "tiles": { "id": "tiles", "directory": "assets/tiles", "source": "tiles.json" },
     "maps": { "id": "maps", "directory": "assets/maps", "source": "maps.json" },
     "music": { "id": "music", "directory": "assets/music", "source": "music.json" },
+    "sounds": { "id": "sounds", "directory": "assets/sounds", "source": "sounds.json" },
     "uiConfig": { "id": "uiConfig", "directory": "assets/config", "source": "uiConfig.json" }
 }

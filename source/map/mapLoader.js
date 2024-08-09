@@ -278,6 +278,14 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         ]`;
     }
 
+    const stringify2DArray2 = array => {
+        const rows = array.map(row => JSON.stringify(row));
+        return `[
+        ${rows.join(`,
+        `)}
+    ]`;
+    }
+
     const {
         music,
         width,
@@ -298,6 +306,14 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         }
     }
 
+    const formattedEntities = gameMap.entities.map(data => 
+        `{ "type": "${data.type}", "tileX": ${data.tileX}, "tileY": ${data.tileY} }`
+    ).join(',\n        ');
+
+    const formattedConnections = gameMap.connections.map(data => 
+        `{ "type": "${data.type}", "id": "${data.id}", "scroll": ${data.scroll} }`
+    ).join(',\n        ');
+
     return `{
     "music": ${music},
     "width": ${width},
@@ -309,9 +325,13 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         "floor": ${stringify2DArray(layers["floor"])},
         "top": ${stringify2DArray(layers["top"])}
     },
-    "tiles": ${stringify2DArray(entityTiles)},
-    "connections": [],
-    "entities" : [],
+    "tiles": ${stringify2DArray2(entityTiles)},
+    "connections": [
+        ${formattedConnections}    
+    ],
+    "entities" : [
+        ${formattedEntities}
+    ],
     "flags" : {}
 }`;
 }

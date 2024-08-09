@@ -66,11 +66,11 @@
             [{},{},{},{},{},{},{},{},{},{}]
     ],
     "connections": [
-        { "type": "east", "id": "MAP_2", "scroll": 2}
+        { "type": "east", "id": "MAP_2", "scroll": 2 }
     ],
     "entities": [
-        { "type": "player", "tileX": 2, "tileY": 3, "isResetting": true },
-        { "type": "rival", "tileX": 5, "tileY": 8, "isResetting": true }
+        { "type": "player", "tileX": 5, "tileY": 7 },
+        { "type": "rival", "tileX": 5, "tileY": 8 }
     ],
     "flags" : {}
 }

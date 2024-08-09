@@ -67,12 +67,11 @@
     ],
     "connections": [
         { "type": "west", "id": "MAP", "scroll": -2}
-    ]
-    ,
+    ],
     "entities": [
-        { "type": "rival", "tileX": 2, "tileY": 1, "isResetting": true },
-        { "type": "rival", "tileX": 4, "tileY": 1, "isResetting": true },
-        { "type": "rival", "tileX": 7, "tileY": 9, "isResetting": true }
+        { "type": "rival", "tileX": 2, "tileY": 1 },
+        { "type": "rival", "tileX": 4, "tileY": 1 },
+        { "type": "rival", "tileX": 7, "tileY": 9 }
     ],
     "flags" : {}
 }

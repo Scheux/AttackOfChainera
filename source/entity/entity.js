@@ -13,10 +13,16 @@ export const Entity = function(id, DEBUG_NAME) {
     this.events = new EventEmitter();
     this.events.listen(Entity.EVENT_POSITION_UPDATE);
     this.events.listen(Entity.EVENT_TRANSITION_MAP);
+    this.events.listen(Entity.EVENT_DIRECTION_UPDATE);
+    this.events.listen(Entity.EVENT_SPRITE_UPDATE);
+    this.events.listen(Entity.EVENT_TARGET_REACHED);
 }
 
-Entity.EVENT_POSITION_UPDATE = 0;
-Entity.EVENT_TRANSITION_MAP = 1; 
+Entity.EVENT_POSITION_UPDATE = "EVENT_POSITION_UPDATE";
+Entity.EVENT_TRANSITION_MAP = "EVENT_TRANSITION_MAP"; 
+Entity.EVENT_DIRECTION_UPDATE = "EVENT_DIRECTION_UPDATE";
+Entity.EVENT_SPRITE_UPDATE = "EVENT_SPRITE_UPDATE";
+Entity.EVENT_TARGET_REACHED = "EVENT_TARGET_REACHED";
 
 Entity.prototype.update = function(gameContext) {
     this.states.update(gameContext);

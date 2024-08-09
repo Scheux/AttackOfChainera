@@ -68,7 +68,7 @@ EntityManager.prototype.getEntity = function(entityID) {
 EntityManager.prototype.createEntity = function(entityType) {    
     const config = this.entityTypes[entityType];
     const entityID = this.IDGenerator.getID();
-    const entity = new Entity(entityID);
+    const entity = new Entity(entityID, entityType);
 
     if(config) {
         entity.setConfig(config);

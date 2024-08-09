@@ -34,14 +34,14 @@
             "fish_right_reflect": {"x":208,"y":16,"w":16,"h":16}
         },
         "animations": {
-            "walk_down": { "id": "walk_down", "frameTime": 0.2, "frames": ["idle_down", "walk_down_1", "idle_down", "walk_down_2"] },
-            "walk_up": { "id": "walk_up", "frameTime": 0.2, "frames": ["idle_up", "walk_up_1", "idle_up", "walk_up_2"] },
-            "walk_left": { "id": "walk_left", "frameTime": 0.2, "frames": ["idle_left", "walk_left_1" ] },
-            "walk_right": { "id": "walk_right", "frameTime": 0.2, "frames": ["idle_right", "walk_right_1" ] },
-            "bike_down": { "id": "bike_down", "frameTime": 0.2, "frames": ["bike_idle_down", "bike_down_1", "bike_idle_down", "bike_down_2"] },
-            "bike_up": { "id": "bike_up", "frameTime": 0.2, "frames": ["bike_idle_up", "bike_up_1", "bike_idle_up", "bike_up_2"] },
-            "bike_left": { "id": "bike_left", "frameTime": 0.2, "frames": ["bike_idle_left", "bike_left_1" ] },
-            "bike_right": { "id": "bike_right", "frameTime": 0.2, "frames": ["bike_idle_right", "bike_right_1" ] }
+            "walk_down": { "id": "walk_down", "frameTime": 0.134, "frames": ["walk_down_1", "idle_down", "walk_down_2", "idle_down"] },
+            "walk_up": { "id": "walk_up", "frameTime": 0.134, "frames": ["walk_up_1", "idle_up", "walk_up_2", "idle_up"] },
+            "walk_left": { "id": "walk_left", "frameTime": 0.134, "frames": ["walk_left_1", "idle_left"] },
+            "walk_right": { "id": "walk_right", "frameTime": 0.134, "frames": ["walk_right_1", "idle_right"] },
+            "bike_down": { "id": "bike_down", "frameTime": 0.134, "frames": ["bike_down_1", "bike_idle_down", "bike_down_2", "bike_idle_down"] },
+            "bike_up": { "id": "bike_up", "frameTime": 0.134, "frames": ["bike_up_1", "bike_idle_up", "bike_up_2", "bike_idle_up"] },
+            "bike_left": { "id": "bike_left", "frameTime": 0.134, "frames": ["bike_left_1", "bike_idle_left"] },
+            "bike_right": { "id": "bike_right", "frameTime": 0.134, "frames": ["bike_right_1", "bike_idle_right"] }
         }
     },
     "characters": {
@@ -61,10 +61,10 @@
             "rival_walk_right_1": {"x":144,"y":0,"w":16,"h":16}
         },
         "animations": {
-            "rival_walk_down": { "id": "rival_walk_down", "frameTime": 0.2, "frames": ["rival_idle_down", "rival_walk_down_1", "rival_idle_down", "rival_walk_down_2"] },
-            "rival_walk_up": { "id": "rival_walk_up", "frameTime": 0.2, "frames": ["rival_idle_up", "rival_walk_up_1", "rival_idle_up", "rival_walk_up_2"] },
-            "rival_walk_left": { "id": "rival_walk_left", "frameTime": 0.2, "frames": ["rival_idle_left", "rival_walk_left_1" ] },
-            "rival_walk_right": { "id": "rival_walk_right", "frameTime": 0.2, "frames": ["rival_idle_right", "rival_walk_right_1" ] }
+            "rival_walk_down": { "id": "rival_walk_down", "frameTime": 0.134, "frames": ["rival_walk_down_1", "rival_idle_down", "rival_walk_down_2", "rival_idle_down"] },
+            "rival_walk_up": { "id": "rival_walk_up", "frameTime": 0.134, "frames": ["rival_walk_up_1", "rival_idle_up", "rival_walk_up_2", "rival_idle_up"] },
+            "rival_walk_left": { "id": "rival_walk_left", "frameTime": 0.134, "frames": ["rival_walk_left_1", "rival_idle_left"] },
+            "rival_walk_right": { "id": "rival_walk_right", "frameTime": 0.134, "frames": ["rival_walk_right_1", "rival_idle_right"] }
         }
     }
 }

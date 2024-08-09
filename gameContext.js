@@ -19,11 +19,16 @@ import { PlayGameState } from "./states/gameContext/playGame.js";
 import { PositionComponent } from "./components/position.js";
 import { SpriteComponent } from "./components/sprite.js";
 import { Entity } from "./source/entity/entity.js";
+import { NPCIdleState } from "./states/npc/idle.js";
+import { PlayerIdleState } from "./states/player/idle.js";
+import { PlayerMoveState } from "./states/player/move.js";
+import { MoveComponent } from "./components/move.js";
+import { MorphSystem } from "./systems/morph.js";
 
 const DEFAULT_SPRITE = "idle_down";
 
 export const GameContext = function() {
-    this.config = {};
+    this.types = {};
     this.client = new Client();
     this.renderer = new Camera(window.innerWidth, window.innerHeight);
     this.timer = new Timer(60);
@@ -77,7 +82,7 @@ GameContext.STATE_MAP_EDITOR = 1;
 GameContext.STATE_PLAY_GAME = 2;
 
 GameContext.prototype.loadResources = function(resources) {
-    this.config = resources.config;
+    this.types = resources.types;
     this.uiManager.loadFontTypes(null);
     this.uiManager.loadIconTypes(null);
     this.uiManager.loadUserInterfaceTypes(resources.uiConfig);
@@ -87,10 +92,8 @@ GameContext.prototype.loadResources = function(resources) {
     this.mapLoader.loadMapTypes(resources.maps);
     this.spriteManager.loadTileSprites(resources.tiles);
     this.spriteManager.loadSpriteTypes(resources.sprites);
-
-    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "s", () => {
-        this.saveGame();
-    })
+    this.client.soundPlayer.soundList = resources.sounds;
+    this.client.soundPlayer.loadAllSounds();
 }
 
 //SCRAP! When loading a map in, always check if any of the entities of gameMap.entities has a "reset" flag
@@ -231,7 +234,7 @@ GameContext.prototype.loadMap = async function(mapID, ignoreEntities) {
 
         if(positionComponent.mapID === mapID) {
             this.enableEntity(entityID);
-            this.updateEntityPositionEvent(entityID, 0, 0);
+            this.updateEntityEvents(entityID, 0, 0);
             continue;
         }
 
@@ -241,7 +244,7 @@ GameContext.prototype.loadMap = async function(mapID, ignoreEntities) {
                 const offsetY = Camera.TILE_HEIGHT * connection.startY;
 
                 this.enableEntity(entityID);
-                this.updateEntityPositionEvent(entityID, offsetX, offsetY);
+                this.updateEntityEvents(entityID, offsetX, offsetY);
                 break;
             }
         }
@@ -334,31 +337,110 @@ GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY,
     entity.components.addComponent(positionComponent);
     entity.components.addComponent(spriteComponent);  
     
-    switch(entityType.objectType) {
-        case "Player": {
-            break;
-        }
-
-        default: {
-            console.warn(`objectType ${entityType.objectType} is not valid!`);
-            break;
-        }
-    }
+    this.constructEntity(entity, entityType.objectType);
 
     return entityID;
 }
 
-GameContext.prototype.updateEntityPositionEvent = function(entityID, mapOffsetX, mapOffsetY) {
-    const entity = this.entityManager.getEntity(entityID);
+GameContext.prototype.constructEntity = function(entity, objectType) {
+    switch(objectType) {
+        case "Player": {
+            entity.states.addState(0, new PlayerIdleState());
+            entity.states.addState(1, new PlayerMoveState());
+            entity.states.setNextState(0);
+            entity.components.addComponent(new MoveComponent());
+            this.loadPlayer(entity);
+            break;
+        }
 
+        case "NPC": {
+            entity.states.addState(0, new NPCIdleState());
+            entity.states.setNextState(0);
+            break;
+        }
+
+        default: {
+            console.warn(`objectType ${objectType} is not valid!`);
+            break;
+        }
+    }
+
+}
+
+GameContext.prototype.loadPlayer = function(entity) {
+    const moveComponent = entity.components.getComponent(MoveComponent);
+
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "w", (event, keyboard) => moveComponent.isMovingUp = true);
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "a", (event, keyboard) => moveComponent.isMovingLeft = true);
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "s", (event, keyboard) => moveComponent.isMovingDown = true);
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "d", (event, keyboard) => moveComponent.isMovingRight = true);
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "b", (event, keyboard) => {
+        if(!moveComponent.hasBoots) {
+            moveComponent.isRunning = !moveComponent.isRunning;
+        }
+    });
+    
+    this.client.keyboard.subscribe(Keyboard.KEY_RELEASED, "w", (event, keyboard) => moveComponent.isMovingUp = false);
+    this.client.keyboard.subscribe(Keyboard.KEY_RELEASED, "a", (event, keyboard) => moveComponent.isMovingLeft = false);
+    this.client.keyboard.subscribe(Keyboard.KEY_RELEASED, "s", (event, keyboard) => moveComponent.isMovingDown = false);
+    this.client.keyboard.subscribe(Keyboard.KEY_RELEASED, "d", (event, keyboard) => moveComponent.isMovingRight = false);
+
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "e", () => {
+        const positionComponent = entity.components.getComponent(PositionComponent);
+        const gameMap = this.mapLoader.getLoadedMap(positionComponent.mapID);
+
+        if(!gameMap) {
+            return;
+        }
+
+        const tileOffsetX = positionComponent.direction === PositionComponent.DIRECTION_EAST ? 1 : positionComponent.direction === PositionComponent.DIRECTION_WEST ? -1 : 0;
+        const tileOffsetY = positionComponent.direction === PositionComponent.DIRECTION_SOUTH ? 1 : positionComponent.direction === PositionComponent.DIRECTION_NORTH ? -1 : 0;
+        const interactionTile = gameMap.getTile(positionComponent.tileX + tileOffsetX, positionComponent.tileY + tileOffsetY);
+        const entityIDs = Object.keys(interactionTile);
+
+        if(entityIDs.length === 0) {
+            return;
+        }
+
+        const interactedEntity = this.entityManager.getEntity(entityIDs[0]);
+        interactedEntity.states.onEventEnter(this, entity);
+    });
+
+    this.player = entity;
+}
+
+GameContext.prototype.updateEntityEvents = function(entityID, mapOffsetX, mapOffsetY) {
+    const entity = this.entityManager.getEntity(entityID);
     const positionComponent = entity.components.getComponent(PositionComponent);
     const spriteComponent = entity.components.getComponent(SpriteComponent);
-
     const sprite = this.spriteManager.getSprite(spriteComponent.spriteID);
 
+    entity.events.unsubscribe(Entity.EVENT_DIRECTION_UPDATE, "GAME_CONTEXT");
     entity.events.unsubscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT");
-    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (positionX, positionY) => sprite.setPositionRaw(positionX + mapOffsetX, positionY + mapOffsetY));
-    entity.events.emit(Entity.EVENT_POSITION_UPDATE, positionComponent.positionX, positionComponent.positionY);
+    entity.events.unsubscribe(Entity.EVENT_SPRITE_UPDATE, "GAME_CONTEXT");
+
+    entity.events.subscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT", (deltaX, deltaY) => {
+        const positionX = positionComponent.positionX + deltaX;
+        const positionY = positionComponent.positionY + deltaY;
+
+        const spritePositionX = positionX + mapOffsetX;
+        const spritePositionY = positionY + mapOffsetY;
+
+        positionComponent.positionX = positionX;
+        positionComponent.positionY = positionY;
+
+        sprite.setPositionRaw(spritePositionX, spritePositionY);
+    });
+
+    entity.events.subscribe(Entity.EVENT_DIRECTION_UPDATE, "GAME_CONTEXT", direction => {
+        positionComponent.direction = direction;
+    });
+
+    entity.events.subscribe(Entity.EVENT_SPRITE_UPDATE, "GAME_CONTEXT", (spriteData, config) => {
+        MorphSystem.morphSprite(this, entity, spriteData, config);
+    });
+
+    entity.events.emit(Entity.EVENT_POSITION_UPDATE, 0, 0);
 }
 
 GameContext.prototype.enableEntity = function(entityID) {
@@ -398,6 +480,9 @@ GameContext.prototype.disableEntity = function(entityID) {
     this.spriteManager.removeSprite(spriteComponent.spriteID);
 
     spriteComponent.spriteID = null;
+
+    entity.events.unsubscribe(Entity.EVENT_DIRECTION_UPDATE, "GAME_CONTEXT");
+    entity.events.unsubscribe(Entity.EVENT_SPRITE_UPDATE, "GAME_CONTEXT");
     entity.events.unsubscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT");
 
     const gameMap = this.mapLoader.getCachedMap(positionComponent.mapID);
@@ -411,13 +496,13 @@ GameContext.prototype.getViewportTile = function() {
     return viewportTile;
 }
 
-GameContext.prototype.getConfigElement = function(key) {
-    if(!this.config[key]) {
-        console.warn(`ConfigElement ${key} does not exist! Returning null...`);
+GameContext.prototype.getType = function(key) {
+    if(!this.types[key]) {
+        console.warn(`Types ${key} don't not exist! Returning null...`);
         return null;
     }
 
-    return this.config[key];
+    return this.types[key];
 }
 
 /*

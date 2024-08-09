@@ -6,4 +6,4 @@ State.prototype.exit = function(stateMachine) {}
 
 State.prototype.update = function(stateMachine, gameContext) {}
 
-State.prototype.onEventEnter = function (stateMachine, event) {}
+State.prototype.onEventEnter = function(stateMachine, event) {}

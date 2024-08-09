@@ -198,7 +198,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
     const incrementCollisionIndex = () => {
         const cursorTile = getViewportTile(client.cursor.position, renderer.viewportX, renderer.viewportY);
         const gameMap = mapLoader.getCachedMap(EDITOR_MAP_ID);
-        const collisionTypes = gameContext.getConfigElement("collisionTypes");
+        const collisionTypes = gameContext.getType("collisionTypes");
         const collisionTypesKeys = Object.keys(collisionTypes);
 
         if(!gameMap) {
