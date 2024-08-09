@@ -14,8 +14,8 @@ PlayGameState.prototype.enter = async function(stateMachine) {
     const { uiManager, spriteManager } = gameContext;
     const saveData = {
         "entityData": [
-            { "type": "player", "map": "MAP", "tileX": 4, "tileY": 4, "spriteType": "walk_down" },
-            { "type": "rival", "map": "MAP", "tileX": 5, "tileY": 6, "spriteType": "walk_down" },
+            { "type": "player", "map": "MAP", "tileX": 2, "tileY": 3, "spriteType": "walk_down" },
+            { "type": "rival", "map": "MAP", "tileX": 5, "tileY": 8, "spriteType": "walk_down" },
             { "type": "rival", "map": "MAP_2", "tileX": 5, "tileY": 6, "spriteType": "walk_down" },
             { "type": "rival", "map": "MAP_2", "tileX": 6, "tileY": 6, "spriteType": "walk_down" },
             { "type": "rival", "map": "MAP_2", "tileX": 7, "tileY": 6, "spriteType": "walk_down" }
@@ -26,8 +26,8 @@ PlayGameState.prototype.enter = async function(stateMachine) {
     };
 
     uiManager.parseUI("PLAY_GAME", gameContext);
-
-    await gameContext.loadGame(saveData);
+    gameContext.loadMap("MAP");
+    //await gameContext.loadGame(saveData);
 
     /*
     spriteManager.createSprite("player", true, "walk_down").setPositionRaw(0, 0);

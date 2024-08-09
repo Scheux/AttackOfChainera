@@ -3,6 +3,7 @@ import { GameMap } from "./gameMap.js";
 
 export const MapLoader = function() {
     this.mapTypes = null;
+    this.mapCache = {};
     this.loadedMaps = new Map();
     this.cachedMaps = new Map();
     this.activeMapID = null;
@@ -288,6 +289,15 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         flags
     } = gameMap;
 
+    const entityTiles = [];
+
+    for(let i = 0; i < height; i++) {
+        entityTiles[i] = [];
+        for(let j = 0; j < width; j++) {
+            entityTiles[i][j] = {};
+        }
+    }
+
     return `{
     "music": ${music},
     "width": ${width},
@@ -299,7 +309,7 @@ MapLoader.prototype.saveMap = function(gameMapID) {
         "floor": ${stringify2DArray(layers["floor"])},
         "top": ${stringify2DArray(layers["top"])}
     },
-    "tiles": [],
+    "tiles": ${stringify2DArray(entityTiles)},
     "connections": [],
     "entities" : [],
     "flags" : {}

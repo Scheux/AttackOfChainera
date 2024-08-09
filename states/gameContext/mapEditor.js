@@ -205,7 +205,7 @@ MapEditorState.prototype.enter = function(stateMachine) {
             return;
         }
 
-        const currentIndex = gameMap.getTile("collision", cursorTile.x, cursorTile.y);
+        const currentIndex = gameMap.getLayerTile("collision", cursorTile.x, cursorTile.y);
         const nextIndex = currentIndex + 1;
 
         if(nextIndex > collisionTypesKeys.length - 1) {
@@ -365,12 +365,12 @@ MapEditorState.prototype.enter = function(stateMachine) {
         const mapID = prompt("MAP-ID?");
 
         if(mapID.length === 0) {
-            const loadSuccess = await gameContext.loadMap(MAP_ID);
+            const loadSuccess = await gameContext.loadMap(MAP_ID, true);
             EDITOR_MAP_ID = MAP_ID;
             return;
         }
 
-        const loadSuccess = await gameContext.loadMap(mapID);
+        const loadSuccess = await gameContext.loadMap(mapID, true);
         EDITOR_MAP_ID = mapID;
     });
 

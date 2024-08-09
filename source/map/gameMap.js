@@ -129,7 +129,7 @@ GameMap.prototype.outOfBounds = function(tileX, tileY) {
     return tileX < 0 || tileX >= this.width || tileY < 0 || tileY >= this.width;
 }
 
-GameMap.prototype.getTile = function(layerID, tileX, tileY) {
+GameMap.prototype.getLayerTile = function(layerID, tileX, tileY) {
     if(!this.layers[layerID]) {
         console.warn(`Layer ${layerID} does not exist! Returning null...`);
         return null;
@@ -141,4 +141,51 @@ GameMap.prototype.getTile = function(layerID, tileX, tileY) {
     }
 
     return this.layers[layerID][tileY][tileX];
+}
+
+GameMap.prototype.getTile = function(tileX, tileY) {
+    if(!this.tiles[tileY]) {
+        console.warn(`Row ${tileY} does not exist! Returning null...`);
+        return null;
+    }
+
+    return this.tiles[tileY][tileX];
+}
+
+GameMap.prototype.removePointers = function(tileX, tileY, rangeX, rangeY, pointer) {
+    for(let i = 0; i < rangeY; i++) {
+        for(let j = 0; j < rangeX; j++) {
+            const locationX = tileX + j;
+            const locationY = tileY + i;
+            const tile = this.getTile(locationX, locationY);
+            
+            if(!tile) {
+                console.warn(`Tile [${locationY}][${locationX}] does not exist! Continuing...`);
+                continue;
+            }
+
+            if(tile[pointer]) {
+                delete tile[pointer];
+            }
+        }
+    }
+}
+
+GameMap.prototype.setPointers = function(tileX, tileY, rangeX, rangeY, pointer) {
+    for(let i = 0; i < rangeY; i++) {
+        for(let j = 0; j < rangeX; j++) {
+            const locationX = tileX + j;
+            const locationY = tileY + i;
+            const tile = this.getTile(locationX, locationY);
+            
+            if(!tile) {
+                console.warn(`Tile [${locationY}][${locationX}] does not exist! Continuing...`);
+                continue;
+            }
+
+            if(!tile[pointer]) {
+                tile[pointer] = 1;
+            }
+        }
+    }
 }

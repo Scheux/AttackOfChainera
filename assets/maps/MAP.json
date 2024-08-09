@@ -1,43 +1,44 @@
 {
+    "music": null,
     "width": 10,
     "height": 10,
     "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
     "layers": {
         "collision": [
+            [1,1,1,1,1,0,1,1,1,1],
+            [1,1,1,1,1,0,1,1,1,1],
+            [1,1,0,1,1,0,1,1,0,1],
+            [0,0,0,0,1,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,1,0],
+            [0,0,0,1,0,0,1,1,1,0],
+            [0,0,0,0,0,0,1,1,1,0],
             [0,0,0,0,0,0,0,0,0,0]
         ],
         "bottom": [
-            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand2"],["set_field","sand"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","mud"]],
-            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand"],["set_field","sand2"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","mud"],["set_field","grass"]],
-            [["set_field","sand"],["set_field","sand2"],["set_field","sand2"],["set_field","sand2"],["set_field","sand"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","grass"]],
-            [["set_field","sand"],["set_field","sand"],["set_field","sand2"],["set_field","sand"],["set_field","sand2"],["set_field","sand2"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"]],
-            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand2"],["set_field","sand2"],["set_field","sand2"],["set_field","sand"],["set_field","sand2"],["set_field","sand"]],
-            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","sand"],["set_field","sand2"],["set_field","sand2"],["set_field","sand2"],["set_field","sand"]],
-            [["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"]],
-            [["set_field","grass2"],["set_field","grass"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","grass"]],
-            [["set_field","mud"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass2"],["set_field","grass2"],["set_field","grass"]],
-            [["set_field","mud"],["set_field","grass2"],["set_field","grass2"],["set_field","grass"],["set_field","grass"],["set_field","grass"],["set_field","mud"],["set_field","grass2"],["set_field","grass2"],["set_field","grass2"]]
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"]],
+            [["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"],["overworld_day","sand"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
         ],
         "floor": [
-            [null,null,null,null,null,null,null,null,["set_field","flowers"],null],
-            [null,null,null,null,null,null,null,["set_field","flowers"],null,null],
-            [null,null,null,null,null,null,null,null,["set_field","flowers"],null],
+            [["overworld_day","tree_large_top"],["overworld_day","house_1"],["overworld_day","house_2"],["overworld_day","house_3"],["overworld_day","house_4"],null,["overworld_day","cave_wall_nw"],["overworld_day","cave_wall_n"],["overworld_day","cave_wall_n"],["overworld_day","cave_wall_ne"]],
+            [["overworld_day","tree_large_bottom"],["overworld_day","house_5"],["overworld_day","house_6"],["overworld_day","house_7"],["overworld_day","house_8"],null,["overworld_day","cave_Wall_w"],["overworld_day","cave_wall_c"],["overworld_day","cave_wall_c"],["overworld_day","cave_wall_e"]],
+            [["overworld_day","tree_small"],["overworld_day","house_9"],["overworld_day","house_10"],["overworld_day","house_11"],["overworld_day","house_12"],null,["overworld_day","cave_wall_sw"],["overworld_day","cave_wall_s"],["overworld_day","cave_entrance"],["overworld_day","cave_wall_se"]],
+            [null,null,null,null,["overworld_day","sign"],null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [["set_field","flowers"],null,["set_field","flowers"],null,null,null,null,null,null,null],
-            [null,["set_field","flowers"],null,null,["set_field","flowers"],null,null,["set_field","flowers"],["set_field","flowers"],null],
-            [null,["set_field","flowers"],["set_field","flowers"],null,null,null,null,["set_field","flowers"],["set_field","flowers"],["set_field","flowers"]]
+            [["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","fence_n"],["overworld_day","tree_large_bottom"],["overworld_day","tree_large_bottom"],null],
+            [["overworld_day","tall_grass"],["overworld_day","tall_grass"],null,["overworld_day","tree_large_bottom"],null,null,["overworld_day","tree_small"],["overworld_day","rock_large_nw"],["overworld_day","rock_large_ne"],null],
+            [["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],null,null,["overworld_day","tree_small"],["overworld_day","rock_large_sw"],["overworld_day","rock_large_se"],null],
+            [["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],["overworld_day","tall_grass"],null,null,null,null,null]
         ],
         "top": [
             [null,null,null,null,null,null,null,null,null,null],
@@ -45,18 +46,31 @@
             [null,null,null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
-            [null,null,null,null,null,null,null,null,null,null],
+            [null,null,null,null,null,null,null,["overworld_day","tree_large_top"],["overworld_day","tree_large_top"],null],
+            [null,null,null,["overworld_day","tree_large_top"],null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null],
             [null,null,null,null,null,null,null,null,null,null]
         ]
     },
+    "tiles": [
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}],
+            [{},{},{},{},{},{},{},{},{},{}]
+    ],
     "connections": [
         { "type": "east", "id": "MAP_2", "scroll": 2}
     ],
     "entities": [
-        { "type": "player", "tileX": 4, "tileY": 4, "isResetting": true },
-        { "type": "rival", "tileX": 5, "tileY": 6, "isResetting": true }
-    ]
+        { "type": "player", "tileX": 2, "tileY": 3, "isResetting": true },
+        { "type": "rival", "tileX": 5, "tileY": 8, "isResetting": true }
+    ],
+    "flags" : {}
 }

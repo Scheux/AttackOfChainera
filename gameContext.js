@@ -20,6 +20,8 @@ import { PositionComponent } from "./components/position.js";
 import { SpriteComponent } from "./components/sprite.js";
 import { Entity } from "./source/entity/entity.js";
 
+const DEFAULT_SPRITE = "idle_down";
+
 export const GameContext = function() {
     this.config = {};
     this.client = new Client();
@@ -68,8 +70,6 @@ export const GameContext = function() {
             element.events.emit(UIElement.EVENT_CLICKED);
         }
     });
-
-    this.mapCache = {}; //list of all maps that have been loaded
 }
 
 GameContext.STATE_MAIN_MENU = 0;
@@ -97,12 +97,20 @@ GameContext.prototype.loadResources = function(resources) {
 //if that flag exists, then create a new entity based on that flag
 //if a map gets unloaded and an entity has the "reset" flag, that entity gets deleted. straight up. bye-bye.
 
+GameContext.prototype.exitGame = function() {
+    this.actionQueue.workEnd();
+    this.entityManager.workEnd();
+    this.spriteManager.workEnd();
+    this.tileManager.workEnd();
+    //this.uiManager.workEnd();
+}
+
 GameContext.prototype.saveGame = function() {
     const entityData = [];
     const mapCache = {};
     
-    for (const key in this.mapCache) {
-        const cacheState = this.mapCache[key];
+    for (const key in this.mapLoader.mapCache) {
+        const cacheState = this.mapLoader.mapCache[key];
         mapCache[key] = cacheState;
     }
     
@@ -152,9 +160,11 @@ GameContext.prototype.loadGame = async function(gameData) {
         }
 
         this.createEntity(map, type, tileX, tileY, spriteType);
+
+        //Store playerData not on the player entity but in the client!
     }
 
-    this.mapCache = mapCache;
+    this.mapLoader.mapCache = mapCache;
     await this.loadMap(mapID);
 }
 
@@ -169,7 +179,7 @@ GameContext.prototype.newGame = function() {
  * @param {string} mapID The ID of the map to be loaded.
  * @returns {boolean} If the loading process was successful.
  */
-GameContext.prototype.loadMap = async function(mapID) {
+GameContext.prototype.loadMap = async function(mapID, ignoreEntities) {
     await this.mapLoader.loadMap(mapID);
     const gameMap = this.mapLoader.getLoadedMap(mapID);
     const oldActiveMapID = this.mapLoader.getActiveMapID();
@@ -190,26 +200,29 @@ GameContext.prototype.loadMap = async function(mapID) {
 
     this.mapLoader.setActiveMap(mapID);
     this.client.musicPlayer.loadTrack(gameMap.music);
-    this.tileManager.workStart(gameMap.tiles);
     this.actionQueue.workStart();
 
-    if(!this.mapCache[mapID]) {
+    if(ignoreEntities) {
+        return;
+    }
+
+    if(!this.mapLoader.mapCache[mapID]) {
         for(const entityConfig of gameMap.entities) {
-            this.createEntity(mapID, entityConfig.type, entityConfig.tileX, entityConfig.tileY, "idle_down");
+            this.createEntity(mapID, entityConfig.type, entityConfig.tileX, entityConfig.tileY, DEFAULT_SPRITE);
         }
 
-        this.mapCache[mapID] = 1;
+        this.mapLoader.mapCache[mapID] = 1;
     }
 
     for(const connection of gameMap.connections) {
-        if(!this.mapCache[connection.id]) {
+        if(!this.mapLoader.mapCache[connection.id]) {
             const connectedMap = this.mapLoader.getLoadedMap(connection.id);
 
             for(const entityConfig of connectedMap.entities) {
-                this.createEntity(connection.id, entityConfig.type, entityConfig.tileX, entityConfig.tileY, "idle_down");
+                this.createEntity(connection.id, entityConfig.type, entityConfig.tileX, entityConfig.tileY, DEFAULT_SPRITE);
             }
 
-            this.mapCache[connection.id] = 1;
+            this.mapLoader.mapCache[connection.id] = 1;
         }
     }
 
@@ -293,9 +306,6 @@ GameContext.prototype.removeEntity = function(mapID, entityID) {
 
     this.entityManager.removeEntity(entityID);
     this.spriteManager.removeSprite(spriteComponent.spriteID);
-
-    //TODO: What if entities are outside the main map?
-    this.tileManager.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
 }
 
 GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY, spriteType) {
@@ -335,9 +345,6 @@ GameContext.prototype.createEntity = function(mapID, entityTypeID, tileX, tileY,
         }
     }
 
-    //TODO: What if entities are outside the main map?
-    this.tileManager.setPointers(tileX, tileY, entityType.dimX, entityType.dimY, entityID);
-
     return entityID;
 }
 
@@ -372,6 +379,9 @@ GameContext.prototype.enableEntity = function(entityID) {
     const spriteID = sprite.getID();
 
     spriteComponent.spriteID = spriteID;
+
+    const gameMap = this.mapLoader.getCachedMap(positionComponent.mapID);
+    gameMap.setPointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
 }
 
 GameContext.prototype.disableEntity = function(entityID) {
@@ -389,6 +399,9 @@ GameContext.prototype.disableEntity = function(entityID) {
 
     spriteComponent.spriteID = null;
     entity.events.unsubscribe(Entity.EVENT_POSITION_UPDATE, "GAME_CONTEXT");
+
+    const gameMap = this.mapLoader.getCachedMap(positionComponent.mapID);
+    gameMap.removePointers(positionComponent.tileX, positionComponent.tileY, positionComponent.dimX, positionComponent.dimY, entityID);
 }
 
 GameContext.prototype.getViewportTile = function() {
@@ -398,6 +411,16 @@ GameContext.prototype.getViewportTile = function() {
     return viewportTile;
 }
 
+GameContext.prototype.getConfigElement = function(key) {
+    if(!this.config[key]) {
+        console.warn(`ConfigElement ${key} does not exist! Returning null...`);
+        return null;
+    }
+
+    return this.config[key];
+}
+
+/*
 GameContext.prototype.setupPlayer3D = function() {
     this.player = null;
     const position3D = this.player.position3D;
@@ -434,15 +457,4 @@ GameContext.prototype.setupPlayer3D = function() {
         }
     });
 }
-
-GameContext.prototype.getConfigElement = function(key) {
-    if(!this.config[key]) {
-        console.warn(`ConfigElement ${key} does not exist! Returning null...`);
-        return null;
-    }
-
-    return this.config[key];
-}
-
-//TODO: When first loading a map, load the entities.
-//TODO: Tile manager no longer operates on this.tiles. <- too much ram!
+*/

@@ -72,31 +72,5 @@
             ]
         },
         "animations": {}
-    },
-    "set_field": { 
-        "id": "set_field",
-        "directory": "assets/tiles",
-        "source": "set_field.png",
-        "offset": { "x": 0, "y": 0 },
-        "frameTime": 1,
-        "allowFlip": false,
-        "patterns": {
-            "grass": [
-                ["grass", "grass2"],
-                ["grass2", "grass"]
-            ]
-        },
-        "frames": {
-            "grass": {"x":0,"y":0,"w":16,"h":16},
-            "grass2": {"x":16,"y":0,"w":16,"h":16},
-            "mud": {"x":32,"y":0,"w":16,"h":16},
-            "sand": {"x":48,"y":0,"w":16,"h":16},
-            "flowers1": {"x":0,"y":16,"w":16,"h":16},
-            "flowers2": {"x":16,"y":16,"w":16,"h":16},
-            "sand2": {"x":32,"y":16,"w":16,"h":16}
-        },
-        "animations": {
-            "flowers": { "id": "flowers", "frameTime": 1, "frames": [ "flowers1", "flowers2" ]}
-        }
     }
 }
