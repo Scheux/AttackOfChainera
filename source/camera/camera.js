@@ -1,4 +1,4 @@
-import { PositionComponent } from "../../components/position.js";
+import { Position3DComponent } from "../../components/position3D.js";
 import { EventEmitter } from "../events/eventEmitter.js";
 import { Canvas } from "./canvas.js";
 import { Raycaster } from "./raycaster.js";
@@ -25,10 +25,11 @@ export const Camera = function(screenWidth, screenHeight) {
     window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight));
 
     this.loading = false;
+    this.initializeRaycaster();
 }
 
-Camera.DRAW_2D_MAP = true;
-Camera.DRAW_RAYCAST = false;
+Camera.DRAW_2D_MAP = false;
+Camera.DRAW_RAYCAST = true;
 Camera.SCALE = 4;
 Camera.TILE_WIDTH = 16;
 Camera.TILE_HEIGHT = 16;
@@ -268,11 +269,6 @@ Camera.prototype.update = function(gameContext) {
     this.display.clear();
     this.calculateFPS(deltaTime);
 
-    if(gameContext.player && !this.loading) {
-        const positionComponent = gameContext.player.components.getComponent(PositionComponent);
-        this.follow(positionComponent.positionX, positionComponent.positionY, 2 * deltaTime, 1);
-    }
-
     if(Camera.DRAW_2D_MAP) {
         this.draw2DMap(gameContext);
         this.events.emit(Camera.EVENT_MAP_RENDER_COMPLETE, this);
@@ -286,23 +282,12 @@ Camera.prototype.update = function(gameContext) {
 }
 
 Camera.prototype.drawRaycaster = function(gameContext) {
-    if(!this.raycaster) {
+    if(!this.raycaster || !gameContext.player) {
         return;
     }
 
-    const { timer, spriteManager } = gameContext; 
-    const realTime = timer.getRealTime();
-
-    const graphics = [["test_raycast", "grass"], ["test_raycast", "water"], ["test_raycast", "meadow"], ["test_raycast", "ocean"]].map(([setID, animationID]) => {
-        const tileSet = spriteManager.tileSprites[setID];
-        const buffers = tileSet.getAnimationFrame(animationID, realTime);
-        const buffer = buffers[0];
-
-        return buffer;
-    });
-
-    this.raycaster.copyPosition(gameContext.player.position3D);
-    this.raycaster.raycast(gameContext, graphics);
+    this.raycaster.copyPosition(gameContext.player.components.getComponent(Position3DComponent));
+    this.raycaster.raycast(gameContext);
 
     this.display.context.drawImage(this.raycaster.display.canvas, 0, 0, this.display.width, this.display.height);
     this.display.context.fillRect(this.display.centerX - 4, this.display.centerY - 4, 8, 8);
@@ -324,6 +309,11 @@ Camera.prototype.limitViewport = function() {
     if(this.viewportY >= this.viewportY_limit) {
         this.viewportY = this.viewportY_limit;
     }
+}
+
+Camera.prototype.shiftViewport = function(deltaX, deltaY) {
+    this.viewportX += deltaX;
+    this.viewportY += deltaY;
 }
 
 Camera.prototype.dragViewportBy = function(param_dragX, param_dragY) {
@@ -364,7 +354,7 @@ Camera.prototype.loadViewport = function(mapWidth, mapHeight) {
 
 Camera.prototype.initializeRaycaster = function() {
     this.raycaster = new Raycaster();
-    this.raycaster.display.resize(this.display.width / 2, this.display.height / 2);
+    this.raycaster.display.resize(this.display.width / Camera.SCALE, this.display.height / Camera.SCALE);
     this.raycaster.display.getImageData();
     this.raycaster.copyScreen();
     this.raycaster.calculateRayData();
@@ -382,7 +372,7 @@ Camera.prototype.resizeViewport = function(width, height) {
     this.display.resize(width, height);
 
     if(this.raycaster) {
-        this.raycaster.display.resize(width / 2, height / 2);
+        this.raycaster.display.resize(width / Camera.SCALE, height / Camera.SCALE);
         this.raycaster.display.getImageData();
         this.raycaster.copyScreen();
         this.raycaster.calculateRayData();

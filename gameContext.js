@@ -24,6 +24,9 @@ import { PlayerIdleState } from "./states/player/idle.js";
 import { PlayerMoveState } from "./states/player/move.js";
 import { MoveComponent } from "./components/move.js";
 import { MorphSystem } from "./systems/morph.js";
+import { Position3DComponent } from "./components/position3D.js";
+import { Move3DComponent } from "./components/move3D.js";
+import { PlayerDefault } from "./states/playerDefault.js";
 
 const DEFAULT_SPRITE = "idle_down";
 
@@ -45,6 +48,8 @@ export const GameContext = function() {
     this.states.addState(GameContext.STATE_MAP_EDITOR, new MapEditorState());
     this.states.addState(GameContext.STATE_PLAY_GAME, new PlayGameState());
 
+    this.setupPlayer3D();
+
     this.timer.inputFunction = () => {
         this.client.update(this);
     }
@@ -52,6 +57,10 @@ export const GameContext = function() {
     this.timer.updateFunction = () => {
         this.actionQueue.update(this);
         this.entityManager.update(this);
+
+        if(this.player) {
+            this.player.update(this);
+        }
     }
 
     this.timer.renderFunction = () => {
@@ -505,11 +514,14 @@ GameContext.prototype.getType = function(key) {
     return this.types[key];
 }
 
-/*
 GameContext.prototype.setupPlayer3D = function() {
-    this.player = null;
-    const position3D = this.player.position3D;
-    const move3D = this.player.move3D;
+    this.player = new Entity("PLAYER", "PLAYER")
+
+    const position3D = new Position3DComponent();
+    const move3D = new Move3DComponent();
+
+    this.player.components.addComponent(position3D);
+    this.player.components.addComponent(move3D);
 
     this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "w", (event, keyboard) => move3D.isMovingUp = true);
     this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "a", (event, keyboard) => move3D.isMovingLeft = true);
@@ -541,5 +553,25 @@ GameContext.prototype.setupPlayer3D = function() {
             position3D.pitch = -8;
         }
     });
+
+    this.renderer.display.canvas.addEventListener("click", async () => {
+        if(!this.client.cursor.isLocked) {
+            this.renderer.display.canvas.requestPointerLock();
+            return;
+        }
+
+        document.exitPointerLock();
+    });
+
+    document.addEventListener("pointerlockchange", () => {
+        if (document.pointerLockElement === this.renderer.display.canvas) {
+            this.client.cursor.isLocked = true;
+            return;
+        }
+
+        this.client.cursor.isLocked = false;
+    });
+
+    this.player.states.addState(0, new PlayerDefault());
+    this.player.states.setNextState(0);
 }
-*/

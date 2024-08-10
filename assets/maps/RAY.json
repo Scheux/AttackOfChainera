@@ -1,0 +1,75 @@
+{
+    "music": null,
+    "width": 10,
+    "height": 10,
+    "layerOpacity": { "collision": 0, "bottom": 1, "floor": 1, "top": 1 },
+    "layers": {
+        "collision": [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,0,0,0,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,1,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1]
+        ],
+        "bottom": [
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
+        ],
+        "floor": [
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],null,null,null,null,null,null,null,null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,["overworld_day","flowers"],null,null,null,null,["overworld_day","flowers"],null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,null,null,null,null,null,null,null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,null,null,["overworld_day","flowers"],null,null,null,null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,null,null,null,null,null,null,null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,["overworld_day","flowers"],null,null,null,null,null,null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,null,null,null,null,null,null,null,["overworld_day","grass"]],
+            [["overworld_day","grass"],null,null,null,null,null,null,["overworld_day","flowers"],null,["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
+        ],
+        "top": [
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
+        ]
+    },
+    "tiles": [
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{},{},{}]
+    ],
+    "connections": [
+            
+    ],
+    "entities" : [
+        
+    ],
+    "flags" : {}
+}

@@ -103,11 +103,8 @@ PlayerIdleState.prototype.update = function(stateMachine, gameContext) {
             stateMachine.setNextState(1);
             connectedMap.setPointers(moveComponent.targetTileX, moveComponent.targetTileY, positionComponent.dimX, positionComponent.dimY, entity.id);
 
-            renderer.loading = true;
             await gameContext.loadMap(connection.id);
-            renderer.loading = false;
-
-            renderer.follow(positionComponent.positionX, positionComponent.positionY, 0, 0);
+            renderer.shiftViewport(-connection.startX * Camera.TILE_WIDTH, -connection.startY * Camera.TILE_HEIGHT);
         }
     }
 

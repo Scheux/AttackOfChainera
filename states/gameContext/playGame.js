@@ -26,7 +26,8 @@ PlayGameState.prototype.enter = async function(stateMachine) {
     };
 
     uiManager.parseUI("PLAY_GAME", gameContext);
-    gameContext.loadMap("MAP");
+    gameContext.setupPlayer3D();
+    gameContext.loadMap("RAY", true);
     //await gameContext.loadGame(saveData);
 
     /*

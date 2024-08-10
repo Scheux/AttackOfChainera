@@ -1,4 +1,5 @@
 {
+    "RAY": { "id": "RAY", "directory": "assets/maps/", "source": "RAY.json" },
     "MAP": { "id": "MAP", "directory": "assets/maps/", "source": "MAP.json" },
     "MAP_2": { "id": "MAP_2", "directory": "assets/maps/", "source": "MAP_2.json" },
     "MAP_3": { "id": "MAP_3", "directory": "assets/maps/", "source": "MAP_3.json" }

@@ -6,10 +6,10 @@ import { Canvas } from "./canvas.js";
 
 export const Raycaster = function() {
     this.fov = 60;
-    this.positionX = 500;
-    this.positionY = 500;
-    this.positionZ = 32;
-    this.rotation = 90;
+    this.positionX = 0;
+    this.positionY = 0;
+    this.positionZ = 0;
+    this.rotation = 0;
     this.pitch = 0;
 
     this.rayAngles = [];
@@ -33,6 +33,7 @@ export const Raycaster = function() {
     ResourceLoader.promiseImage("assets/sky.png").then(image => this.skybox = new ImageBuffer(image));
 }
 
+Raycaster.SHADOW_DISTANCE = 16;
 Raycaster.WALL_X_POSITIVE = -1;
 Raycaster.WALL_X_NEGATIVE = 1;
 Raycaster.WALL_Y_POSITIVE = -1;
@@ -73,7 +74,7 @@ Raycaster.prototype.copyScreen = function() {
     this.PROJECTION_HEIGHT = Math.floor(this.display.centerY);
 }
 
-Raycaster.prototype.raycast = function(gameContext, graphics) {
+Raycaster.prototype.raycast = function(gameContext) {
     const { mapLoader, renderer } = gameContext;
     const gameMap = mapLoader.getActiveMap();
 
@@ -81,16 +82,18 @@ Raycaster.prototype.raycast = function(gameContext, graphics) {
         return;
     }
 
-    const cameraAngle = toRadian(this.rotation);
+    const cameraAngle = toRadian(this.rotation); //can be precalced!
+    //rotation is always normalized from 0 tp 360
 
     for(let rayIndex = 0; rayIndex < this.rayAngles.length; rayIndex++) {
         const rayAngle = this.rayAngles[rayIndex];
         const correctedRayAngle = cameraAngle + rayAngle;
-    
-        const rayIntersections = this.checkRayIntersections(toAngle(correctedRayAngle), gameMap)
+        const rayAngleDegrees = toAngle(correctedRayAngle);
+
+        const rayIntersections = this.checkRayIntersections(rayAngleDegrees, gameMap)
         const rayIntersectionsArraySorted = rayIntersections.sort((a, b) => b.distance - a.distance);
 
-        this.drawRays(rayIntersectionsArraySorted, rayIndex, gameMap, correctedRayAngle, graphics, renderer.buffer);
+        this.drawRays(gameContext, rayIntersectionsArraySorted, rayIndex, gameMap, correctedRayAngle, rayAngleDegrees);
     }   
 
     this.display.context.putImageData(this.display.imageData, 0, 0);
@@ -109,9 +112,10 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
     }
 
     const rayHits = [];
-    const tanRayAngle = Math.tan(toRadian(rayAngle));
-    const sinRayAngle = Math.sin(toRadian(rayAngle));
-    const cosRayAngle = Math.cos(toRadian(rayAngle));
+    const radianAngle = toRadian(rayAngle);
+    const tanRayAngle = Math.tan(radianAngle);
+    const sinRayAngle = Math.sin(radianAngle);
+    const cosRayAngle = Math.cos(radianAngle);
 
     let horizDistance = Infinity;
     let horHitX = this.positionX;
@@ -158,6 +162,8 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
             "textureOffset": sinRayAngle > 0 ? Camera.TILE_HEIGHT - horHitX % Camera.TILE_HEIGHT : horHitX % Camera.TILE_HEIGHT,
             "hitBy": "HORIZONTAL"
         });
+
+        break;
 
         const interactiveTile = interactiveMap[mapY][mapX];
 
@@ -214,6 +220,8 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
             "textureOffset": cosRayAngle > 0 ? vertHitY % Camera.TILE_WIDTH : Camera.TILE_WIDTH - vertHitY % Camera.TILE_WIDTH,
             "hitBy": "VERTICAL"
         });   
+        
+        break;
         
         const interactiveTile = interactiveMap[mapY][mapX];
 
@@ -357,140 +365,206 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
     return horizDistance < vertDistance ? horizRay : vertRay;
 }
 
-Raycaster.prototype.drawRays = function(rayIntersectionsArraySorted, pixelColumn, gameMap, correctedRayAngle, graphics) {
+Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted, pixelColumn, gameMap, rayAngleRadians, rayAngleDegrees) {
+    const realTime = gameContext.timer.getRealTime();
     const WALL_HEIGHT = 1;
     const visualMap = gameMap.layers["floor"];
-    const interactiveMap = gameMap.layers["collision"];
+    const collisionMap = gameMap.layers["collision"];
 
     for(let i = 0; i < rayIntersectionsArraySorted.length; i++) {
         const { tileX, tileY, hitX, hitY, distance, textureOffset, hitBy } = rayIntersectionsArraySorted[i];
-
-        const maxDistance = 2000;
-        const shadingFactor = (1 - Math.exp(-distance / maxDistance));
-
         const correctedDistance = distance * this.fishEyeFixes[pixelColumn];
         const ratio = this.distanceToPlane / correctedDistance;
-        const projectionHeight = Camera.TILE_HEIGHT * this.distanceToPlane / correctedDistance;
+        const projectionHeight = Camera.TILE_HEIGHT * ratio;
 
         const wallBottom = ratio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
         const wallTop = wallBottom - projectionHeight * WALL_HEIGHT;
-        const wallHeight = Math.floor(wallBottom - wallTop);
+        const wallHeight = wallBottom - wallTop;
 
         const visualTile = visualMap[tileY][tileX];
-        const interactiveTile = interactiveMap[tileY][tileX];
-        const buffer = graphics[visualTile];
+        const collisionTile = collisionMap[tileY][tileX];
+
+        const buffer = gameContext.spriteManager.tileSprites[visualTile[0]].getAnimationFrame(visualTile[1], realTime)[0];
 
         if(i === 0) {
-            this.drawSky(pixelColumn, correctedRayAngle);
+            this.drawSky(pixelColumn, rayAngleDegrees);
+            this.drawCeiling(gameContext, pixelColumn, rayAngleRadians, wallTop, gameMap);
         }
 
         this.drawWall(pixelColumn, textureOffset, wallTop, wallHeight, distance, buffer);
 
         if(i === rayIntersectionsArraySorted.length - 1) {
-            this.drawFloor(pixelColumn, correctedRayAngle, Math.floor(wallBottom), gameMap, graphics);
+            this.drawFloor(gameContext, pixelColumn, rayAngleRadians, wallBottom, gameMap);
         }
-        
-        //this.drawCeiling(Math.floor(wallTop), pixelColumn, correctedRayAngle, gameMap, graphics, position3D, pitchOffset);
     }
 }
 
 Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, distance, buffer) {
-    //GANZ FETT EHRE AN CHATGPT!
-    const TILE_HEIGHT = Camera.TILE_HEIGHT;
-    const shadingFactor = 300 / (distance + 1);
-    const sourceX = Math.floor(textureOffset);
-    const sourceY = 0;
-    const sourceWidth = 1;
-    const sourceHeight = TILE_HEIGHT;
+    const displayWidth = this.display.canvas.width;
+    const bufferWidth = buffer.bitmap.width;
+    const targetImageData = this.display.imageData.data;
+    const bufferImageData = buffer.imageData.data;
 
+    const shadingFactor = Raycaster.SHADOW_DISTANCE / (distance + 0.1);
+    const sourceX = Math.floor(textureOffset);
     const destinationX = pixelColumn;
     const destinationY = Math.floor(wallTop);
-    const destinationWidth = 1;
-    const destinationHeight = Math.floor(wallHeight);
+    const heightDifference = Camera.TILE_HEIGHT / wallHeight;
 
-    for (let y = 0; y < destinationHeight; y++) {
-        const sourceIndex = ((sourceY + Math.floor(y * sourceHeight / destinationHeight)) * buffer.bitmap.width + sourceX) * this.bytesPerPixel;
-        const destinationIndex = ((destinationY + y) * this.display.canvas.width + destinationX) * this.bytesPerPixel;
+    for(let y = 0; y < wallHeight; y++) {
+        const destinationPixelY = destinationY + y;
+        const sourcePixelY = ~~(y * heightDifference);
 
-        const sourceR = buffer.imageData.data[sourceIndex];
-        const sourceG = buffer.imageData.data[sourceIndex + 1];
-        const sourceB = buffer.imageData.data[sourceIndex + 2];
+        const destinationIndex = (destinationPixelY * displayWidth + destinationX) * this.bytesPerPixel;
+        const sourceIndex = (sourcePixelY * bufferWidth + sourceX) * this.bytesPerPixel;
 
-        this.display.drawPixel(destinationIndex,
-            Math.min(sourceR, sourceR * shadingFactor),
-            Math.min(sourceG, sourceG * shadingFactor),
-            Math.min(sourceB, sourceB * shadingFactor),
-            255
-        );
+        const sourceR = bufferImageData[sourceIndex];
+        const sourceG = bufferImageData[sourceIndex + 1];
+        const sourceB = bufferImageData[sourceIndex + 2];
+
+        targetImageData[destinationIndex] = Math.min(sourceR, sourceR * shadingFactor);
+        targetImageData[destinationIndex + 1] = Math.min(sourceG, sourceG * shadingFactor);
+        targetImageData[destinationIndex + 2] = Math.min(sourceB, sourceB * shadingFactor);
+        targetImageData[destinationIndex + 3] = 255;
     }
 }
 
-Raycaster.prototype.drawSky = function(pixelColumn, rayAngle) {
-    const xRatio = normalizeAngle(toAngle(rayAngle)) / 360;
-    const sourceColumn = Math.floor(this.skybox.width * xRatio);
+Raycaster.prototype.drawSky = function(pixelColumn, rayAngleDegrees) {
+    const targetImageData = this.display.imageData.data;
+    const sourceImageData = this.skybox.imageData.data;
+
+    const pixelStep = this.bytesPerPixel * this.skybox.width;
+    const xRatio = normalizeAngle(rayAngleDegrees) / 360;
+    const sourceColumn = ~~(this.skybox.width * xRatio);
     const drawEnd = this.PROJECTION_HEIGHT + this.positionZ - this.pitchOffset;
 
     let sourceIndex = sourceColumn * this.bytesPerPixel;
 
-    for (let row = 0; row < drawEnd; row++) {
-        const targetIndex = this.bytesPerPixel * (row * this.width + pixelColumn);
+    for(let row = 0; row < drawEnd; row++) {
+        const targetIndex = (row * this.width + pixelColumn) * this.bytesPerPixel;
 
-        const red = this.skybox.imageData.data[sourceIndex];
-        const green = this.skybox.imageData.data[sourceIndex + 1];
-        const blue = this.skybox.imageData.data[sourceIndex + 2];
+        const sourceR = sourceImageData[sourceIndex];
+        const sourceG = sourceImageData[sourceIndex + 1];
+        const sourceB = sourceImageData[sourceIndex + 2];
 
-        this.display.drawPixel(targetIndex, red, green, blue, 255);
-        sourceIndex += this.bytesPerPixel * this.skybox.width;
+        targetImageData[targetIndex] = sourceR;
+        targetImageData[targetIndex + 1] = sourceG;
+        targetImageData[targetIndex + 2] = sourceB;
+        targetImageData[targetIndex + 3] = 255;
+
+        sourceIndex += pixelStep;
     }
 }
 
-Raycaster.prototype.drawFloor = function(pixelColumn, rayAngle, wallBottom, gameMap, graphics) {
+Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wallBottom, gameMap) {
+    const targetImageData = this.display.imageData.data;
+
+    const pixelStep = this.bytesPerPixel * this.width;
+    const mapWidth = gameMap.width;
+    const mapHeight = gameMap.height;
     const bottomMap = gameMap.layers["bottom"];
     const visualMap = gameMap.layers["floor"];
-    const interactiveMap = gameMap.layers["collision"];
-    const byteStep = this.bytesPerPixel * this.width;
 
-    let targetIndex = this.bytesPerPixel * (wallBottom * this.width + pixelColumn);
+    const cosAngle = Math.cos(rayAngle);
+    const sinAngle = Math.sin(rayAngle);
+    const destinationY = Math.floor(wallBottom);
 
-    for (let row = wallBottom + 1; row < this.height; row++) {
+    let targetIndex = this.bytesPerPixel * (destinationY * this.width + pixelColumn);
+
+    for (let row = destinationY + 1; row <= this.height; row++) {
         const straightDistance = this.positionZ / (row + this.pitchOffset - this.PROJECTION_HEIGHT) * this.distanceToPlane;
         const diagDist = straightDistance * this.inverseFishEyeFixes[pixelColumn];
 
-        const xEnd = ~~(diagDist * Math.cos(rayAngle) + this.positionX);
-        const yEnd = ~~(diagDist * Math.sin(rayAngle) + this.positionY);
-    
+        const xEnd = ~~(diagDist * cosAngle + this.positionX);
+        const yEnd = ~~(diagDist * sinAngle + this.positionY);
         const cellX = ~~(xEnd / Camera.TILE_WIDTH);
         const cellY = ~~(yEnd / Camera.TILE_HEIGHT);
 
-        if (cellX < gameMap.width && cellY < gameMap.height && cellX > 0 && cellY > 0) {
-            const bottomTileID = bottomMap[cellY][cellX];
-            const visualTileID = visualMap[cellY][cellX];
-            const interactiveTile = interactiveMap[cellY][cellX];
-
-            if(bottomTileID === null || visualTileID !== 0 && (!interactiveTile || !interactiveTile.isWindow)) {
-                targetIndex += byteStep;
-                continue;
-            }
-
-            const buffer = graphics[bottomTileID];
-            const shadingFactor = 300 / (diagDist + 1);
-            const sourceData = buffer.imageData.data;
-            const tileRow = ~~(xEnd % Camera.TILE_WIDTH);
-            const tileCol = ~~(yEnd % Camera.TILE_HEIGHT);
-
-            const sourceIndex = this.bytesPerPixel * (tileCol * Camera.TILE_HEIGHT + tileRow);
-            const sourceR = sourceData[sourceIndex];
-            const sourceG = sourceData[sourceIndex + 1];
-            const sourceB = sourceData[sourceIndex + 2];
-
-            this.display.drawPixel(targetIndex,
-                Math.min(sourceR, sourceR * shadingFactor),
-                Math.min(sourceG, sourceG * shadingFactor),
-                Math.min(sourceB, sourceB * shadingFactor),
-                255
-            );
-            targetIndex += byteStep;
+        if(cellX < 0 || cellX >= mapWidth || cellY < 0 || cellY >= mapHeight) {
+            continue;
         }
+
+        const bottomTile = bottomMap[cellY][cellX];
+        const visualTile = visualMap[cellY][cellX];
+
+        if(bottomTile === null || visualTile !== null) {
+            targetIndex += pixelStep;
+            continue;
+        }
+
+        const buffer = gameContext.spriteManager.tileSprites[bottomTile[0]].getAnimationFrame(bottomTile[1], 0)[0];;
+        const shadingFactor = Raycaster.SHADOW_DISTANCE / (diagDist + 0.1);
+        const sourceData = buffer.imageData.data;
+        const tileRow = xEnd % Camera.TILE_WIDTH;
+        const tileColumn = yEnd % Camera.TILE_HEIGHT;
+
+        const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
+        const sourceR = sourceData[sourceIndex];
+        const sourceG = sourceData[sourceIndex + 1];
+        const sourceB = sourceData[sourceIndex + 2];
+
+        targetImageData[targetIndex] = Math.min(sourceR, sourceR * shadingFactor);
+        targetImageData[targetIndex + 1] = Math.min(sourceG, sourceG * shadingFactor),
+        targetImageData[targetIndex + 2] = Math.min(sourceB, sourceB * shadingFactor),
+        targetImageData[targetIndex + 3] = 255
+      
+        targetIndex += pixelStep;
+    }
+}
+
+Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, wallTop, gameMap) {
+    const targetImageData = this.display.imageData.data;
+
+    const pixelStep = this.bytesPerPixel * this.width;
+    const mapWidth = gameMap.width;
+    const mapHeight = gameMap.height;
+    const visualMap = gameMap.layers["floor"];
+    const ceilMap = gameMap.layers["top"];
+
+    const cosAngle = Math.cos(rayAngle);
+    const sinAngle = Math.sin(rayAngle);
+    const destinationY = Math.floor(wallTop);
+
+    let targetIndex = this.bytesPerPixel * (destinationY * this.width + pixelColumn);
+
+    for(let row = destinationY; row >= 0; row--) {
+        const straightDistance = this.positionZ / (this.PROJECTION_HEIGHT - row - this.pitchOffset) * this.distanceToPlane;
+        const diagDist = straightDistance * this.inverseFishEyeFixes[pixelColumn];
+
+        const xEnd = ~~(diagDist * cosAngle + this.positionX);
+        const yEnd = ~~(diagDist * sinAngle + this.positionY);
+        const cellX = ~~(xEnd / Camera.TILE_WIDTH);
+        const cellY = ~~(yEnd / Camera.TILE_HEIGHT);
+
+        if(cellX < 0 || cellX >= mapWidth || cellY < 0 || cellY >= mapHeight) {
+            continue;
+        }
+
+        const ceilTile = ceilMap[cellY][cellX];
+        const visualTile = visualMap[cellY][cellX];
+
+        if (ceilTile === null || visualTile !== null) {
+            targetIndex -= pixelStep;
+            continue;
+        }
+
+        const buffer = gameContext.spriteManager.tileSprites[ceilTile[0]].getAnimationFrame(ceilTile[1], 0)[0];;
+        const shadingFactor = Raycaster.SHADOW_DISTANCE / (diagDist + 0.1);
+        const sourceData = buffer.imageData.data;
+        const tileRow = xEnd % Camera.TILE_WIDTH;
+        const tileColumn = yEnd % Camera.TILE_HEIGHT;
+
+        const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
+        const sourceR = sourceData[sourceIndex];
+        const sourceG = sourceData[sourceIndex + 1];
+        const sourceB = sourceData[sourceIndex + 2];
+
+        targetImageData[targetIndex] = Math.min(sourceR, sourceR * shadingFactor);
+        targetImageData[targetIndex + 1] = Math.min(sourceG, sourceG * shadingFactor);
+        targetImageData[targetIndex + 2] = Math.min(sourceB, sourceB * shadingFactor);
+        targetImageData[targetIndex + 3] = 255;
+
+        targetIndex -= pixelStep;
     }
 }
 

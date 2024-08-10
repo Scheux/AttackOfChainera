@@ -6,7 +6,7 @@ export const Move3DComponent = function() {
     this.isJumping = false;
     this.isCrouching = false;
     this.isFalling = false;
-    this.speed = 0;
+    this.speed = 64;
     this.acceleration = 0;
     this.initialAcceleration = 0;
 }
