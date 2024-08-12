@@ -354,7 +354,7 @@ Camera.prototype.loadViewport = function(mapWidth, mapHeight) {
 
 Camera.prototype.initializeRaycaster = function() {
     this.raycaster = new Raycaster();
-    this.raycaster.resize(this.display.width / Camera.SCALE, this.display.height / Camera.SCALE);
+    this.raycaster.resize(384, 216);
 }
 
 Camera.prototype.clearRaycaster = function() {
@@ -369,7 +369,7 @@ Camera.prototype.resizeViewport = function(width, height) {
     this.display.resize(width, height);
 
     if(this.raycaster) {
-        this.raycaster.resize(width / Camera.SCALE, height / Camera.SCALE);
+        //this.raycaster.resize(512, 288);
     }
 
     this.events.emit(Camera.EVENT_SCREEN_RESIZE, this.viewportWidth, this.viewportHeight);
