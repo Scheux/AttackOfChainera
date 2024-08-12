@@ -8,6 +8,8 @@ export const PlayerDefault = function() {
     State.call(this);
 }
 
+const MAX_DISTANCE = 4;
+
 PlayerDefault.prototype = Object.create(State.prototype);
 PlayerDefault.prototype.constructor = PlayerDefault;
 
@@ -28,12 +30,14 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
     const move3D = entity.components.getComponent(Move3DComponent);
 
     const floor = gameMap.layers["floor"];
+    const collisionLayer = gameMap.layers["collision"];
+
     const deltaTime = timer.getFixedDeltaTime();
 
     const entityRotation = position3D.rotation;
     const entitySpeed = move3D.speed * deltaTime;
 
-    const gravity = 8;
+    const gravity = 10;
     let dirX = 0;
     let dirY = 0;
     
@@ -41,7 +45,7 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
         move3D.acceleration -= gravity * deltaTime;
         position3D.positionZ += move3D.acceleration * deltaTime;
 
-        if(position3D.positionZ >= 64) {
+        if(position3D.positionZ >= Camera.TILE_HEIGHT) {
             move3D.isJumping = false;
             move3D.isFalling = true;
         }
@@ -54,19 +58,19 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
         const tileX = Math.floor(position3D.positionX / Camera.TILE_WIDTH);
         const tileY = Math.floor(position3D.positionY / Camera.TILE_HEIGHT);
 
-        if(floor[tileY][tileX] !== 0) {
-            if(position3D.positionZ < 64) {
-                position3D.positionZ = 64;
+        if(floor[tileY][tileX] !== null) {
+            if(position3D.positionZ < Camera.TILE_HEIGHT) {
+                position3D.positionZ = Camera.TILE_HEIGHT;
                 move3D.isFalling = false;
                 move3D.isJumping = false;
-                move3D.acceleration = move3D.initialAcceleration;
+                move3D.acceleration = move3D.acceleration_default;
             }
         } else {
-            if(position3D.positionZ <= 32) {
-                position3D.positionZ = 32;
+            if(position3D.positionZ <= Camera.TILE_HEIGHT / 2) {
+                position3D.positionZ = Camera.TILE_HEIGHT / 2;
                 move3D.isFalling = false;
                 move3D.isJumping = false;
-                move3D.acceleration = move3D.initialAcceleration;
+                move3D.acceleration = move3D.acceleration_default;
             }
         }
     }
@@ -104,28 +108,27 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
 
     let nextPositionX = position3D.positionX + dirX * entitySpeed;
     let nextPositionY = position3D.positionY + dirY * entitySpeed;
-    /*
+    
     let movementAngle = toAngle(Math.atan2(dirY, dirX));
-    let ray = gameContext.renderer.checkRayIntersectionSingle(nextPositionX, nextPositionY, movementAngle, layers, true);
+    let ray = gameContext.renderer.raycaster.checkRayIntersectionSingle(nextPositionX, nextPositionY, movementAngle, collisionLayer);
 
-    if (ray && ray.distance < 20 && position3D.positionZ < 96) {
+    if (ray && ray.distance < MAX_DISTANCE) {
         nextPositionX = position3D.positionX + dirX * entitySpeed;
         nextPositionY = position3D.positionY;
         movementAngle = Math.atan2(0, dirX) * (180 / Math.PI);
-        ray = gameContext.renderer.checkRayIntersectionSingle(nextPositionX, nextPositionY, movementAngle, layers, true);
+        ray = gameContext.renderer.raycaster.checkRayIntersectionSingle(nextPositionX, nextPositionY, movementAngle, collisionLayer);
 
-        if (ray && ray.distance < 20 && position3D.positionZ < 96) {
+        if (ray && ray.distance < MAX_DISTANCE) {
             nextPositionX = position3D.positionX;
             nextPositionY = position3D.positionY + dirY * entitySpeed;
             movementAngle = Math.atan2(dirY, 0) * (180 / Math.PI);
-            ray = gameContext.renderer.checkRayIntersectionSingle(nextPositionX, nextPositionY, movementAngle, layers, true);
+            ray = gameContext.renderer.raycaster.checkRayIntersectionSingle(nextPositionX, nextPositionY, movementAngle, collisionLayer);
 
-            if (ray && ray.distance < 20 && position3D.positionZ < 96) {
+            if (ray && ray.distance < MAX_DISTANCE) {
                 return;
             }
         }
     }
-    */
    
     position3D.positionX = nextPositionX;
     position3D.positionY = nextPositionY;

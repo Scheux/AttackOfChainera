@@ -523,6 +523,28 @@ GameContext.prototype.setupPlayer3D = function() {
     this.player.components.addComponent(position3D);
     this.player.components.addComponent(move3D);
 
+    this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "Shift", (event, keyboard) => {
+        if(move3D.isJumping || move3D.isFalling) {
+            return;
+        }
+
+        if(!move3D.isSneaking) {
+            position3D.positionZ -= Camera.TILE_HEIGHT / 4;
+            move3D.speed = move3D.sneakSpeed;
+            move3D.isSneaking = true;
+        } else {
+            position3D.positionZ += Camera.TILE_HEIGHT / 4;
+            move3D.speed = move3D.walkSpeed;
+            move3D.isSneaking = false;
+        }
+    });
+
+    this.client.keyboard.subscribe(Keyboard.KEY_DOWN, " ", (event, keyboard) => {
+        if(!move3D.isSneaking && !move3D.isFalling) {
+            move3D.isJumping = true;
+        }
+    });
+
     this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "w", (event, keyboard) => move3D.isMovingUp = true);
     this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "a", (event, keyboard) => move3D.isMovingLeft = true);
     this.client.keyboard.subscribe(Keyboard.KEY_PRESSED, "s", (event, keyboard) => move3D.isMovingDown = true);

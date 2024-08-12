@@ -3,6 +3,9 @@ import { normalizeAngle, toAngle, toRadian } from "../helpers.js";
 import { ResourceLoader } from "../resourceLoader.js";
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
+import { LightSource } from "./lightSource.js";
+
+var count = 0;
 
 export const Raycaster = function() {
     this.fov = 60;
@@ -29,6 +32,14 @@ export const Raycaster = function() {
     this.pitchOffset = 0;
     this.skybox = null;
 
+    this.ambientLight = 0.1;
+    this.lightSources = [
+        new LightSource(24, 136, 8, 1, [255, 0, 0]),
+        new LightSource(24, 24, 8, 64, [255, 0, 0]),
+        new LightSource(24, 24, 8, 64, [0, 0, 255]),
+        new LightSource(24, 24, 8, 64, [255, 0, 255])
+    ];
+
     this.display = new Canvas().createNewElement(1, 1).getImageData();
     ResourceLoader.promiseImage("assets/sky.png").then(image => this.skybox = new ImageBuffer(image));
 }
@@ -38,6 +49,19 @@ Raycaster.WALL_X_POSITIVE = -1;
 Raycaster.WALL_X_NEGATIVE = 1;
 Raycaster.WALL_Y_POSITIVE = -1;
 Raycaster.WALL_Y_NEGATIVE = 1;
+
+Raycaster.prototype.resize = function(width, height) {
+    this.display.resize(width, height);
+    this.display.getImageData();
+
+    this.width = Math.floor(this.display.width);
+    this.height = Math.floor(this.display.height);
+
+    this.PROJECTION_WIDTH = Math.floor(this.display.centerX);
+    this.PROJECTION_HEIGHT = Math.floor(this.display.centerY);
+
+    this.calculateRayData();    
+}
 
 Raycaster.prototype.calculateRayData = function() {
     this.rayAngles = [];
@@ -67,13 +91,6 @@ Raycaster.prototype.copyPosition = function(position3D) {
     this.pitchOffset = Math.tan(toRadian(this.pitch)) * this.distanceToPlane;
 }
 
-Raycaster.prototype.copyScreen = function() {
-    this.width = Math.floor(this.display.width);
-    this.height = Math.floor(this.display.height);
-    this.PROJECTION_WIDTH = Math.floor(this.display.centerX);
-    this.PROJECTION_HEIGHT = Math.floor(this.display.centerY);
-}
-
 Raycaster.prototype.raycast = function(gameContext) {
     const { mapLoader, renderer } = gameContext;
     const gameMap = mapLoader.getActiveMap();
@@ -82,8 +99,14 @@ Raycaster.prototype.raycast = function(gameContext) {
         return;
     }
 
-    const cameraAngle = toRadian(this.rotation); //can be precalced!
-    //rotation is always normalized from 0 tp 360
+    this.lightSources[0].intensity += Math.sin(toRadian(count));
+    this.lightSources[1].x += Math.sin(toRadian(count));
+    this.lightSources[2].y += Math.sin(toRadian(count));
+    this.lightSources[3].x += Math.sin(toRadian(count));
+    this.lightSources[3].y += Math.sin(toRadian(count));
+    count++;
+
+    const cameraAngle = toRadian(this.rotation);
 
     for(let rayIndex = 0; rayIndex < this.rayAngles.length; rayIndex++) {
         const rayAngle = this.rayAngles[rayIndex];
@@ -236,7 +259,7 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
     return rayHits;
 }
 
-Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ignoreWindows) {
+Raycaster.prototype.checkRayIntersectionSingle = function(cameraX, cameraY, rayAngle, tilemap) {
     const mapWidth = tilemap[0].length;
     const mapHeight = tilemap.length;
 
@@ -246,14 +269,15 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
         rayAngle += 360;
     }
 
-    const tanRayAngle = Math.tan(toRadian(rayAngle));
-    const sinRayAngle = Math.sin(toRadian(rayAngle));
-    const cosRayAngle = Math.cos(toRadian(rayAngle));
+    const rayAngleRadian = toRadian(rayAngle);
+    const tanRayAngle = Math.tan(rayAngleRadian);
+    const sinRayAngle = Math.sin(rayAngleRadian);
+    const cosRayAngle = Math.cos(rayAngleRadian);
 
     let horizRay = null;
     let horizDistance = Infinity;
-    let horHitX = this.positionX;
-    let horHitY = this.positionY;
+    let horHitX = cameraX;
+    let horHitY = cameraY;
 
     let horizYAdjust = null;
     let nextHorizYAdjust = null;
@@ -271,8 +295,8 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
 
     let horStepX = horStepY / tanRayAngle;
 
-    let nextHorizY = Math.floor(this.positionY / Camera.TILE_HEIGHT) * Camera.TILE_HEIGHT + nextHorizYAdjust;
-    let nextHorizX = this.positionX + (nextHorizY - this.positionY) / tanRayAngle;
+    let nextHorizY = Math.floor(cameraY / Camera.TILE_HEIGHT) * Camera.TILE_HEIGHT + nextHorizYAdjust;
+    let nextHorizX = cameraX + (nextHorizY - cameraY) / tanRayAngle;
 
     while (nextHorizX >= 0 && nextHorizX < mapWidth * Camera.TILE_WIDTH && nextHorizY >= 0 && nextHorizY < mapHeight * Camera.TILE_HEIGHT) {
         const mapX = Math.floor(nextHorizX / Camera.TILE_WIDTH);
@@ -280,7 +304,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
         const tileID = tilemap[mapY]?.[mapX];
 
         if (tileID !== 0) {
-            horizDistance = Math.sqrt((nextHorizX - this.positionX) ** 2 + (nextHorizY - this.positionY) ** 2);
+            horizDistance = Math.sqrt((nextHorizX - cameraX) ** 2 + (nextHorizY - cameraY) ** 2);
             horHitX = nextHorizX;
             horHitY = nextHorizY;
 
@@ -297,9 +321,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
                 "hitBy": "HORIZONTAL"
             }
 
-            if (tileID !== 3 || ignoreWindows) {
-                break;
-            }
+            break;
         }
 
         nextHorizX += horStepX;
@@ -308,8 +330,8 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
 
     let vertRay = null;
     let vertDistance = Infinity;
-    let vertHitX = this.positionX;
-    let vertHitY = this.positionY;
+    let vertHitX = cameraX;
+    let vertHitY = cameraY;
 
     let vertXAdjust = null;
     let nextVertXAdjust = null;
@@ -327,8 +349,8 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
 
     let verStepY = verStepX * tanRayAngle;
 
-    let nextVertX = Math.floor(this.positionX / Camera.TILE_WIDTH) * Camera.TILE_WIDTH + nextVertXAdjust;
-    let nextVertY = this.positionY + (nextVertX - this.positionX) * tanRayAngle;
+    let nextVertX = Math.floor(cameraX / Camera.TILE_WIDTH) * Camera.TILE_WIDTH + nextVertXAdjust;
+    let nextVertY = cameraY + (nextVertX - cameraX) * tanRayAngle;
 
     while (nextVertX >= 0 && nextVertX < mapWidth * Camera.TILE_WIDTH && nextVertY >= 0 && nextVertY < mapHeight * Camera.TILE_HEIGHT) {
         const mapX = Math.floor((nextVertX + vertXAdjust) / Camera.TILE_WIDTH);
@@ -336,7 +358,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
         const tileID = tilemap[mapY]?.[mapX];
 
         if (tileID !== 0) {
-            vertDistance = Math.sqrt((nextVertX - this.positionX) ** 2 + (nextVertY - this.positionY) ** 2);
+            vertDistance = Math.sqrt((nextVertX - cameraX) ** 2 + (nextVertY - cameraY) ** 2);
             vertHitX = nextVertX;
             vertHitY = nextVertY;
 
@@ -353,9 +375,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(rayAngle, tilemap, ign
                 "hitBy": "HORIZONTAL"
             }
 
-            if (tileID !== 3 || ignoreWindows) {
-                break;
-            }
+            break;
         }
 
         nextVertX += verStepX;
@@ -370,14 +390,16 @@ Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted
     const WALL_HEIGHT = 1;
     const visualMap = gameMap.layers["floor"];
     const collisionMap = gameMap.layers["collision"];
+    const fishEyeFix = this.fishEyeFixes[pixelColumn];
 
     for(let i = 0; i < rayIntersectionsArraySorted.length; i++) {
-        const { tileX, tileY, hitX, hitY, distance, textureOffset, hitBy } = rayIntersectionsArraySorted[i];
-        const correctedDistance = distance * this.fishEyeFixes[pixelColumn];
-        const ratio = this.distanceToPlane / correctedDistance;
-        const projectionHeight = Camera.TILE_HEIGHT * ratio;
+        const ray = rayIntersectionsArraySorted[i];
+        const { tileX, tileY, hitX, hitY, distance, textureOffset, hitBy } = ray;
 
-        const wallBottom = ratio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
+        const distanceRatio = this.distanceToPlane / (distance * fishEyeFix);
+        const projectionHeight = Camera.TILE_HEIGHT * distanceRatio;
+
+        const wallBottom = distanceRatio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
         const wallTop = wallBottom - projectionHeight * WALL_HEIGHT;
         const wallHeight = wallBottom - wallTop;
 
@@ -388,45 +410,90 @@ Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted
 
         if(i === 0) {
             this.drawSky(pixelColumn, rayAngleDegrees);
-            this.drawCeiling(gameContext, pixelColumn, rayAngleRadians, wallTop, gameMap);
+            //this.drawCeiling(gameContext, pixelColumn, rayAngleRadians, wallTop, gameMap);   
         }
 
-        this.drawWall(pixelColumn, textureOffset, wallTop, wallHeight, distance, buffer);
+        this.drawWall(pixelColumn, textureOffset, wallTop, wallHeight, buffer, ray);
 
         if(i === rayIntersectionsArraySorted.length - 1) {
-            this.drawFloor(gameContext, pixelColumn, rayAngleRadians, wallBottom, gameMap);
+            this.drawFloor(gameContext, pixelColumn, rayAngleRadians, wallBottom, gameMap);         
         }
     }
 }
 
-Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, distance, buffer) {
-    const displayWidth = this.display.canvas.width;
+Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, buffer, ray) {
+    const displayHeight = this.height;
+    const displayWidth = this.width;
     const bufferWidth = buffer.bitmap.width;
     const targetImageData = this.display.imageData.data;
-    const bufferImageData = buffer.imageData.data;
+    const sourceData = buffer.imageData.data;
 
-    const shadingFactor = Raycaster.SHADOW_DISTANCE / (distance + 0.1);
     const sourceX = Math.floor(textureOffset);
     const destinationX = pixelColumn;
     const destinationY = Math.floor(wallTop);
     const heightDifference = Camera.TILE_HEIGHT / wallHeight;
 
+    if(wallHeight + wallTop > displayHeight) {
+        wallHeight = displayHeight - wallTop;
+    }
+
     for(let y = 0; y < wallHeight; y++) {
         const destinationPixelY = destinationY + y;
+
+        if(destinationPixelY > displayHeight) {
+            return;
+        }
+
+        if(destinationPixelY < 0) {
+            continue;
+        }
+
         const sourcePixelY = ~~(y * heightDifference);
 
-        const destinationIndex = (destinationPixelY * displayWidth + destinationX) * this.bytesPerPixel;
+        const targetIndex = (destinationPixelY * displayWidth + destinationX) * this.bytesPerPixel;
         const sourceIndex = (sourcePixelY * bufferWidth + sourceX) * this.bytesPerPixel;
 
-        const sourceR = bufferImageData[sourceIndex];
-        const sourceG = bufferImageData[sourceIndex + 1];
-        const sourceB = bufferImageData[sourceIndex + 2];
+        const pointZ = Camera.TILE_HEIGHT - sourcePixelY;
+        const { r, g, b } = this.calculateLightIntensity(ray.hitX, ray.hitY, pointZ);
+        
+        const sourceR = sourceData[sourceIndex];
+        const sourceG = sourceData[sourceIndex + 1];
+        const sourceB = sourceData[sourceIndex + 2];
 
-        targetImageData[destinationIndex] = Math.min(sourceR, sourceR * shadingFactor);
-        targetImageData[destinationIndex + 1] = Math.min(sourceG, sourceG * shadingFactor);
-        targetImageData[destinationIndex + 2] = Math.min(sourceB, sourceB * shadingFactor);
-        targetImageData[destinationIndex + 3] = 255;
+        const finalR = ~~(sourceR * r);
+        const finalG = ~~(sourceG * g);
+        const finalB = ~~(sourceB * b);
+
+        targetImageData[targetIndex] = finalR;
+        targetImageData[targetIndex + 1] = finalG;
+        targetImageData[targetIndex + 2] = finalB;
+        targetImageData[targetIndex + 3] = 255;
     }
+}
+
+Raycaster.prototype.calculateLightIntensity = function(hitX, hitY, pointZ) {
+    let r = this.ambientLight;
+    let g = this.ambientLight;
+    let b = this.ambientLight;
+
+    for (let i = 0; i < this.lightSources.length; i++) {
+        const light = this.lightSources[i];
+        const intensity = light.calculateIntensity(hitX, hitY, pointZ);
+
+        r += intensity * light.color[0];
+        g += intensity * light.color[1];
+        b += intensity * light.color[2];
+    }
+
+    r = Math.min(r, 1);
+    g = Math.min(g, 1);
+    b = Math.min(b, 1);
+
+    return {
+        r: r,
+        g: g,
+        b: b
+    };
 }
 
 Raycaster.prototype.drawSky = function(pixelColumn, rayAngleDegrees) {
@@ -471,7 +538,7 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
 
     let targetIndex = this.bytesPerPixel * (destinationY * this.width + pixelColumn);
 
-    for (let row = destinationY + 1; row <= this.height; row++) {
+    for(let row = destinationY + 1; row <= this.height; row++) {
         const straightDistance = this.positionZ / (row + this.pitchOffset - this.PROJECTION_HEIGHT) * this.distanceToPlane;
         const diagDist = straightDistance * this.inverseFishEyeFixes[pixelColumn];
 
@@ -481,6 +548,7 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
         const cellY = ~~(yEnd / Camera.TILE_HEIGHT);
 
         if(cellX < 0 || cellX >= mapWidth || cellY < 0 || cellY >= mapHeight) {
+            targetIndex += pixelStep;
             continue;
         }
 
@@ -492,21 +560,26 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
             continue;
         }
 
-        const buffer = gameContext.spriteManager.tileSprites[bottomTile[0]].getAnimationFrame(bottomTile[1], 0)[0];;
-        const shadingFactor = Raycaster.SHADOW_DISTANCE / (diagDist + 0.1);
+        const buffer = gameContext.spriteManager.tileSprites[bottomTile[0]].getAnimationFrame(bottomTile[1], 0)[0];
         const sourceData = buffer.imageData.data;
         const tileRow = xEnd % Camera.TILE_WIDTH;
         const tileColumn = yEnd % Camera.TILE_HEIGHT;
 
         const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
+        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0);
+
         const sourceR = sourceData[sourceIndex];
         const sourceG = sourceData[sourceIndex + 1];
         const sourceB = sourceData[sourceIndex + 2];
 
-        targetImageData[targetIndex] = Math.min(sourceR, sourceR * shadingFactor);
-        targetImageData[targetIndex + 1] = Math.min(sourceG, sourceG * shadingFactor),
-        targetImageData[targetIndex + 2] = Math.min(sourceB, sourceB * shadingFactor),
-        targetImageData[targetIndex + 3] = 255
+        const finalR = ~~(sourceR * r);
+        const finalG = ~~(sourceG * g);
+        const finalB = ~~(sourceB * b);
+
+        targetImageData[targetIndex] = finalR;
+        targetImageData[targetIndex + 1] = finalG;
+        targetImageData[targetIndex + 2] = finalB;
+        targetImageData[targetIndex + 3] = 255;
       
         targetIndex += pixelStep;
     }
@@ -537,6 +610,7 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         const cellY = ~~(yEnd / Camera.TILE_HEIGHT);
 
         if(cellX < 0 || cellX >= mapWidth || cellY < 0 || cellY >= mapHeight) {
+            targetIndex -= pixelStep;
             continue;
         }
 
@@ -549,21 +623,26 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         }
 
         const buffer = gameContext.spriteManager.tileSprites[ceilTile[0]].getAnimationFrame(ceilTile[1], 0)[0];;
-        const shadingFactor = Raycaster.SHADOW_DISTANCE / (diagDist + 0.1);
         const sourceData = buffer.imageData.data;
         const tileRow = xEnd % Camera.TILE_WIDTH;
         const tileColumn = yEnd % Camera.TILE_HEIGHT;
 
         const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
+        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0);
+
         const sourceR = sourceData[sourceIndex];
         const sourceG = sourceData[sourceIndex + 1];
         const sourceB = sourceData[sourceIndex + 2];
 
-        targetImageData[targetIndex] = Math.min(sourceR, sourceR * shadingFactor);
-        targetImageData[targetIndex + 1] = Math.min(sourceG, sourceG * shadingFactor);
-        targetImageData[targetIndex + 2] = Math.min(sourceB, sourceB * shadingFactor);
-        targetImageData[targetIndex + 3] = 255;
+        const finalR = ~~(sourceR * r);
+        const finalG = ~~(sourceG * g);
+        const finalB = ~~(sourceB * b);
 
+        targetImageData[targetIndex] = finalR;
+        targetImageData[targetIndex + 1] = finalG;
+        targetImageData[targetIndex + 2] = finalB;
+        targetImageData[targetIndex + 3] = 255;
+      
         targetIndex -= pixelStep;
     }
 }

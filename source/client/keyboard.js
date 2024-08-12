@@ -18,6 +18,8 @@ export const Keyboard = function() {
     this.keys.add("d");
     this.keys.add("b");
     this.keys.add("e");
+    this.keys.add(" ");
+    this.keys.add("Shift");
 }
 
 Keyboard.KEY_PRESSED = 0;
