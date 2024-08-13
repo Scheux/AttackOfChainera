@@ -3,7 +3,7 @@
         "FPS_COUNTER_TEXT_FPS": {
             "id": "FPS_COUNTER_TEXT_FPS",
             "type": "TEXT",
-            "anchor": "TOP_LEFT",
+            "anchor": "BOTTOM_LEFT",
             "position": { "x": 0, "y": 25 },
             "text": "FPS",
             "font": "50px Arial",

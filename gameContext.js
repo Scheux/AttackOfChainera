@@ -177,7 +177,10 @@ GameContext.prototype.loadGame = async function(gameData) {
     }
 
     this.mapLoader.mapCache = mapCache;
+
     await this.loadMap(mapID);
+
+    this.parseMap(mapID, false);
 }
 
 GameContext.prototype.newGame = function() {
@@ -185,14 +188,9 @@ GameContext.prototype.newGame = function() {
     //2. FUN
 }
 
-/**
- * Loads a map with all its neighbors and entities.
- * 
- * @param {string} mapID The ID of the map to be loaded.
- * @returns {boolean} If the loading process was successful.
- */
-GameContext.prototype.loadMap = async function(mapID, ignoreEntities) {
+GameContext.prototype.loadMap = async function(mapID) {
     await this.mapLoader.loadMap(mapID);
+
     const gameMap = this.mapLoader.getLoadedMap(mapID);
     const oldActiveMapID = this.mapLoader.getActiveMapID();
 
@@ -209,6 +207,12 @@ GameContext.prototype.loadMap = async function(mapID, ignoreEntities) {
         
         this.unloadProcess(mapID);
     }
+
+    return true;
+}
+
+GameContext.prototype.parseMap = function(mapID, ignoreEntities) {
+    const gameMap = this.mapLoader.getLoadedMap(mapID);
 
     this.mapLoader.setActiveMap(mapID);
     this.client.musicPlayer.loadTrack(gameMap.music);
@@ -258,16 +262,8 @@ GameContext.prototype.loadMap = async function(mapID, ignoreEntities) {
             }
         }
     }
-
-    return true;
 }
 
-/**
- * Unloads every loaded map that is no longer needed.
- * Also unloads their entities.
- * 
- * @param {string} mapID The id of the new main map.
- */
 GameContext.prototype.unloadProcess = function(mapID) {
     const coreMap = this.mapLoader.getLoadedMap(mapID);
     const keptMaps = new Set([mapID]);
@@ -515,6 +511,7 @@ GameContext.prototype.getType = function(key) {
 }
 
 GameContext.prototype.setupPlayer3D = function() {
+    const PITCH_LIMIT = 10;
     this.player = new Entity("PLAYER", "PLAYER")
 
     const position3D = new Position3DComponent();
@@ -569,10 +566,10 @@ GameContext.prototype.setupPlayer3D = function() {
 
         position3D.pitch -= deltaY / 20;
 
-        if(position3D.pitch > 8) {
-            position3D.pitch = 8;
-        } else if (position3D.pitch < -8) {
-            position3D.pitch = -8;
+        if(position3D.pitch > PITCH_LIMIT) {
+            position3D.pitch = PITCH_LIMIT;
+        } else if (position3D.pitch < -PITCH_LIMIT) {
+            position3D.pitch = -PITCH_LIMIT;
         }
     });
 

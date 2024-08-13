@@ -104,6 +104,7 @@ PlayerIdleState.prototype.update = function(stateMachine, gameContext) {
             connectedMap.setPointers(moveComponent.targetTileX, moveComponent.targetTileY, positionComponent.dimX, positionComponent.dimY, entity.id);
 
             await gameContext.loadMap(connection.id);
+            gameContext.parseMap(connection.id, false);
             renderer.shiftViewport(-connection.startX * Camera.TILE_WIDTH, -connection.startY * Camera.TILE_HEIGHT);
         }
     }

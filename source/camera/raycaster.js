@@ -4,6 +4,7 @@ import { ResourceLoader } from "../resourceLoader.js";
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { LightSource } from "./lightSource.js";
+import { Minimap } from "./minimap.js";
 
 var count = 0;
 
@@ -32,7 +33,7 @@ export const Raycaster = function() {
     this.pitchOffset = 0;
     this.skybox = null;
 
-    this.ambientLight = 0.1;
+    this.ambientLight = 0.2;
     this.lightSources = [
         new LightSource(24, 136, 8, 1, [255, 0, 0]),
         new LightSource(24, 24, 8, 64, [255, 0, 0]),
@@ -40,6 +41,10 @@ export const Raycaster = function() {
         new LightSource(24, 24, 8, 64, [255, 0, 255])
     ];
 
+    this.fogColor = { r: 200, g: 200, b: 200 };
+    this.maxFogDistance = 400;
+    this.minimap = new Minimap();
+    this.minimap.setViewport(10, 10);
     this.display = new Canvas().createNewElement(1, 1).getImageData();
     ResourceLoader.promiseImage("assets/sky.png").then(image => this.skybox = new ImageBuffer(image));
 }
@@ -91,19 +96,12 @@ Raycaster.prototype.copyPosition = function(position3D) {
     this.pitchOffset = Math.tan(toRadian(this.pitch)) * this.distanceToPlane;
 }
 
-Raycaster.prototype.raycast = function(gameContext) {
-    const { mapLoader, renderer } = gameContext;
-    const gameMap = mapLoader.getActiveMap();
-
-    if(!gameMap) {
-        return;
-    }
-
+Raycaster.prototype.raycast = function(gameContext, gameMap) {
     this.lightSources[0].intensity += Math.sin(toRadian(count));
-    this.lightSources[1].x += Math.sin(toRadian(count));
-    this.lightSources[2].y += Math.sin(toRadian(count));
-    this.lightSources[3].x += Math.sin(toRadian(count));
-    this.lightSources[3].y += Math.sin(toRadian(count));
+    this.lightSources[1].positionX += Math.sin(toRadian(count));
+    this.lightSources[2].positionY += Math.sin(toRadian(count));
+    this.lightSources[3].positionX += Math.sin(toRadian(count));
+    this.lightSources[3].positionY += Math.sin(toRadian(count));
     count++;
 
     const cameraAngle = toRadian(this.rotation);
@@ -387,7 +385,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(cameraX, cameraY, rayA
 
 Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted, pixelColumn, gameMap, rayAngleRadians, rayAngleDegrees) {
     const realTime = gameContext.timer.getRealTime();
-    const WALL_HEIGHT = 1;
+    const metaMap = gameMap.tiles;
     const visualMap = gameMap.layers["floor"];
     const collisionMap = gameMap.layers["collision"];
     const fishEyeFix = this.fishEyeFixes[pixelColumn];
@@ -400,20 +398,26 @@ Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted
         const projectionHeight = Camera.TILE_HEIGHT * distanceRatio;
 
         const wallBottom = distanceRatio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
-        const wallTop = wallBottom - projectionHeight * WALL_HEIGHT;
+        const wallTop = wallBottom - projectionHeight;
         const wallHeight = wallBottom - wallTop;
 
         const visualTile = visualMap[tileY][tileX];
         const collisionTile = collisionMap[tileY][tileX];
+        const metaTile = metaMap[tileY][tileX];
 
         const buffer = gameContext.spriteManager.tileSprites[visualTile[0]].getAnimationFrame(visualTile[1], realTime)[0];
+        const stackCount = metaTile.stacks ? metaTile.stacks : 1;
 
         if(i === 0) {
             this.drawSky(pixelColumn, rayAngleDegrees);
-            //this.drawCeiling(gameContext, pixelColumn, rayAngleRadians, wallTop, gameMap);   
+            //this.drawCeiling(gameContext, pixelColumn, rayAngleRadians, wallTop, gameMap);  
         }
 
-        this.drawWall(pixelColumn, textureOffset, wallTop, wallHeight, buffer, ray);
+        for(let s = 0; s < stackCount; s++) {
+            const lightAmplitude = s + 1;
+            const positionY = wallTop - projectionHeight * s;
+            this.drawWall(pixelColumn, textureOffset, positionY, wallHeight, buffer, ray, gameMap, lightAmplitude);
+        } 
 
         if(i === rayIntersectionsArraySorted.length - 1) {
             this.drawFloor(gameContext, pixelColumn, rayAngleRadians, wallBottom, gameMap);         
@@ -421,7 +425,7 @@ Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted
     }
 }
 
-Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, buffer, ray) {
+Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wallHeight, buffer, ray, gameMap, amplitude) {
     const displayHeight = this.height;
     const displayWidth = this.width;
     const bufferWidth = buffer.bitmap.width;
@@ -432,6 +436,7 @@ Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wal
     const destinationX = pixelColumn;
     const destinationY = Math.floor(wallTop);
     const heightDifference = Camera.TILE_HEIGHT / wallHeight;
+    const lightAmplitude = Camera.TILE_HEIGHT * amplitude;
 
     if(wallHeight + wallTop > displayHeight) {
         wallHeight = displayHeight - wallTop;
@@ -453,16 +458,16 @@ Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wal
         const targetIndex = (destinationPixelY * displayWidth + destinationX) * this.bytesPerPixel;
         const sourceIndex = (sourcePixelY * bufferWidth + sourceX) * this.bytesPerPixel;
 
-        const pointZ = Camera.TILE_HEIGHT - sourcePixelY;
-        const { r, g, b } = this.calculateLightIntensity(ray.hitX, ray.hitY, pointZ);
-        
+        const { r, g, b } = this.calculateLightIntensity(ray.hitX, ray.hitY, lightAmplitude - sourcePixelY, gameMap);
+        const { r: fogR, g: fogG, b: fogB, intensity: fogIntensity } = this.calculateFogIntensity(ray.distance);
+
         const sourceR = sourceData[sourceIndex];
         const sourceG = sourceData[sourceIndex + 1];
         const sourceB = sourceData[sourceIndex + 2];
 
-        const finalR = ~~(sourceR * r);
-        const finalG = ~~(sourceG * g);
-        const finalB = ~~(sourceB * b);
+        const finalR = ~~(fogR + (1 - fogIntensity) * sourceR * r);
+        const finalG = ~~(fogG + (1 - fogIntensity) * sourceG * g);
+        const finalB = ~~(fogB + (1 - fogIntensity) * sourceB * b);
 
         targetImageData[targetIndex] = finalR;
         targetImageData[targetIndex + 1] = finalG;
@@ -471,7 +476,21 @@ Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wal
     }
 }
 
-Raycaster.prototype.calculateLightIntensity = function(hitX, hitY, pointZ) {
+Raycaster.prototype.calculateFogIntensity = function(distance) {
+    const intensity = Math.min(1, distance / this.maxFogDistance);
+    const r = this.fogColor.r * intensity;
+    const g = this.fogColor.g * intensity;
+    const b = this.fogColor.b * intensity;
+
+    return {
+        r,
+        g,
+        b,
+        intensity
+    }
+}
+
+Raycaster.prototype.calculateLightIntensity = function(hitX, hitY, pointZ, gameMap) {
     let r = this.ambientLight;
     let g = this.ambientLight;
     let b = this.ambientLight;
@@ -556,6 +575,10 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
         const visualTile = visualMap[cellY][cellX];
 
         if(bottomTile === null || visualTile !== null) {
+            targetImageData[targetIndex] = 0;
+            targetImageData[targetIndex + 1] = 0;
+            targetImageData[targetIndex + 2] = 0;
+            targetImageData[targetIndex + 3] = 0;
             targetIndex += pixelStep;
             continue;
         }
@@ -566,15 +589,16 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
         const tileColumn = yEnd % Camera.TILE_HEIGHT;
 
         const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
-        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0);
-
+        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0, gameMap);
+        const fogIntensity = Math.min(1, diagDist / this.maxFogDistance);
+        
         const sourceR = sourceData[sourceIndex];
         const sourceG = sourceData[sourceIndex + 1];
         const sourceB = sourceData[sourceIndex + 2];
 
-        const finalR = ~~(sourceR * r);
-        const finalG = ~~(sourceG * g);
-        const finalB = ~~(sourceB * b);
+        const finalR = ~~(fogIntensity * this.fogColor.r + (1 - fogIntensity) * sourceR * r);
+        const finalG = ~~(fogIntensity * this.fogColor.g + (1 - fogIntensity) * sourceG * g);
+        const finalB = ~~(fogIntensity * this.fogColor.b + (1 - fogIntensity) * sourceB * b);
 
         targetImageData[targetIndex] = finalR;
         targetImageData[targetIndex + 1] = finalG;
@@ -610,6 +634,7 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         const cellY = ~~(yEnd / Camera.TILE_HEIGHT);
 
         if(cellX < 0 || cellX >= mapWidth || cellY < 0 || cellY >= mapHeight) {
+            //DRAW SKY
             targetIndex -= pixelStep;
             continue;
         }
@@ -618,6 +643,7 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         const visualTile = visualMap[cellY][cellX];
 
         if (ceilTile === null || visualTile !== null) {
+            //DRAW SKY
             targetIndex -= pixelStep;
             continue;
         }
@@ -628,15 +654,16 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         const tileColumn = yEnd % Camera.TILE_HEIGHT;
 
         const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
-        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0);
-
+        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0, gameMap);
+        const fogIntensity = Math.min(1, diagDist / this.maxFogDistance);
+        
         const sourceR = sourceData[sourceIndex];
         const sourceG = sourceData[sourceIndex + 1];
         const sourceB = sourceData[sourceIndex + 2];
 
-        const finalR = ~~(sourceR * r);
-        const finalG = ~~(sourceG * g);
-        const finalB = ~~(sourceB * b);
+        const finalR = ~~(fogIntensity * this.fogColor.r + (1 - fogIntensity) * sourceR * r);
+        const finalG = ~~(fogIntensity * this.fogColor.g + (1 - fogIntensity) * sourceG * g);
+        const finalB = ~~(fogIntensity * this.fogColor.b + (1 - fogIntensity) * sourceB * b);
 
         targetImageData[targetIndex] = finalR;
         targetImageData[targetIndex + 1] = finalG;
@@ -648,5 +675,4 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
 }
 
 Raycaster.prototype.drawSprites = function() {
-
 }

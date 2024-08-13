@@ -365,12 +365,14 @@ MapEditorState.prototype.enter = function(stateMachine) {
         const mapID = prompt("MAP-ID?");
 
         if(mapID.length === 0) {
-            const loadSuccess = await gameContext.loadMap(MAP_ID, true);
+            const loadSuccess = await gameContext.loadMap(MAP_ID);
+            gameContext.parseMap(MAP_ID, true);
             EDITOR_MAP_ID = MAP_ID;
             return;
         }
 
-        const loadSuccess = await gameContext.loadMap(mapID, true);
+        const loadSuccess = await gameContext.loadMap(mapID);
+        gameContext.parseMap(mapID, true);
         EDITOR_MAP_ID = mapID;
     });
 

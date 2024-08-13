@@ -7,9 +7,9 @@
         "collision": [
             [1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,0,0,0,0,1,0,1],
+            [1,0,0,0,0,0,0,1,0,1],
             [1,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,1,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,1],
             [1,0,1,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,1],
@@ -18,14 +18,14 @@
         ],
         "bottom": [
             [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
-            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"]],
+            [["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"]],
+            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"]],
+            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"]],
+            [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"]],
+            [["overworld_day","flowers"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"]],
             [["overworld_day","grass"],["overworld_day","grass"],["overworld_day","flowers"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"],["overworld_day","grass"]]
         ],
         "floor": [
@@ -56,13 +56,13 @@
     "tiles": [
         [{},{},{},{},{},{},{},{},{},{}],
         [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{"stacks": 2},{},{}],
         [{},{},{},{},{},{},{},{},{},{}],
         [{},{},{},{},{},{},{},{},{},{}],
         [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{"stacks": 2},{},{},{},{},{},{},{}],
         [{},{},{},{},{},{},{},{},{},{}],
-        [{},{},{},{},{},{},{},{},{},{}],
-        [{},{},{},{},{},{},{},{},{},{}],
-        [{},{},{},{},{},{},{},{},{},{}],
+        [{},{},{},{},{},{},{},{"stacks": 2},{},{}],
         [{},{},{},{},{},{},{},{},{},{}]
     ],
     "connections": [

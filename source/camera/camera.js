@@ -1,5 +1,6 @@
 import { Position3DComponent } from "../../components/position3D.js";
 import { EventEmitter } from "../events/eventEmitter.js";
+import { toRadian } from "../helpers.js";
 import { Canvas } from "./canvas.js";
 import { Raycaster } from "./raycaster.js";
 
@@ -14,7 +15,7 @@ export const Camera = function(screenWidth, screenHeight) {
     this.fps = 0;
     this.smoothedFPS = 60;
     this.smoothingFactor = 0.01;
-    
+
     this.raycaster = null;
     this.display = new Canvas().useExistingElement(screenWidth, screenHeight, "canvas");
 
@@ -23,8 +24,6 @@ export const Camera = function(screenWidth, screenHeight) {
     this.events.listen(Camera.EVENT_MAP_RENDER_COMPLETE);
 
     window.addEventListener("resize", () => this.resizeViewport(window.innerWidth, window.innerHeight));
-
-    this.loading = false;
     this.initializeRaycaster();
 }
 
@@ -268,7 +267,7 @@ Camera.prototype.update = function(gameContext) {
 
     this.display.clear();
     this.calculateFPS(deltaTime);
-
+    
     if(Camera.DRAW_2D_MAP) {
         this.draw2DMap(gameContext);
         this.events.emit(Camera.EVENT_MAP_RENDER_COMPLETE, this);
@@ -282,15 +281,45 @@ Camera.prototype.update = function(gameContext) {
 }
 
 Camera.prototype.drawRaycaster = function(gameContext) {
-    if(!this.raycaster || !gameContext.player) {
+    const MINIMAP_SCALE = 1;
+    const { mapLoader } = gameContext;
+    const gameMap = mapLoader.getActiveMap();
+    
+    if(!this.raycaster || !gameContext.player || !gameMap) {
         return;
     }
 
-    this.raycaster.copyPosition(gameContext.player.components.getComponent(Position3DComponent));
-    this.raycaster.raycast(gameContext);
+    const playerPosition = gameContext.player.components.getComponent(Position3DComponent);
+    const { positionX, positionY, rotation } = playerPosition;
+
+    this.raycaster.copyPosition(playerPosition);
+    this.raycaster.raycast(gameContext, gameMap);
 
     this.display.context.drawImage(this.raycaster.display.canvas, 0, 0, this.display.width, this.display.height);
     this.display.context.fillRect(this.display.centerX - 4, this.display.centerY - 4, 8, 8);
+
+    this.raycaster.minimap.center(positionX, positionY);
+    this.raycaster.minimap.draw(gameContext, gameMap.layers["floor"], this.display.context);
+
+    const playerRay = this.raycaster.checkRayIntersectionSingle(positionX, positionY, rotation, gameMap.layers["collision"]);
+
+    if(!playerRay) {
+        return;
+    }
+
+    const roationRadians = toRadian(rotation);
+    const rayLength = playerRay.distance;
+    const rayStartX = this.raycaster.minimap.viewportWidth / 2 + 16;
+    const rayStartY = this.raycaster.minimap.viewportHeight / 2 + 16;
+    const rayEndX = rayStartX + 16 * Math.cos(roationRadians);
+    const rayEndY = rayStartY + 16 * Math.sin(roationRadians);
+
+    this.display.context.strokeStyle = "#ffff00";
+    this.display.context.lineWidth = 3;
+    this.display.context.beginPath();
+    this.display.context.moveTo(rayStartX, rayStartY);
+    this.display.context.lineTo(rayEndX, rayEndY);
+    this.display.context.stroke();
 }
 
 Camera.prototype.limitViewport = function() {
@@ -367,11 +396,6 @@ Camera.prototype.resizeViewport = function(width, height) {
 
     //this.loadViewport(this.mapWidth, this.mapHeight);
     this.display.resize(width, height);
-
-    if(this.raycaster) {
-        //this.raycaster.resize(512, 288);
-    }
-
     this.events.emit(Camera.EVENT_SCREEN_RESIZE, this.viewportWidth, this.viewportHeight);
 }
 

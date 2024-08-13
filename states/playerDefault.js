@@ -6,6 +6,10 @@ import { State } from "../source/state/state.js";
 
 export const PlayerDefault = function() {
     State.call(this);
+
+    this.bobbingTime = 0;
+    this.BOBBING_AMPLITUDE = 1;
+    this.BOBBING_FREQUENCY = 15;
 }
 
 const MAX_DISTANCE = 4;
@@ -76,6 +80,11 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
     }
     
     if(!move3D.isMovingUp && !move3D.isMovingDown && !move3D.isMovingLeft && !move3D.isMovingRight) {
+        if(move3D.isFalling || move3D.isJumping) {
+            return;
+        }
+        this.bobbingTime = 0;
+        position3D.positionZ = Camera.TILE_HEIGHT / 2;
         return;
     }
     
@@ -132,4 +141,9 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
    
     position3D.positionX = nextPositionX;
     position3D.positionY = nextPositionY;
+
+    this.bobbingTime += deltaTime * entitySpeed;
+    position3D.positionZ = Camera.TILE_HEIGHT / 2 + this.BOBBING_AMPLITUDE * Math.sin(this.bobbingTime * this.BOBBING_FREQUENCY);
+
+    console.log(position3D.positionZ)
 }
