@@ -33,9 +33,7 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
     const position3D = entity.components.getComponent(Position3DComponent);
     const move3D = entity.components.getComponent(Move3DComponent);
 
-    const floor = gameMap.layers["floor"];
     const collisionLayer = gameMap.layers["collision"];
-
     const deltaTime = timer.getFixedDeltaTime();
 
     const entityRotation = position3D.rotation;
@@ -62,7 +60,7 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
         const tileX = Math.floor(position3D.positionX / Camera.TILE_WIDTH);
         const tileY = Math.floor(position3D.positionY / Camera.TILE_HEIGHT);
 
-        if(floor[tileY][tileX] !== null) {
+        if(collisionLayer[tileY][tileX] !== 0) {
             if(position3D.positionZ < Camera.TILE_HEIGHT) {
                 position3D.positionZ = Camera.TILE_HEIGHT;
                 move3D.isFalling = false;
@@ -144,6 +142,4 @@ PlayerDefault.prototype.update = function(stateMachine, gameContext) {
 
     this.bobbingTime += deltaTime * entitySpeed;
     position3D.positionZ = Camera.TILE_HEIGHT / 2 + this.BOBBING_AMPLITUDE * Math.sin(this.bobbingTime * this.BOBBING_FREQUENCY);
-
-    console.log(position3D.positionZ)
 }

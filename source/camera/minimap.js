@@ -62,10 +62,8 @@ Minimap.prototype.draw = function(gameContext, minimapLayer, context) {
             }
 
             const [tileSetID, tileSetAnimationID] = tile;
-            const tileSet = spriteManager.tileSprites[tileSetID];
-            const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
-            const buffer = buffers[0];
-    
+            const buffer = spriteManager.getTileBuffer(tileSetID, tileSetAnimationID);
+
             context.drawImage(
                 buffer.bitmap, 
                 0, 0, buffer.width, buffer.height,

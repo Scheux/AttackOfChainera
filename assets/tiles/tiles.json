@@ -71,6 +71,7 @@
                 ["house_9", "house_10", "house_11", "house_12"]
             ]
         },
-        "animations": {}
+        "animations": {
+        }
     }
 }

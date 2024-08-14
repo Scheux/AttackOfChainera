@@ -64,6 +64,7 @@ export const GameContext = function() {
     }
 
     this.timer.renderFunction = () => {
+        this.spriteManager.update(this);
         this.uiManager.update(this);
         this.renderer.update(this);
     }

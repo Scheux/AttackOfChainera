@@ -4,4 +4,5 @@ export const Animation = function(id, frames, frameTime) {
     this.frameTime = frameTime;
     this.frameCount = frames.length;
     this.frameTimeTotal = frames.length * frameTime;
+    this.globalFrameKey = frames[0];
 }

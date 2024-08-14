@@ -51,6 +51,8 @@ export const ImageSheet = function(image, config) {
     }
 }
 
+ImageSheet.BUFFER_NOT_FLIPPED = 0;
+ImageSheet.BUFFER_FLIPPED = 1;
 ImageSheet.DEFAULT_ANIMATION_ID = "default";
 
 ImageSheet.prototype.getFrameByID = function(frameID) {
@@ -60,7 +62,7 @@ ImageSheet.prototype.getFrameByID = function(frameID) {
 }
 
 ImageSheet.prototype.getBuffersByID = function(frameID) {
-    const frame = this.getFrameByID(frameID);
+    const frame = this.frames[frameID];
     const buffers = this.buffers.get(frame.frameKey);
 
     return buffers;
@@ -157,7 +159,7 @@ ImageSheet.prototype.getAnimation = function(key) {
 ImageSheet.prototype.getAnimationFrame = function(animationID, time) {
     const animation = this.getAnimation(animationID);
     const currentFrameTime = time % animation.frameTimeTotal;
-    const frameIndex = (currentFrameTime / animation.frameTime) | 0;
+    const frameIndex = ~~(currentFrameTime / animation.frameTime);
     const frameKey = animation.frames[frameIndex];
     const buffers = this.getBuffersByID(frameKey);
 

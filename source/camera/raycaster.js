@@ -124,7 +124,7 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
     const mapWidth = gameMap.width;
     const mapHeight = gameMap.height;
     const visualMap = gameMap.layers["floor"];
-    const interactiveMap = gameMap.layers["collision"];
+    const metaMap = gameMap.tiles;
 
     rayAngle = rayAngle % 360;
     
@@ -184,11 +184,7 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
             "hitBy": "HORIZONTAL"
         });
 
-        break;
-
-        const interactiveTile = interactiveMap[mapY][mapX];
-
-        if ((!interactiveTile || !interactiveTile.isWindow) && this.positionZ < Camera.TILE_HEIGHT) {
+        if (!metaMap[mapY][mapX].isWindow) {
             break;
         }
 
@@ -241,12 +237,8 @@ Raycaster.prototype.checkRayIntersections = function(rayAngle, gameMap) {
             "textureOffset": cosRayAngle > 0 ? vertHitY % Camera.TILE_WIDTH : Camera.TILE_WIDTH - vertHitY % Camera.TILE_WIDTH,
             "hitBy": "VERTICAL"
         });   
-        
-        break;
-        
-        const interactiveTile = interactiveMap[mapY][mapX];
 
-        if ((!interactiveTile || !interactiveTile.isWindow) && this.positionZ < Camera.TILE_WIDTH) {
+        if (!metaMap[mapY][mapX].isWindow) {
             break;
         }
 
@@ -384,7 +376,7 @@ Raycaster.prototype.checkRayIntersectionSingle = function(cameraX, cameraY, rayA
 }
 
 Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted, pixelColumn, gameMap, rayAngleRadians, rayAngleDegrees) {
-    const realTime = gameContext.timer.getRealTime();
+    const { spriteManager } = gameContext;
     const metaMap = gameMap.tiles;
     const visualMap = gameMap.layers["floor"];
     const collisionMap = gameMap.layers["collision"];
@@ -397,16 +389,16 @@ Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted
         const distanceRatio = this.distanceToPlane / (distance * fishEyeFix);
         const projectionHeight = Camera.TILE_HEIGHT * distanceRatio;
 
-        const wallBottom = distanceRatio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
-        const wallTop = wallBottom - projectionHeight;
-        const wallHeight = wallBottom - wallTop;
-
         const visualTile = visualMap[tileY][tileX];
-        const collisionTile = collisionMap[tileY][tileX];
         const metaTile = metaMap[tileY][tileX];
 
-        const buffer = gameContext.spriteManager.tileSprites[visualTile[0]].getAnimationFrame(visualTile[1], realTime)[0];
+        const buffer = spriteManager.getTileBuffer(visualTile[0], visualTile[1]);
         const stackCount = metaTile.stacks ? metaTile.stacks : 1;
+        const heightAmplitude = metaTile.height ? metaTile.height : 1;
+
+        const wallBottom = distanceRatio * this.positionZ + this.PROJECTION_HEIGHT - this.pitchOffset;
+        const wallTop = wallBottom - projectionHeight * heightAmplitude;
+        const wallHeight = wallBottom - wallTop;
 
         if(i === 0) {
             this.drawSky(pixelColumn, rayAngleDegrees);
@@ -415,12 +407,12 @@ Raycaster.prototype.drawRays = function(gameContext, rayIntersectionsArraySorted
 
         for(let s = 0; s < stackCount; s++) {
             const lightAmplitude = s + 1;
-            const positionY = wallTop - projectionHeight * s;
+            const positionY = wallTop - projectionHeight * s * heightAmplitude;
             this.drawWall(pixelColumn, textureOffset, positionY, wallHeight, buffer, ray, gameMap, lightAmplitude);
         } 
 
         if(i === rayIntersectionsArraySorted.length - 1) {
-            this.drawFloor(gameContext, pixelColumn, rayAngleRadians, wallBottom, gameMap);         
+            this.drawFloor(gameContext, pixelColumn, rayAngleRadians, wallBottom, this.height, gameMap);         
         }
     }
 }
@@ -429,9 +421,8 @@ Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wal
     const displayHeight = this.height;
     const displayWidth = this.width;
     const bufferWidth = buffer.bitmap.width;
-    const targetImageData = this.display.imageData.data;
+    const targetData = this.display.imageData.data;
     const sourceData = buffer.imageData.data;
-
     const sourceX = Math.floor(textureOffset);
     const destinationX = pixelColumn;
     const destinationY = Math.floor(wallTop);
@@ -458,21 +449,10 @@ Raycaster.prototype.drawWall = function(pixelColumn, textureOffset, wallTop, wal
         const targetIndex = (destinationPixelY * displayWidth + destinationX) * this.bytesPerPixel;
         const sourceIndex = (sourcePixelY * bufferWidth + sourceX) * this.bytesPerPixel;
 
-        const { r, g, b } = this.calculateLightIntensity(ray.hitX, ray.hitY, lightAmplitude - sourcePixelY, gameMap);
-        const { r: fogR, g: fogG, b: fogB, intensity: fogIntensity } = this.calculateFogIntensity(ray.distance);
+        const light = this.calculateLightIntensity(ray.hitX, ray.hitY, lightAmplitude - sourcePixelY, gameMap);
+        const fog = this.calculateFogIntensity(ray.distance);
 
-        const sourceR = sourceData[sourceIndex];
-        const sourceG = sourceData[sourceIndex + 1];
-        const sourceB = sourceData[sourceIndex + 2];
-
-        const finalR = ~~(fogR + (1 - fogIntensity) * sourceR * r);
-        const finalG = ~~(fogG + (1 - fogIntensity) * sourceG * g);
-        const finalB = ~~(fogB + (1 - fogIntensity) * sourceB * b);
-
-        targetImageData[targetIndex] = finalR;
-        targetImageData[targetIndex + 1] = finalG;
-        targetImageData[targetIndex + 2] = finalB;
-        targetImageData[targetIndex + 3] = 255;
+        this.drawPixel(targetData, targetIndex, sourceData, sourceIndex, light, fog);
     }
 }
 
@@ -542,8 +522,9 @@ Raycaster.prototype.drawSky = function(pixelColumn, rayAngleDegrees) {
     }
 }
 
-Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wallBottom, gameMap) {
-    const targetImageData = this.display.imageData.data;
+Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, drawStart, drawEnd, gameMap) {
+    const { spriteManager } = gameContext;
+    const targetData = this.display.imageData.data;
 
     const pixelStep = this.bytesPerPixel * this.width;
     const mapWidth = gameMap.width;
@@ -553,11 +534,11 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
 
     const cosAngle = Math.cos(rayAngle);
     const sinAngle = Math.sin(rayAngle);
-    const destinationY = Math.floor(wallBottom);
+    const destinationY = Math.floor(drawStart);
 
     let targetIndex = this.bytesPerPixel * (destinationY * this.width + pixelColumn);
 
-    for(let row = destinationY + 1; row <= this.height; row++) {
+    for(let row = destinationY + 1; row <= drawEnd; row++) {
         const straightDistance = this.positionZ / (row + this.pitchOffset - this.PROJECTION_HEIGHT) * this.distanceToPlane;
         const diagDist = straightDistance * this.inverseFishEyeFixes[pixelColumn];
 
@@ -575,42 +556,34 @@ Raycaster.prototype.drawFloor = function(gameContext, pixelColumn, rayAngle, wal
         const visualTile = visualMap[cellY][cellX];
 
         if(bottomTile === null || visualTile !== null) {
-            targetImageData[targetIndex] = 0;
-            targetImageData[targetIndex + 1] = 0;
-            targetImageData[targetIndex + 2] = 0;
-            targetImageData[targetIndex + 3] = 0;
+            targetData[targetIndex] = 0;
+            targetData[targetIndex + 1] = 0;
+            targetData[targetIndex + 2] = 0;
+            targetData[targetIndex + 3] = 0;
             targetIndex += pixelStep;
             continue;
         }
 
-        const buffer = gameContext.spriteManager.tileSprites[bottomTile[0]].getAnimationFrame(bottomTile[1], 0)[0];
+        const buffer = spriteManager.getTileBuffer(bottomTile[0], bottomTile[1]);
         const sourceData = buffer.imageData.data;
+
         const tileRow = xEnd % Camera.TILE_WIDTH;
         const tileColumn = yEnd % Camera.TILE_HEIGHT;
 
         const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
-        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0, gameMap);
-        const fogIntensity = Math.min(1, diagDist / this.maxFogDistance);
+
+        const light = this.calculateLightIntensity(xEnd, yEnd, 0, gameMap);
+        const fog = this.calculateFogIntensity(diagDist);
         
-        const sourceR = sourceData[sourceIndex];
-        const sourceG = sourceData[sourceIndex + 1];
-        const sourceB = sourceData[sourceIndex + 2];
+        this.drawPixel(targetData, targetIndex, sourceData, sourceIndex, light, fog);
 
-        const finalR = ~~(fogIntensity * this.fogColor.r + (1 - fogIntensity) * sourceR * r);
-        const finalG = ~~(fogIntensity * this.fogColor.g + (1 - fogIntensity) * sourceG * g);
-        const finalB = ~~(fogIntensity * this.fogColor.b + (1 - fogIntensity) * sourceB * b);
-
-        targetImageData[targetIndex] = finalR;
-        targetImageData[targetIndex + 1] = finalG;
-        targetImageData[targetIndex + 2] = finalB;
-        targetImageData[targetIndex + 3] = 255;
-      
         targetIndex += pixelStep;
     }
 }
 
 Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, wallTop, gameMap) {
-    const targetImageData = this.display.imageData.data;
+    const { spriteManager } = gameContext;
+    const targetData = this.display.imageData.data;
 
     const pixelStep = this.bytesPerPixel * this.width;
     const mapWidth = gameMap.width;
@@ -634,7 +607,6 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         const cellY = ~~(yEnd / Camera.TILE_HEIGHT);
 
         if(cellX < 0 || cellX >= mapWidth || cellY < 0 || cellY >= mapHeight) {
-            //DRAW SKY
             targetIndex -= pixelStep;
             continue;
         }
@@ -643,35 +615,43 @@ Raycaster.prototype.drawCeiling = function(gameContext, pixelColumn, rayAngle, w
         const visualTile = visualMap[cellY][cellX];
 
         if (ceilTile === null || visualTile !== null) {
-            //DRAW SKY
             targetIndex -= pixelStep;
             continue;
         }
 
-        const buffer = gameContext.spriteManager.tileSprites[ceilTile[0]].getAnimationFrame(ceilTile[1], 0)[0];;
+        const buffer = spriteManager.getTileBuffer(ceilTile[0], ceilTile[1]);
         const sourceData = buffer.imageData.data;
+
         const tileRow = xEnd % Camera.TILE_WIDTH;
         const tileColumn = yEnd % Camera.TILE_HEIGHT;
 
         const sourceIndex = this.bytesPerPixel * (tileColumn * Camera.TILE_HEIGHT + tileRow);
-        const { r, g, b } = this.calculateLightIntensity(xEnd, yEnd, 0, gameMap);
-        const fogIntensity = Math.min(1, diagDist / this.maxFogDistance);
-        
-        const sourceR = sourceData[sourceIndex];
-        const sourceG = sourceData[sourceIndex + 1];
-        const sourceB = sourceData[sourceIndex + 2];
 
-        const finalR = ~~(fogIntensity * this.fogColor.r + (1 - fogIntensity) * sourceR * r);
-        const finalG = ~~(fogIntensity * this.fogColor.g + (1 - fogIntensity) * sourceG * g);
-        const finalB = ~~(fogIntensity * this.fogColor.b + (1 - fogIntensity) * sourceB * b);
+        const light = this.calculateLightIntensity(xEnd, yEnd, 0, gameMap);
+        const fog = this.calculateFogIntensity(diagDist);
 
-        targetImageData[targetIndex] = finalR;
-        targetImageData[targetIndex + 1] = finalG;
-        targetImageData[targetIndex + 2] = finalB;
-        targetImageData[targetIndex + 3] = 255;
+        this.drawPixel(targetData, targetIndex, sourceData, sourceIndex, light, fog);
       
         targetIndex -= pixelStep;
     }
+}
+
+Raycaster.prototype.drawPixel = function(targetData, targetIndex, sourceData, sourceIndex, light, fog) {
+    const { r, g, b } = light;
+    const { r: fogR, g: fogG, b: fogB, intensity: fogIntensity } = fog;
+
+    const sourceR = sourceData[sourceIndex];
+    const sourceG = sourceData[sourceIndex + 1];
+    const sourceB = sourceData[sourceIndex + 2];
+
+    const finalR = ~~(fogR + (1 - fogIntensity) * sourceR * r);
+    const finalG = ~~(fogG + (1 - fogIntensity) * sourceG * g);
+    const finalB = ~~(fogB + (1 - fogIntensity) * sourceB * b);
+
+    targetData[targetIndex] = finalR;
+    targetData[targetIndex + 1] = finalG;
+    targetData[targetIndex + 2] = finalB;
+    targetData[targetIndex + 3] = 255;
 }
 
 Raycaster.prototype.drawSprites = function() {

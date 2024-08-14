@@ -72,14 +72,11 @@ Camera.prototype.drawTile = function(gameContext, tileX, tileY, tileGraphics) {
         return;
     }
 
-    const { timer, spriteManager } = gameContext;
-    const realTime = timer.getRealTime();
+    const { spriteManager } = gameContext;
     const renderY = tileY * Camera.TILE_HEIGHT - this.viewportY;
     const renderX = tileX * Camera.TILE_WIDTH - this.viewportX;
     const [tileSetID, tileSetAnimationID] = tileGraphics;
-    const tileSet = spriteManager.tileSprites[tileSetID];
-    const buffers = tileSet.getAnimationFrame(tileSetAnimationID, realTime);
-    const buffer = buffers[0];
+    const buffer = spriteManager.getTileBuffer(tileSetID, tileSetAnimationID);
 
     this.display.context.drawImage(
         buffer.bitmap, 

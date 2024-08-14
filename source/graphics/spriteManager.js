@@ -1,4 +1,5 @@
 import { IDGenerator } from "../idGenerator.js";
+import { ImageSheet } from "./imageSheet.js";
 import { Sprite } from "./sprite.js";
 
 export const SpriteManager = function() {
@@ -7,6 +8,23 @@ export const SpriteManager = function() {
     this.sprites = new Map();
     this.rootSprites = [];
     this.IDgenerator = new IDGenerator();
+}
+
+SpriteManager.prototype.update = function(gameContext) {
+    const { timer } = gameContext;
+    const realTime = timer.getRealTime();
+    
+    for(const key in this.tileSprites) {
+        const tileSet = this.tileSprites[key];
+
+        for(const [animationID, animation] of tileSet.loadedAnimations) {
+            const currentFrameTime = realTime % animation.frameTimeTotal;
+            const frameIndex = (currentFrameTime / animation.frameTime) | 0;
+            const frameKey = animation.frames[frameIndex];
+
+            animation.globalFrameKey = frameKey;
+        }
+    }
 }
 
 SpriteManager.prototype.loadSpriteTypes = function(spriteTypes) {
@@ -153,4 +171,12 @@ SpriteManager.prototype.updateSprite = function(spriteID, setID, animationID) {
     const animationConfig = setConfig.getAnimation(animationID);
 
     sprite.override(setConfig, animationConfig);
+}
+
+SpriteManager.prototype.getTileBuffer = function(tileSetID, tileSetAnimationID) {
+    const tileSet = this.tileSprites[tileSetID];
+    const animation = tileSet.getAnimation(tileSetAnimationID);
+    const buffers = tileSet.getBuffersByID(animation.globalFrameKey);
+
+    return buffers[ImageSheet.BUFFER_NOT_FLIPPED];
 }
